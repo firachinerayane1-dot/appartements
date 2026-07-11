@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Inscription</title>
+</head>
+<body>
+    <h1>Créer un compte</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">S'inscrire</button>
+    </form>
+
+    <script>
+        const roleField = document.getElementById('id_role');
+        const matriculeField = document.getElementById('id_matricule');
+        const matriculeContainer = matriculeField.closest('p');
+
+        function toggleMatricule() {
+            if (roleField.value === 'ENSEIGNANT') {
+                matriculeContainer.style.display = 'block';
+            } else {
+                matriculeContainer.style.display = 'none';
+                matriculeField.value = '';
+            }
+        }
+
+        roleField.addEventListener('change', toggleMatricule);
+        toggleMatricule(); // run once immediately, so it's correct on page load too
+    </script>
+</body>
+</html>
