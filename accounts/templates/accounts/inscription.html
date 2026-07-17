@@ -1,34 +1,39 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Inscription</title>
-</head>
-<body>
-    <h1>Créer un compte</h1>
-
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">S'inscrire</button>
-    </form>
-
-    <script>
-        const roleField = document.getElementById('id_role');
-        const matriculeField = document.getElementById('id_matricule');
-        const matriculeContainer = matriculeField.closest('p');
-
-        function toggleMatricule() {
-            if (roleField.value === 'ENSEIGNANT') {
-                matriculeContainer.style.display = 'block';
-            } else {
-                matriculeContainer.style.display = 'none';
-                matriculeField.value = '';
-            }
-        }
-
-        roleField.addEventListener('change', toggleMatricule);
-        toggleMatricule(); // run once immediately, so it's correct on page load too
-    </script>
-</body>
-</html>
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Créer un compte · Appartements{% endblock %}
+{% block body_class %}auth-body{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'accounts/auth.css' %}">{% endblock %}
+{% block content %}
+<main class="auth-page auth-signup">
+  <section class="auth-showcase" aria-label="Présentation">
+    <a class="auth-brand" href="{% url 'apartments:liste' %}"><span>⌂</span> Appartements</a>
+    <div><p class="eyebrow">Quelques minutes suffisent</p><h1>Trouvez votre appartement idéal.</h1><p>Créez votre espace pour réserver rapidement et suivre chaque étape de votre séjour.</p></div>
+    <p class="auth-trust">Des logements sélectionnés avec soin pour votre confort.</p>
+  </section>
+  <section class="auth-panel">
+    <div class="auth-card auth-card-wide">
+      <div class="auth-heading"><p class="eyebrow">Bienvenue</p><h2>Créer un compte</h2><p>Déjà inscrit ? <a href="{% url 'accounts:connexion' %}">Se connecter</a></p></div>
+      {% if google_oauth_configured %}
+      <form method="post" action="{% url 'google_login' %}">{% csrf_token %}<button class="google-button" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.91h5.38a4.6 4.6 0 0 1-2 3.02v2.54h3.24c1.9-1.75 2.98-4.32 2.98-7.4Z"/><path fill="#34A853" d="M12 22c2.7 0 4.97-.9 6.62-2.42l-3.24-2.52c-.9.6-2.05.96-3.38.96-2.61 0-4.82-1.76-5.61-4.13H3.04v2.6A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.39 13.9A6 6 0 0 1 6.08 12c0-.66.11-1.3.31-1.9V7.5H3.04A10 10 0 0 0 2 12c0 1.61.39 3.14 1.04 4.5l3.35-2.6Z"/><path fill="#EA4335" d="M12 5.98c1.47 0 2.78.5 3.82 1.49l2.87-2.87A9.63 9.63 0 0 0 12 2a10 10 0 0 0-8.96 5.5l3.35 2.6C7.18 7.74 9.39 5.98 12 5.98Z"/></svg> S’inscrire avec Google</button></form>
+      {% else %}<button class="google-button" type="button" disabled title="Configurez Google OAuth dans le fichier .env">S’inscrire avec Google</button>{% endif %}
+      <div class="auth-divider"><span>ou avec votre email</span></div>
+      <form method="post" class="auth-form">{% csrf_token %}
+        {% if form.non_field_errors %}<div class="form-error">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="form-grid">
+          <div><label for="{{ form.prenom.id_for_label }}">Prénom</label>{{ form.prenom }}{{ form.prenom.errors }}</div>
+          <div><label for="{{ form.nom.id_for_label }}">Nom</label>{{ form.nom }}{{ form.nom.errors }}</div>
+        </div>
+        <label for="{{ form.email.id_for_label }}">Adresse email</label>{{ form.email }}{{ form.email.errors }}
+        <div class="form-grid"><div><label for="{{ form.telephone.id_for_label }}">Téléphone <small>(facultatif)</small></label>{{ form.telephone }}{{ form.telephone.errors }}</div><div><label for="{{ form.role.id_for_label }}">Type de client</label>{{ form.role }}{{ form.role.errors }}</div></div>
+        <div id="matricule-container"><label for="{{ form.matricule.id_for_label }}">Matricule enseignant</label>{{ form.matricule }}{{ form.matricule.errors }}</div>
+        <label for="{{ form.password1.id_for_label }}">Mot de passe</label><div class="password-field">{{ form.password1 }}<button type="button" class="password-toggle" data-target="{{ form.password1.id_for_label }}">Afficher</button></div>{{ form.password1.errors }}
+        <label for="{{ form.password2.id_for_label }}">Confirmer le mot de passe</label><div class="password-field">{{ form.password2 }}<button type="button" class="password-toggle" data-target="{{ form.password2.id_for_label }}">Afficher</button></div>{{ form.password2.errors }}
+        <button class="auth-submit" type="submit">Créer mon compte</button>
+        <p class="auth-legal">En créant un compte, vous acceptez les conditions d’utilisation et la politique de confidentialité.</p>
+      </form>
+    </div>
+  </section>
+</main>
+{% include "accounts/_password_toggle.html" %}
+<script>const role=document.getElementById('id_role'),box=document.getElementById('matricule-container'),field=document.getElementById('id_matricule');function toggleMatricule(){const visible=role.value==='ENSEIGNANT';box.hidden=!visible;if(!visible)field.value=''}role.addEventListener('change',toggleMatricule);toggleMatricule();</script>
+{% endblock %}

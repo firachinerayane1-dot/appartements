@@ -86,3 +86,8 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
         if self.role == self.ENSEIGNANT:
             return 0.15  # example: 15% off — adjust to your real business rule
         return 0.0
+
+    @property
+    def type_client(self):
+        """Alias métier conservant le vocabulaire Client/Enseignant."""
+        return self.role if self.role != self.ADMINISTRATEUR else None

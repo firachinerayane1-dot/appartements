@@ -1,0 +1,56 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Réservez un appartement confortable à Casablanca en toute simplicité.">
+  <title>{% block title %}CasaStay · Appartements à Casablanca{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <header class="site-header">
+    <div class="shell nav-shell">
+      <a class="brand" href="{% url 'core:accueil' %}" aria-label="CasaStay, accueil"><span class="brand-mark">C</span><span>Casa<span>Stay</span></span></a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav"><span></span><span></span><span></span><span class="sr-only">Ouvrir le menu</span></button>
+      <nav class="main-nav" id="main-nav" aria-label="Navigation principale">
+        <a class="{% if request.resolver_match.namespace == 'core' %}active{% endif %}" href="{% url 'core:accueil' %}">Accueil</a>
+        <a class="{% if request.resolver_match.namespace == 'apartments' %}active{% endif %}" href="{% url 'apartments:liste' %}">Appartements</a>
+        {% if user.is_authenticated %}
+          {% if user.est_administrateur %}
+            <a class="{% if request.resolver_match.namespace == 'dashboard' %}active{% endif %}" href="{% url 'dashboard:index' %}">Tableau de bord</a>
+            <a class="{% if request.resolver_match.namespace == 'reservations' %}active{% endif %}" href="{% url 'reservations:admin_liste' %}">Réservations</a>
+          {% else %}
+            <a class="{% if request.resolver_match.namespace == 'reservations' %}active{% endif %}" href="{% url 'reservations:mes_reservations' %}">Mes réservations</a>
+          {% endif %}
+          <a class="nav-icon-link" href="{% url 'notifications:liste' %}" aria-label="Notifications">Notifications {% if notifications_non_lues %}<span class="nav-badge">{{ notifications_non_lues }}</span>{% endif %}</a>
+          <div class="user-menu">
+            <a class="user-chip" href="{% url 'accounts:profil' %}"><span>{{ user.prenom|first|default:'U' }}{{ user.nom|first }}</span><span class="user-copy"><strong>{{ user.prenom }}</strong><small>{{ user.get_role_display }}</small></span></a>
+            <form method="post" action="{% url 'accounts:deconnexion' %}">{% csrf_token %}<button class="link-button" type="submit">Déconnexion</button></form>
+          </div>
+        {% else %}
+          <a href="{% url 'accounts:connexion' %}">Connexion</a>
+          <a class="nav-cta" href="{% url 'accounts:inscription' %}">Créer un compte</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  {% if messages %}<div class="toast-wrap" role="status">{% for message in messages %}<div class="toast {{ message.tags|default:'info' }}"><span>{{ message }}</span><button type="button" aria-label="Fermer">×</button></div>{% endfor %}</div>{% endif %}
+
+  {% block content %}{% endblock %}
+
+  <footer class="site-footer">
+    <div class="shell footer-grid">
+      <div><a class="brand brand-light" href="{% url 'core:accueil' %}"><span class="brand-mark">C</span><span>Casa<span>Stay</span></span></a><p>Des appartements confortables et une réservation claire, au cœur de Casablanca.</p></div>
+      <div><h2>Explorer</h2><a href="{% url 'apartments:liste' %}">Nos appartements</a><a href="{% url 'core:accueil' %}#localisation">Localisation</a><a href="{% url 'core:accueil' %}#services">Nos services</a></div>
+      <div><h2>Votre espace</h2>{% if user.is_authenticated %}<a href="{% url 'accounts:profil' %}">Mon profil</a>{% if user.est_administrateur %}<a href="{% url 'dashboard:index' %}">Administration</a>{% else %}<a href="{% url 'reservations:mes_reservations' %}">Mes réservations</a>{% endif %}{% else %}<a href="{% url 'accounts:connexion' %}">Se connecter</a><a href="{% url 'accounts:inscription' %}">Créer un compte</a>{% endif %}</div>
+      <div><h2>Localisation</h2><p>Casablanca, Maroc</p><p>Assistance disponible depuis votre espace client.</p></div>
+    </div>
+    <div class="shell footer-bottom"><span>© {% now 'Y' %} CasaStay</span><span>Réservation d’appartements à Casablanca</span></div>
+  </footer>
+  <script src="{% static 'js/site.js' %}" defer></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
