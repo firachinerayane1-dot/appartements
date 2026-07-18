@@ -4,8 +4,16 @@ from .models import Appartement, PeriodeVacances, Photo
 
 
 class RechercheDisponibiliteForm(forms.Form):
-    date_debut = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
-    date_fin = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    date_debut = forms.DateField(
+        label="Date d'arrivée",
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date'}),
+    )
+    date_fin = forms.DateField(
+        label='Date de départ',
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date'}),
+    )
 
     def clean(self):
         data = super().clean()

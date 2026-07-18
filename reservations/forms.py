@@ -3,8 +3,14 @@ from django.utils import timezone
 
 
 class ReservationForm(forms.Form):
-    date_debut = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    date_fin = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    date_debut = forms.DateField(
+        label="Date d'arrivée",
+        widget=forms.DateInput(attrs={'type': 'date'}),
+    )
+    date_fin = forms.DateField(
+        label='Date de départ',
+        widget=forms.DateInput(attrs={'type': 'date'}),
+    )
 
     def clean(self):
         data = super().clean()

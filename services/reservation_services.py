@@ -2,7 +2,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.db.models import Exists, OuterRef
 
-from apartments.models import Appartement
+from apartments.models import Appartement, PeriodeVacances
 from reservations.models import Reservation
 
 
@@ -45,31 +45,19 @@ def chercher_appartements_disponibles(date_debut, date_fin, client=None):
         date_debut__lt=date_fin,
         date_fin__gt=date_debut,
     )
-    appartements = (
-        Appartement.objects.filter(disponible=True)
-        .annotate(a_une_reservation_en_conflit=Exists(reservations_en_conflit))
-        .filter(a_une_reservation_en_conflit=False)
+    appartements = Appartement.objects.filter(
+        ~Exists(reservations_en_conflit),
+        disponible=True,
     )
 
     # Cette règle métier existe déjà dans l'application : pendant les
     # vacances, certains appartements sont réservés aux enseignants.
     if client and client.is_authenticated and not client.est_enseignant():
-        periodes_vacances_en_conflit = appartement_periodes_vacances(date_debut, date_fin)
-        appartements = (
-            appartements
-            .annotate(a_une_periode_vacances=Exists(periodes_vacances_en_conflit))
-            .filter(a_une_periode_vacances=False)
+        periodes_vacances_en_conflit = PeriodeVacances.objects.filter(
+            appartement_id=OuterRef('pk'),
+            date_debut__lt=date_fin,
+            date_fin__gt=date_debut,
         )
+        appartements = appartements.filter(~Exists(periodes_vacances_en_conflit))
 
     return appartements
-
-
-def appartement_periodes_vacances(date_debut, date_fin):
-    """Construit la sous-requête des vacances qui chevauchent une période."""
-    from apartments.models import PeriodeVacances
-
-    return PeriodeVacances.objects.filter(
-        appartement_id=OuterRef('pk'),
-        date_debut__lt=date_fin,
-        date_fin__gt=date_debut,
-    )
