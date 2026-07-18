@@ -1,10 +1,11 @@
 :root {
-  --auth-ink: #14213d;
-  --auth-muted: #64748b;
-  --auth-primary: #d97706;
-  --auth-primary-dark: #b45309;
-  --auth-border: #dbe2ea;
-  --auth-bg: #f8fafc;
+  --auth-ink: #2B2A28;
+  --auth-muted: #706E69;
+  --auth-primary: #1F4B3F;
+  --auth-primary-dark: #16372F;
+  --auth-secondary: #B5651D;
+  --auth-border: #E0DDD6;
+  --auth-bg: #F5F3EF;
 }
 
 body.auth-body {
@@ -33,9 +34,9 @@ body.auth-body {
   justify-content: space-between;
   color: white;
   background:
-    linear-gradient(145deg, rgba(15, 35, 64, .92), rgba(30, 58, 95, .84)),
-    radial-gradient(circle at 80% 20%, #d97706 0, transparent 35%),
-    #14213d;
+    linear-gradient(145deg, rgba(22, 55, 47, .94), rgba(31, 75, 63, .70)),
+    url("../img/residence/balcon.jpeg") center/cover no-repeat,
+    #1F4B3F;
 }
 
 .auth-showcase::after {
@@ -51,11 +52,11 @@ body.auth-body {
 }
 
 .auth-brand { color: white; text-decoration: none; font-size: 1.15rem; font-weight: 750; letter-spacing: -.01em; }
-.auth-brand span { display: inline-grid; place-items: center; width: 2rem; height: 2rem; margin-right: .5rem; border-radius: .55rem; background: var(--auth-primary); }
+.auth-brand span { display: inline-grid; place-items: center; width: 2rem; height: 2rem; margin-right: .5rem; border-radius: 50% 50% 50% 5px; background: var(--auth-secondary); }
 .auth-showcase > div { max-width: 560px; position: relative; z-index: 1; }
 .auth-showcase h1 { margin: .5rem 0 1rem; max-width: 520px; font-size: clamp(2.5rem, 5vw, 4.8rem); line-height: .98; letter-spacing: -.055em; }
-.auth-showcase p { max-width: 520px; font-size: 1.08rem; line-height: 1.7; color: #dbeafe; }
-.auth-showcase .eyebrow { color: #fbbf24; }
+.auth-showcase p { max-width: 520px; font-size: 1.08rem; line-height: 1.7; color: rgba(255,255,255,.78); }
+.auth-showcase .eyebrow { color: #F0CDAE; }
 .auth-trust { position: relative; z-index: 1; font-size: .86rem !important; }
 .eyebrow { margin: 0; color: var(--auth-primary-dark); font-size: .76rem !important; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 
@@ -65,7 +66,7 @@ body.auth-body {
 .auth-heading { margin-bottom: 1.6rem; }
 .auth-heading h2 { margin: .35rem 0 .45rem; font-size: clamp(2rem, 4vw, 2.8rem); letter-spacing: -.04em; }
 .auth-heading p { margin: 0; color: var(--auth-muted); }
-.auth-heading a, .label-row a { color: var(--auth-primary-dark); font-weight: 700; text-decoration: none; }
+.auth-heading a, .label-row a { color: var(--auth-secondary); font-weight: 700; text-decoration: none; }
 
 .google-button {
   width: 100%; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: .75rem;
@@ -89,12 +90,12 @@ body.auth-body {
   border: 1px solid var(--auth-border); border-radius: .6rem; background: white; color: var(--auth-ink); font: inherit;
   outline: none; transition: border-color .18s, box-shadow .18s;
 }
-.auth-input:focus { border-color: var(--auth-primary); box-shadow: 0 0 0 3px rgba(217,119,6,.13); }
+.auth-input:focus { border-color: var(--auth-primary); box-shadow: 0 0 0 3px rgba(31,75,63,.12); }
 .password-field { position: relative; }
 .password-field .auth-input { padding-right: 5.4rem; }
-.password-toggle { position: absolute; right: .55rem; top: 50%; transform: translateY(-50%); padding: .35rem; background: transparent; color: var(--auth-primary-dark); font-size: .75rem; font-weight: 750; }
-.auth-submit { margin-top: .55rem; min-height: 50px; border-radius: .65rem; background: var(--auth-primary); font-weight: 800; font-size: .95rem; box-shadow: 0 8px 22px rgba(217,119,6,.2); }
-.auth-submit:hover { background: var(--auth-primary-dark); }
+.password-toggle { position: absolute; right: .55rem; top: 50%; transform: translateY(-50%); padding: .35rem; background: transparent; color: var(--auth-secondary); font-size: .75rem; font-weight: 750; }
+.auth-submit { margin-top: .55rem; min-height: 50px; border: 0; border-radius: .2rem; background: var(--auth-primary); color: white; font-weight: 800; font-size: .95rem; box-shadow: 0 8px 22px rgba(31,75,63,.18); }
+.auth-submit:hover { background: var(--auth-secondary); }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; }
 .form-grid > div { display: grid; gap: .7rem; }
 .errorlist { margin: -.25rem 0 .2rem; padding: 0; color: #b91c1c; font-size: .78rem; list-style: none; }

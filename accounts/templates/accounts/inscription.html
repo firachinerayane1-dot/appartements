@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Créer un compte · Appartements{% endblock %}
+{% block title %}Créer un compte · Rahal Stay{% endblock %}
 {% block body_class %}auth-body{% endblock %}
-{% block extra_head %}<link rel="stylesheet" href="{% static 'accounts/auth.css' %}">{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'accounts/auth.css' %}?v=4">{% endblock %}
 {% block content %}
 <main class="auth-page auth-signup">
   <section class="auth-showcase" aria-label="Présentation">
-    <a class="auth-brand" href="{% url 'apartments:liste' %}"><span>⌂</span> Appartements</a>
-    <div><p class="eyebrow">Quelques minutes suffisent</p><h1>Trouvez votre appartement idéal.</h1><p>Créez votre espace pour réserver rapidement et suivre chaque étape de votre séjour.</p></div>
-    <p class="auth-trust">Des logements sélectionnés avec soin pour votre confort.</p>
+    <a class="auth-brand" href="{% url 'core:accueil' %}"><span>R</span> Rahal Stay</a>
+    <div><p class="eyebrow">Votre séjour à Sidi Rahal</p><h1>Votre parenthèse commence ici.</h1><p>Créez votre espace pour réserver rapidement et suivre chaque étape de votre séjour.</p></div>
+    <p class="auth-trust">Des appartements au sein de la résidence privée Amwaj.</p>
   </section>
   <section class="auth-panel">
     <div class="auth-card auth-card-wide">
