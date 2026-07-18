@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Connexion · Appartements{% endblock %}
+{% block title %}Connexion · Rahal Stay{% endblock %}
 {% block body_class %}auth-body{% endblock %}
-{% block extra_head %}<link rel="stylesheet" href="{% static 'accounts/auth.css' %}">{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'accounts/auth.css' %}?v=4">{% endblock %}
 {% block content %}
 <main class="auth-page">
   <section class="auth-showcase" aria-label="Présentation">
-    <a class="auth-brand" href="{% url 'apartments:liste' %}"><span>⌂</span> Appartements</a>
+    <a class="auth-brand" href="{% url 'core:accueil' %}"><span>R</span> Rahal Stay</a>
     <div>
-      <p class="eyebrow">Votre prochain séjour commence ici</p>
+      <p class="eyebrow">Résidence Amwaj · Sidi Rahal</p>
       <h1>Heureux de vous revoir.</h1>
       <p>Connectez-vous pour retrouver vos réservations, vos paiements et vos notifications.</p>
     </div>
-    <p class="auth-trust">Réservation simple · Paiement sécurisé · Assistance dédiée</p>
+    <p class="auth-trust">Piscine · Jardins · Résidence privée · Terrain multisports</p>
   </section>
 
   <section class="auth-panel">

@@ -1,21 +1,21 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}CasaStay · Votre séjour à Casablanca{% endblock %}
+{% block title %}Rahal Stay · Votre séjour à Sidi Rahal{% endblock %}
 {% block body_class %}home-page{% endblock %}
 {% block content %}
 <main>
   <section class="hero">
     <div class="hero-backdrop" aria-hidden="true"></div>
     <div class="shell hero-content">
-      <p class="kicker light">Séjournez autrement à Casablanca</p>
-      <h1>Un appartement qui vous ressemble, <em>au bon endroit.</em></h1>
-      <p class="hero-lead">Des logements sélectionnés pour leur confort, leur emplacement et la simplicité de votre expérience.</p>
+      <p class="kicker light">Résidence privée · Sidi Rahal</p>
+      <h1>Le calme d’un séjour <em>entre jardin et océan.</em></h1>
+      <p class="hero-lead">Des appartements lumineux au sein de la résidence Amwaj, avec piscine, jardins paysagers et espaces de loisirs.</p>
       <form class="hero-search" method="get" action="{% url 'apartments:liste' %}">
         <div><label for="home-arrivee">Arrivée</label><input id="home-arrivee" type="date" name="date_debut" required></div>
         <div><label for="home-depart">Départ</label><input id="home-depart" type="date" name="date_fin" required></div>
         <button class="button button-primary" type="submit"><span>Rechercher</span><span aria-hidden="true">→</span></button>
       </form>
-      <div class="hero-meta"><span><strong>{{ nombre_appartements }}</strong> logement{{ nombre_appartements|pluralize }} disponible{{ nombre_appartements|pluralize }}</span><span><strong>Casablanca</strong> au cœur de la ville</span><span><strong>Simple</strong> réservation en ligne</span></div>
+      <div class="hero-meta"><span><strong>{{ nombre_appartements }}</strong> logement{{ nombre_appartements|pluralize }} disponible{{ nombre_appartements|pluralize }}</span><span><strong>Résidence privée</strong> calme et sécurisée</span><span><strong>Sidi Rahal</strong> côte atlantique</span></div>
     </div>
   </section>
 
@@ -25,10 +25,10 @@
       {% for appartement in appartements_en_vedette %}
       <article class="property-card">
         <a class="property-media" href="{% url 'apartments:detail' appartement.pk %}">
-          {% with photo=appartement.photos.first %}{% if photo %}<img src="{{ photo.image.url }}" alt="{{ photo.legende|default:appartement.titre }}">{% else %}<div class="property-placeholder"><span>CasaStay</span></div>{% endif %}{% endwith %}
+          {% with photo=appartement.photos.first %}{% if photo %}<img src="{{ photo.image.url }}" alt="{{ photo.legende|default:appartement.titre }}">{% else %}<div class="property-placeholder"><span>Rahal Stay</span></div>{% endif %}{% endwith %}
           <span class="availability-tag">Disponible</span>
         </a>
-        <div class="property-content"><div><p class="property-location">Casablanca, Maroc</p><h3><a href="{% url 'apartments:detail' appartement.pk %}">{{ appartement.titre }}</a></h3></div><p>{{ appartement.description|truncatewords:16 }}</p><div class="property-footer"><span>👥 {{ appartement.capacite }} personne{{ appartement.capacite|pluralize }}</span><strong>{{ appartement.prix_par_nuit }} <small>MAD / nuit</small></strong></div></div>
+        <div class="property-content"><div><p class="property-location">Amwaj · Sidi Rahal</p><h3><a href="{% url 'apartments:detail' appartement.pk %}">{{ appartement.titre }}</a></h3></div><p>{{ appartement.description|truncatewords:16 }}</p><div class="property-footer"><span>{{ appartement.capacite }} voyageur{{ appartement.capacite|pluralize }}</span><strong>{{ appartement.prix_par_nuit }} <small>MAD / nuit</small></strong></div></div>
       </article>
       {% empty %}
       <div class="empty-state span-all"><span class="empty-icon">⌂</span><h3>Les premiers appartements arrivent bientôt</h3><p>Le catalogue est en cours de préparation.</p></div>
@@ -36,18 +36,29 @@
     </div>
   </section>
 
-  <section class="section section-soft" id="services"><div class="shell"><div class="section-heading centered"><div><p class="kicker">L’expérience CasaStay</p><h2>Tout ce qu’il faut, sans complication</h2></div></div><div class="feature-grid">
-    <article><span class="feature-icon">⌖</span><h3>Emplacements pratiques</h3><p>Des logements à Casablanca, proches des services et des principaux axes de déplacement.</p></article>
-    <article><span class="feature-icon">✓</span><h3>Réservation claire</h3><p>Consultez la disponibilité, le montant et le statut de votre séjour depuis un espace unique.</p></article>
-    <article><span class="feature-icon">◇</span><h3>Paiement maîtrisé</h3><p>Une étape de paiement explicite et un reçu accessible après chaque confirmation.</p></article>
-    <article><span class="feature-icon">◎</span><h3>Suivi centralisé</h3><p>Notifications, réservations et informations de profil restent accessibles à tout moment.</p></article>
+  <section class="section section-soft" id="services"><div class="shell"><div class="section-heading centered"><div><p class="kicker">La résidence</p><h2>Des vacances simples, dans un cadre préservé</h2></div></div><div class="feature-grid">
+    <article><span class="feature-icon">01</span><h3>Piscine au cœur des jardins</h3><p>Un espace de baignade entouré de pelouses, de palmiers et d’allées paysagées.</p></article>
+    <article><span class="feature-icon">02</span><h3>Résidence privée</h3><p>Un environnement calme, soigné et pensé pour profiter sereinement de votre séjour.</p></article>
+    <article><span class="feature-icon">03</span><h3>Terrain multisports</h3><p>Un espace dédié aux activités et aux moments partagés, à quelques pas du logement.</p></article>
+    <article><span class="feature-icon">04</span><h3>Parking sur place</h3><p>Un accès pratique à la résidence et des espaces de stationnement à proximité.</p></article>
   </div></div></section>
 
-  <section class="section shell location-section" id="localisation">
-    <div class="location-copy"><p class="kicker">Nous trouver</p><h2>Votre point de départ à Casablanca</h2><p>Profitez d’une ville vivante entre architecture, quartiers d’affaires, littoral et culture. La localisation exacte de chaque logement est communiquée dans les détails de réservation.</p><div class="location-list"><span><b>Ville</b> Casablanca, Maroc</span><span><b>Accès</b> Tramway, taxis et grands axes</span><span><b>À proximité</b> Commerces, restaurants et services</span></div><a class="button button-dark" href="https://www.openstreetmap.org/?mlat=33.5731&mlon=-7.5898#map=12/33.5731/-7.5898" target="_blank" rel="noopener">Ouvrir la carte <span>↗</span></a></div>
-    <div class="map-card"><iframe title="Carte de Casablanca" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=-7.6900%2C33.5200%2C-7.5100%2C33.6500&amp;layer=mapnik&amp;marker=33.5731%2C-7.5898"></iframe><div class="map-label"><span class="brand-mark">C</span><div><strong>CasaStay</strong><small>Casablanca, Maroc</small></div></div></div>
+  <section class="section shell residence-section" id="residence">
+    <div class="residence-intro"><div><p class="kicker">En images</p><h2>Découvrez votre prochain lieu de vacances</h2></div><p>De l’intérieur lumineux aux jardins de la résidence, découvrez les espaces qui rythmeront votre séjour à Sidi Rahal.</p></div>
+    <div class="residence-gallery">
+      <figure class="gallery-wide"><img src="{% static 'img/residence/salon.jpeg' %}" alt="Salon lumineux de l’appartement" loading="lazy"><figcaption>Un intérieur lumineux</figcaption></figure>
+      <figure class="gallery-tall"><img src="{% static 'img/residence/piscine-jardin.jpeg' %}" alt="Piscine et jardin de la résidence Amwaj" loading="lazy"><figcaption>Jardins paysagers</figcaption></figure>
+      <figure><img src="{% static 'img/residence/balcon.jpeg' %}" alt="Balcon avec vue sur la résidence" loading="lazy"><figcaption>Vue depuis le balcon</figcaption></figure>
+      <figure><img src="{% static 'img/residence/terrain-sport.jpeg' %}" alt="Terrain multisports de la résidence" loading="lazy"><figcaption>Terrain multisports</figcaption></figure>
+      <figure><img src="{% static 'img/residence/parking.jpeg' %}" alt="Accès au parking de la résidence" loading="lazy"><figcaption>Accès et parking</figcaption></figure>
+    </div>
   </section>
 
-  <section class="section shell"><div class="cta-panel"><div><p class="kicker light">Prêt à réserver ?</p><h2>Votre prochain séjour commence ici.</h2><p>Parcourez les appartements disponibles et choisissez vos dates.</p></div><a class="button button-light" href="{% url 'apartments:liste' %}">Découvrir les logements <span>→</span></a></div></section>
+  <section class="section shell location-section" id="localisation">
+    <div class="location-copy"><p class="kicker">Nous trouver</p><h2>À la résidence Amwaj, Sidi Rahal</h2><p>Une adresse tournée vers les vacances sur la côte atlantique, dans un cadre privé et verdoyant.</p><div class="location-list"><span><b>Adresse</b> Résidence Amwaj, Sidi Rahal</span><span><b>Coordonnées</b> 33.455229, -8.0011702</span><span><b>Sur place</b> Piscine, jardins, terrain multisports et parking</span></div><a class="button button-dark" href="https://maps.app.goo.gl/q9qEuBE8mfuVFwrj8" target="_blank" rel="noopener">Obtenir l’itinéraire <span>↗</span></a></div>
+    <div class="map-card"><iframe title="Carte de la résidence Amwaj à Sidi Rahal" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=-8.0211702%2C33.442229%2C-7.9811702%2C33.468229&amp;layer=mapnik&amp;marker=33.455229%2C-8.0011702"></iframe><div class="map-label"><span class="brand-mark">R</span><div><strong>Résidence Amwaj</strong><small>Sidi Rahal, Maroc</small></div></div></div>
+  </section>
+
+  <section class="section shell"><div class="cta-panel"><div><p class="kicker light">Envie de vous évader ?</p><h2>Votre prochain séjour commence ici, à Sidi Rahal.</h2><p>Consultez les disponibilités et choisissez les dates qui vous ressemblent.</p></div><a class="button button-light" href="{% url 'apartments:liste' %}">Voir les appartements <span>→</span></a></div></section>
 </main>
 {% endblock %}

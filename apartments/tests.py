@@ -55,6 +55,61 @@ class RechercheDisponibiliteTests(TestCase):
             montant_total=Decimal('1000.00'),
         )
 
+    def test_premier_chargement_n_affiche_aucun_appartement(self):
+        response = self.client.get(reverse('apartments:liste'))
+
+        self.assertEqual(response.context['page_obj'].paginator.count, 0)
+        self.assertContains(response, "Veuillez sélectionner une date d'arrivée et une date de départ")
+        self.assertNotContains(response, self.libre.titre)
+
+    def test_les_deux_dates_sont_obligatoires(self):
+        response = self.client.get(
+            reverse('apartments:liste'),
+            {'date_debut': '2027-08-10', 'date_fin': ''},
+        )
+
+        self.assertEqual(response.context['page_obj'].paginator.count, 0)
+        self.assertFormError(response.context['form'], 'date_fin', 'Ce champ est obligatoire.')
+
+    def test_date_de_depart_doit_etre_posterieure(self):
+        response = self.client.get(
+            reverse('apartments:liste'),
+            {'date_debut': '2027-08-15', 'date_fin': '2027-08-10'},
+        )
+
+        self.assertEqual(response.context['page_obj'].paginator.count, 0)
+        self.assertFormError(
+            response.context['form'],
+            'date_fin',
+            "La date de départ doit être postérieure à la date d'arrivée.",
+        )
+
+    def test_date_d_arrivee_passee_est_refusee(self):
+        response = self.client.get(
+            reverse('apartments:liste'),
+            {'date_debut': '2020-01-01', 'date_fin': '2020-01-03'},
+        )
+
+        self.assertEqual(response.context['page_obj'].paginator.count, 0)
+        self.assertFormError(
+            response.context['form'],
+            'date_debut',
+            "La date d'arrivée ne peut pas être passée.",
+        )
+
+    def test_date_invalide_est_refusee(self):
+        response = self.client.get(
+            reverse('apartments:liste'),
+            {'date_debut': 'date-invalide', 'date_fin': '2027-08-15'},
+        )
+
+        self.assertEqual(response.context['page_obj'].paginator.count, 0)
+        self.assertFormError(
+            response.context['form'],
+            'date_debut',
+            'Saisissez une date valide.',
+        )
+
     def test_recherche_exclut_uniquement_les_chevauchements_bloquants(self):
         response = self.client.get(
             reverse('apartments:liste'),
@@ -78,6 +133,16 @@ class RechercheDisponibiliteTests(TestCase):
             response,
             f'{url}?date_debut=2027-08-10&amp;date_fin=2027-08-15',
         )
+
+    def test_message_si_aucun_appartement_n_est_disponible(self):
+        Appartement.objects.update(disponible=False)
+
+        response = self.client.get(
+            reverse('apartments:liste'),
+            {'date_debut': '2027-08-10', 'date_fin': '2027-08-15'},
+        )
+
+        self.assertContains(response, "Aucun appartement n'est disponible pour cette période.")
 
     def test_formulaire_de_reservation_est_pre_rempli(self):
         self.client.force_login(self.client_reservation)

@@ -13,16 +13,12 @@ from .models import Appartement, PeriodeVacances, Photo
 
 def liste(request):
     form = RechercheDisponibiliteForm(request.GET or None)
-    appartements = Appartement.objects.filter(disponible=True)
+    appartements = Appartement.objects.none()
     dates_recherche = None
-    if form.is_valid() and form.cleaned_data.get('date_debut'):
+    if form.is_valid():
         debut, fin = form.cleaned_data['date_debut'], form.cleaned_data['date_fin']
         appartements = chercher_appartements_disponibles(debut, fin, request.user)
         dates_recherche = {'date_debut': debut, 'date_fin': fin}
-    elif request.GET:
-        # Une recherche invalide ne doit jamais présenter le catalogue comme
-        # s'il était disponible pour une période qui n'a pas pu être validée.
-        appartements = Appartement.objects.none()
 
     photos_cartes = Photo.objects.order_by('-principale', 'pk')
     appartements = appartements.prefetch_related(
