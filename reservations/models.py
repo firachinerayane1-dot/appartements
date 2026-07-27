@@ -1,7 +1,19 @@
+import secrets
+import string
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
+
+
+def generer_numero_reservation():
+    """Génère un numéro au format aaAA00000, par exemple waZT74985."""
+    lettres_minuscules = ''.join(secrets.choice(string.ascii_lowercase) for _ in range(2))
+    lettres_majuscules = ''.join(secrets.choice(string.ascii_uppercase) for _ in range(2))
+    chiffres = ''.join(secrets.choice(string.digits) for _ in range(5))
+    return f'{lettres_minuscules}{lettres_majuscules}{chiffres}'
 
 
 class Reservation(models.Model):
@@ -23,6 +35,19 @@ class Reservation(models.Model):
     date_debut = models.DateField()
     date_fin = models.DateField()
     date_reservation = models.DateTimeField(auto_now_add=True)
+    numero_reservation = models.CharField(
+        max_length=9,
+        unique=True,
+        default=generer_numero_reservation,
+        editable=False,
+        validators=[
+            RegexValidator(
+                regex=r'^[a-z]{2}[A-Z]{2}\d{5}$',
+                message='Le numéro de réservation doit contenir 2 lettres minuscules, '
+                        '2 lettres majuscules et 5 chiffres.',
+            ),
+        ],
+    )
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default=EN_ATTENTE)
     montant_total = models.DecimalField(max_digits=10, decimal_places=2)
 
@@ -31,7 +56,7 @@ class Reservation(models.Model):
         constraints = [models.CheckConstraint(condition=Q(date_fin__gt=models.F('date_debut')), name='reservation_dates_valides')]
 
     def __str__(self):
-        return f"{self.client} — {self.appartement} ({self.date_debut})"
+        return f"{self.numero_reservation} — {self.client} — {self.appartement} ({self.date_debut})"
 
     def clean(self):
         if self.date_debut and self.date_fin and self.date_fin <= self.date_debut:
@@ -78,7 +103,7 @@ class Reservation(models.Model):
 
     def generer_recap(self):
         return {
-            'numero': self.pk,
+            'numero': self.numero_reservation,
             'client': str(self.client),
             'appartement': str(self.appartement),
             'date_debut': self.date_debut,

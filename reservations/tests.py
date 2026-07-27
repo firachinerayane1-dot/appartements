@@ -37,6 +37,19 @@ class ReglesReservationTests(TestCase):
         self.assertEqual(reservation.statut, Reservation.EN_ATTENTE)
         self.assertEqual(reservation.montant_total, Decimal('170.00'))
 
+    def test_numero_reservation_est_genere_automatiquement_et_unique(self):
+        premiere = creer_reservation(
+            self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 12)
+        )
+        seconde = creer_reservation(
+            self.enseignant, self.appartement, date(2027, 7, 12), date(2027, 7, 14)
+        )
+
+        self.assertRegex(premiere.numero_reservation, r'^[a-z]{2}[A-Z]{2}\d{5}$')
+        self.assertRegex(seconde.numero_reservation, r'^[a-z]{2}[A-Z]{2}\d{5}$')
+        self.assertNotEqual(premiere.numero_reservation, seconde.numero_reservation)
+        self.assertEqual(premiere.generer_recap()['numero'], premiere.numero_reservation)
+
     def test_chevauchement_avec_reservation_existante_est_bloque(self):
         creer_reservation(self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 12))
         with self.assertRaisesMessage(ValidationError, "pas disponible"):
