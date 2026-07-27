@@ -9,6 +9,8 @@ class AccueilTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'core/accueil.html')
         self.assertContains(response, 'Votre prochain séjour commence ici')
+        self.assertNotContains(response, 'Notre sélection')
+        self.assertNotContains(response, 'property-card')
 
     def test_feuille_de_style_est_trouvee(self):
         self.assertIsNotNone(finders.find('css/site.css'))

@@ -15,24 +15,7 @@
         <div><label for="home-depart">Départ</label><input id="home-depart" type="date" name="date_fin" required></div>
         <button class="button button-primary" type="submit"><span>Rechercher</span><span aria-hidden="true">→</span></button>
       </form>
-      <div class="hero-meta"><span><strong>{{ nombre_appartements }}</strong> logement{{ nombre_appartements|pluralize }} disponible{{ nombre_appartements|pluralize }}</span><span><strong>Résidence privée</strong> calme et sécurisée</span><span><strong>Sidi Rahal</strong> côte atlantique</span></div>
-    </div>
-  </section>
-
-  <section class="section shell" id="appartements">
-    <div class="section-heading"><div><p class="kicker">Notre sélection</p><h2>Des espaces pensés pour votre séjour</h2></div><a class="text-link" href="{% url 'apartments:liste' %}">Voir tous les appartements <span>→</span></a></div>
-    <div class="property-grid">
-      {% for appartement in appartements_en_vedette %}
-      <article class="property-card">
-        <a class="property-media" href="{% url 'apartments:detail' appartement.pk %}">
-          {% with photo=appartement.photos.first %}{% if photo %}<img src="{{ photo.image.url }}" alt="{{ photo.legende|default:appartement.titre }}">{% else %}<div class="property-placeholder"><span>Rahal Stay</span></div>{% endif %}{% endwith %}
-          <span class="availability-tag">Disponible</span>
-        </a>
-        <div class="property-content"><div><p class="property-location">Amwaj · Sidi Rahal</p><h3><a href="{% url 'apartments:detail' appartement.pk %}">{{ appartement.titre }}</a></h3></div><p>{{ appartement.description|truncatewords:16 }}</p><div class="property-footer"><span>{{ appartement.capacite }} voyageur{{ appartement.capacite|pluralize }}</span><strong>{{ appartement.prix_par_nuit }} <small>MAD / nuit</small></strong></div></div>
-      </article>
-      {% empty %}
-      <div class="empty-state span-all"><span class="empty-icon">⌂</span><h3>Les premiers appartements arrivent bientôt</h3><p>Le catalogue est en cours de préparation.</p></div>
-      {% endfor %}
+      <div class="hero-meta"><span><strong>Réservation en ligne</strong> simple et rapide</span><span><strong>Résidence privée</strong> calme et sécurisée</span><span><strong>Sidi Rahal</strong> côte atlantique</span></div>
     </div>
   </section>
 
