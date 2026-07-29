@@ -194,7 +194,7 @@ button, input, select, textarea { font: inherit; }
 .status { display: inline-flex; padding: .32rem .58rem; border-radius: 2px; background: var(--sand); color: #5E5B55; font-size: .66rem; font-weight: 800; }
 .status.EN_ATTENTE { background: #F7EAD9; color: #8B561D; }
 .status.CONFIRMEE, .status.PAYE { background: #E4F0E9; color: #236044; }
-.status.ANNULEE, .status.ECHEC { background: #F5E5E1; color: #953E33; }
+.status.ANNULEE, .status.REJETEE, .status.EXPIREE, .status.ECHEC { background: #F5E5E1; color: #953E33; }
 .form-layout { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 2rem; align-items: start; }
 .form-card { padding: 2rem; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255,255,255,.66); }
 .form-card p { margin: 0 0 1rem; }

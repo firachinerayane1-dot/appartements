@@ -5,9 +5,7 @@ from django.utils import timezone
 
 class Paiement(models.Model):
     CARTE = 'CARTE'
-    VIREMENT = 'VIREMENT'
-    ESPECES = 'ESPECES'
-    METHODES = [(CARTE, 'Carte'), (VIREMENT, 'Virement'), (ESPECES, 'Espèces')]
+    METHODES = [(CARTE, 'Carte bancaire')]
     EN_ATTENTE = 'EN_ATTENTE'
     PAYE = 'PAYE'
     ECHEC = 'ECHEC'
@@ -31,8 +29,14 @@ class Paiement(models.Model):
         reservation = Reservation.objects.select_for_update().get(pk=self.reservation_id)
         if self.statut == self.PAYE:
             return self
+        if reservation.expirer_si_necessaire():
+            raise ValidationError("Le délai de paiement de 24 heures est expiré.")
         if reservation.statut != Reservation.EN_ATTENTE:
             raise ValidationError("La réservation doit être en attente.")
+        if not reservation.politiques_acceptees_le:
+            raise ValidationError("Les politiques doivent être acceptées avant le paiement.")
+        if self.methode != self.CARTE:
+            raise ValidationError("Le paiement est disponible uniquement par carte bancaire.")
         if self.montant != reservation.montant_total:
             raise ValidationError("Le montant du paiement ne correspond pas à la réservation.")
         self.statut = self.PAYE
@@ -44,7 +48,7 @@ class Paiement(models.Model):
     def get_recu(self):
         return {
             'numero': self.pk,
-            'reservation': self.reservation_id,
+            'reservation': self.reservation.numero_reservation,
             'client': str(self.reservation.client),
             'montant': self.montant,
             'methode': self.get_methode_display(),

@@ -1,3 +1,4 @@
+from datetime import timedelta
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
@@ -30,8 +31,10 @@ class Appartement(models.Model):
             return False
         if not hasattr(self, 'reservations'):
             return True
+        limite_paiement = timezone.now() - timedelta(hours=24)
         conflits = self.reservations.filter(
-            statut__in=('EN_ATTENTE', 'CONFIRMEE'),
+            Q(statut='CONFIRMEE')
+            | Q(statut='EN_ATTENTE', date_reservation__gt=limite_paiement),
             date_debut__lt=date_fin,
             date_fin__gt=date_debut,
         )

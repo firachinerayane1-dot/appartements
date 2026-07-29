@@ -12,13 +12,22 @@ from .models import Paiement
 @login_required
 def payer(request, reservation_id):
     reservation = get_object_or_404(Reservation, pk=reservation_id, client=request.user)
+    if reservation.expirer_si_necessaire():
+        messages.error(
+            request,
+            "Le délai de paiement de 24 heures est expiré. L'appartement est de nouveau disponible.",
+        )
+        return redirect('reservations:detail', pk=reservation.pk)
     if reservation.statut != Reservation.EN_ATTENTE:
         messages.info(request, "Cette réservation n'est plus en attente de paiement.")
         return redirect('reservations:detail', pk=reservation.pk)
+    if not reservation.politiques_acceptees_le:
+        messages.info(request, "Vous devez lire et accepter les politiques avant d'accéder au paiement.")
+        return redirect('reservations:politiques', pk=reservation.pk)
     form = PaiementForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         try:
-            paiement = reservation.generer_paiement(form.cleaned_data['methode'])
+            paiement = reservation.generer_paiement(Paiement.CARTE)
             paiement.effectuer()
         except ValidationError as exc:
             form.add_error(None, exc.messages[0])

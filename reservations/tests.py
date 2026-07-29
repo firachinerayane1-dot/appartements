@@ -1,17 +1,20 @@
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
+from django.core import mail
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
 from accounts.models import Utilisateur
 from apartments.models import Appartement, PeriodeVacances
 from payments.models import Paiement
-from services.reservation_services import creer_reservation
+from services.reservation_services import chercher_appartements_disponibles, creer_reservation
 from .models import Reservation
 
 
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
 class ReglesReservationTests(TestCase):
     def setUp(self):
         self.client_regulier = Utilisateur.objects.create_user(
@@ -55,15 +58,90 @@ class ReglesReservationTests(TestCase):
         with self.assertRaisesMessage(ValidationError, "pas disponible"):
             creer_reservation(self.enseignant, self.appartement, date(2027, 7, 11), date(2027, 7, 13))
 
-    def test_paiement_confirme_et_annulation_notifie(self):
+    def test_paiement_confirme_et_interdit_ensuite_annulation(self):
         reservation = creer_reservation(self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 12))
-        paiement = reservation.generer_paiement(Paiement.VIREMENT)
+        reservation.accepter_politiques()
+        paiement = reservation.generer_paiement(Paiement.CARTE)
         paiement.effectuer()
         reservation.refresh_from_db()
         self.assertEqual(reservation.statut, Reservation.CONFIRMEE)
-        reservation.annuler()
-        self.assertEqual(self.enseignant.notifications.count(), 1)
-        self.assertIsNotNone(self.enseignant.notifications.get().date_envoi)
+        with self.assertRaisesMessage(ValidationError, "ne peut pas être annulée"):
+            reservation.annuler()
+
+    def test_creation_envoie_email_politiques_avant_paiement(self):
+        self.client.force_login(self.enseignant)
+        response = self.client.post(
+            reverse('reservations:reserver', args=(self.appartement.pk,)),
+            {'date_debut': '2027-07-10', 'date_fin': '2027-07-12'},
+        )
+
+        reservation = Reservation.objects.get()
+        self.assertRedirects(response, reverse('reservations:detail', args=(reservation.pk,)))
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn(reservation.numero_reservation, mail.outbox[0].subject)
+        self.assertIn(
+            reverse('reservations:politiques', args=(reservation.pk,)),
+            mail.outbox[0].body,
+        )
+        self.assertIn("non remboursable", mail.outbox[0].body)
+
+    def test_politiques_sont_obligatoires_avant_paiement(self):
+        reservation = creer_reservation(
+            self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 12)
+        )
+        with self.assertRaisesMessage(ValidationError, "accepter les politiques"):
+            reservation.generer_paiement(Paiement.CARTE)
+        self.client.force_login(self.enseignant)
+
+        response = self.client.get(reverse('payments:payer', args=(reservation.pk,)))
+        self.assertRedirects(response, reverse('reservations:politiques', args=(reservation.pk,)))
+
+        page_politiques = self.client.get(reverse('reservations:politiques', args=(reservation.pk,)))
+        self.assertContains(page_politiques, "J’ai lu et j’accepte")
+        response = self.client.post(reverse('reservations:politiques', args=(reservation.pk,)))
+        self.assertRedirects(response, reverse('payments:payer', args=(reservation.pk,)))
+
+        reservation.refresh_from_db()
+        self.assertIsNotNone(reservation.politiques_acceptees_le)
+        with self.assertRaisesMessage(ValidationError, "uniquement par carte"):
+            reservation.generer_paiement('VIREMENT')
+        page_paiement = self.client.get(reverse('payments:payer', args=(reservation.pk,)))
+        self.assertEqual(page_paiement.status_code, 200)
+        self.assertContains(page_paiement, "Paiement sécurisé par carte")
+        self.assertNotContains(page_paiement, 'name="methode"')
+        response = self.client.post(
+            reverse('payments:payer', args=(reservation.pk,)),
+            {
+                'numero_carte': '4242 4242 4242 4242',
+                'expiration': '12/30',
+                'cvv': '123',
+            },
+        )
+        paiement = Paiement.objects.get(reservation=reservation)
+        self.assertRedirects(response, reverse('payments:recu', args=(paiement.pk,)))
+        self.assertEqual(paiement.methode, Paiement.CARTE)
+        reservation.refresh_from_db()
+        self.assertEqual(reservation.statut, Reservation.CONFIRMEE)
+
+    def test_reservation_impayee_expire_apres_24_heures(self):
+        reservation = creer_reservation(
+            self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 12)
+        )
+        Reservation.objects.filter(pk=reservation.pk).update(
+            date_reservation=timezone.now() - timedelta(hours=25)
+        )
+        reservation.refresh_from_db()
+
+        self.assertTrue(self.appartement.is_disponible(date(2027, 7, 10), date(2027, 7, 12)))
+        self.assertIn(
+            self.appartement,
+            chercher_appartements_disponibles(date(2027, 7, 10), date(2027, 7, 12)),
+        )
+        self.client.force_login(self.enseignant)
+        response = self.client.get(reverse('payments:payer', args=(reservation.pk,)))
+        self.assertRedirects(response, reverse('reservations:detail', args=(reservation.pk,)))
+        reservation.refresh_from_db()
+        self.assertEqual(reservation.statut, Reservation.EXPIREE)
 
     def test_pages_client_et_dashboard_se_rendent(self):
         reservation = creer_reservation(self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 12))
@@ -71,7 +149,7 @@ class ReglesReservationTests(TestCase):
         for url in (
             reverse('apartments:liste'), reverse('apartments:detail', args=(self.appartement.pk,)),
             reverse('reservations:mes_reservations'), reverse('reservations:detail', args=(reservation.pk,)),
-            reverse('notifications:liste'), reverse('payments:payer', args=(reservation.pk,)),
+            reverse('notifications:liste'), reverse('reservations:politiques', args=(reservation.pk,)),
         ):
             self.assertEqual(self.client.get(url).status_code, 200, url)
 

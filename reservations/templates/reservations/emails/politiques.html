@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="fr">
+<body style="margin:0;background:#f4f1ea;font-family:Arial,sans-serif;color:#17233c">
+  <div style="max-width:640px;margin:0 auto;padding:32px 18px">
+    <div style="background:#ffffff;border-radius:16px;padding:32px">
+      <p style="margin:0 0 8px;color:#b38643;font-size:12px;font-weight:bold;text-transform:uppercase;letter-spacing:1px">CasaStay</p>
+      <h1 style="margin:0 0 12px;font-family:Georgia,serif;font-size:28px">Politiques de votre réservation</h1>
+      <p>Bonjour {{ reservation.client.prenom }},</p>
+      <p>Votre réservation <strong>n°{{ reservation.numero_reservation }}</strong> pour <strong>{{ reservation.appartement }}</strong> a bien été créée.</p>
+      <div style="margin:24px 0;padding:20px;background:#f8f5ee;border-radius:12px">
+        <ul style="margin:0;padding-left:20px;line-height:1.7">
+          <li>L’appartement est maintenu pendant 24 heures.</li>
+          <li>Le paiement est disponible uniquement par carte bancaire.</li>
+          <li>Après paiement, la réservation ne peut plus être annulée.</li>
+          <li>Le tarif payé est non remboursable.</li>
+          <li>Sans paiement avant le <strong>{{ reservation.date_expiration|date:"d/m/Y à H:i" }}</strong>, l’appartement redevient disponible.</li>
+        </ul>
+      </div>
+      <p style="text-align:center;margin:28px 0 8px">
+        <a href="{{ lien_politiques }}" style="display:inline-block;padding:14px 22px;background:#17233c;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:bold">Lire et accepter les politiques</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

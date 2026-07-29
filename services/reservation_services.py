@@ -1,6 +1,9 @@
+from datetime import timedelta
+
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Q
+from django.utils import timezone
 
 from apartments.models import Appartement, PeriodeVacances
 from reservations.models import Reservation
@@ -40,8 +43,12 @@ def chercher_appartements_disponibles(date_debut, date_fin, client=None):
     départ le jour d'une nouvelle arrivée ne constitue donc pas un conflit.
     """
     reservations_en_conflit = Reservation.objects.filter(
+        Q(statut=Reservation.CONFIRMEE)
+        | Q(
+            statut=Reservation.EN_ATTENTE,
+            date_reservation__gt=timezone.now() - timedelta(hours=24),
+        ),
         appartement_id=OuterRef('pk'),
-        statut__in=(Reservation.EN_ATTENTE, Reservation.CONFIRMEE),
         date_debut__lt=date_fin,
         date_fin__gt=date_debut,
     )
