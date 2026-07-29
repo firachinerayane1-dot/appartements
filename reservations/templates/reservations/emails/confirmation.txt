@@ -1,0 +1,62 @@
+CONFIRMATION DE RÉSERVATION
+NUMÉRO DE RÉSERVATION : {{ reservation.numero_reservation }}
+
+Veuillez conserver la confirmation PDF jointe et la présenter lors de votre arrivée.
+
+{{ marque|upper }}
+{{ adresse }}
+Coordonnées GPS : {{ coordonnees }}
+{{ email_contact }}
+{% if telephone_contact %}Tél. : {{ telephone_contact }}{% endif %}
+
+Cher(e) {{ nom_client|upper }},
+
+Merci d'avoir choisi {{ marque }} pour votre séjour. Votre réservation est CONFIRMÉE et votre paiement a bien été enregistré.
+
+DÉTAILS DE LA RÉSERVATION
+Date de réservation : {{ reservation.date_reservation|date:"d/m/Y" }}
+Date d'arrivée : {{ reservation.date_debut|date:"d/m/Y" }}
+Date de départ : {{ reservation.date_fin|date:"d/m/Y" }}
+Nombre de nuitées : {{ reservation.get_duree }}
+Check-In : {{ check_in }}
+Check-Out : {{ check_out }}
+Demandes spéciales : Aucune
+
+VOS COORDONNÉES
+{{ nom_client }}
+Adresse e-mail : {{ client.email }}
+{% if client.telephone %}Téléphone : {{ client.telephone }}{% endif %}
+
+DÉTAILS DE L'HÉBERGEMENT
+Type de logement : {{ reservation.appartement }}
+Description : {{ reservation.appartement.description }}
+Capacité : jusqu'à {{ reservation.appartement.capacite }} voyageur(s)
+Nombre de logements : 1
+
+DÉTAILS DU TARIF
+Total hébergement : {{ montant }} MAD
+Total général : {{ montant }} MAD
+Total payé : {{ montant }} MAD
+Montant dû : {{ solde }} MAD
+
+RÉSERVÉ ET PAYÉ PAR
+{{ nom_client }}
+{{ client.email }}
+Mode de paiement : Carte bancaire
+Date de paiement : {{ date_paiement|date:"d/m/Y à H:i" }}
+
+CONDITIONS ET POLITIQUES
+Politique d'annulation : NON ANNULABLE - NON REMBOURSABLE
+
+{% for politique in politiques %}{{ politique.titre }} :
+{{ politique.texte }}
+
+{% endfor %}Check-In : {{ check_in }}
+Check-Out : {{ check_out }}
+
+Cet e-mail a été envoyé depuis un système automatisé. Merci de ne pas y répondre.
+
+POUR TOUTE DEMANDE SUPPLÉMENTAIRE
+{{ email_contact }}
+{% if telephone_contact %}Tél. : {{ telephone_contact }}{% endif %}
+{{ adresse }}

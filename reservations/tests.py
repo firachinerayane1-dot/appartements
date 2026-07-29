@@ -122,6 +122,26 @@ class ReglesReservationTests(TestCase):
         self.assertEqual(paiement.methode, Paiement.CARTE)
         reservation.refresh_from_db()
         self.assertEqual(reservation.statut, Reservation.CONFIRMEE)
+        self.assertEqual(len(mail.outbox), 1)
+        confirmation = mail.outbox[0]
+        self.assertEqual(
+            confirmation.subject,
+            f'Booking Reference Number {reservation.numero_reservation} - CONFIRMED, RAHAL STAY',
+        )
+        self.assertTrue(confirmation.from_email.startswith('Rahal Stay <'))
+        self.assertIn('NON ANNULABLE - NON REMBOURSABLE', confirmation.body)
+        self.assertIn(reservation.appartement.titre, confirmation.body)
+        self.assertEqual(len(confirmation.alternatives), 1)
+        self.assertIn('Votre séjour est confirmé', confirmation.alternatives[0].content)
+        self.assertEqual(len(confirmation.attachments), 1)
+        piece_jointe = confirmation.attachments[0]
+        self.assertEqual(
+            piece_jointe.filename,
+            f'confirmation-reservation-{reservation.numero_reservation}.pdf',
+        )
+        self.assertEqual(piece_jointe.mimetype, 'application/pdf')
+        self.assertTrue(piece_jointe.content.startswith(b'%PDF'))
+        self.assertGreater(len(piece_jointe.content), 20_000)
 
     def test_reservation_impayee_expire_apres_24_heures(self):
         reservation = creer_reservation(

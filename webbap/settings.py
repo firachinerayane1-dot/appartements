@@ -203,4 +203,19 @@ if EMAIL_HOST.lower() == 'smtp.gmail.com':
     # SMTP attend les 16 caractères sans les espaces de présentation.
     EMAIL_HOST_PASSWORD = ''.join(EMAIL_HOST_PASSWORD.split())
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in {'1', 'true', 'yes'}
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'CasaStay <no-reply@casastay.local>')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Rahal Stay <no-reply@rahalstay.local>')
+
+RAHAL_STAY_NAME = os.getenv('RAHAL_STAY_NAME', 'Rahal Stay')
+RAHAL_STAY_ADDRESS = os.getenv(
+    'RAHAL_STAY_ADDRESS',
+    'Résidence Amwaj, Sidi Rahal, Maroc',
+)
+RAHAL_STAY_COORDINATES = os.getenv('RAHAL_STAY_COORDINATES', '33.455229, -8.0011702')
+RAHAL_STAY_CONTACT_EMAIL = os.getenv(
+    'RAHAL_STAY_CONTACT_EMAIL',
+    EMAIL_HOST_USER or 'contact@rahalstay.local',
+)
+RAHAL_STAY_CONTACT_PHONE = os.getenv('RAHAL_STAY_CONTACT_PHONE', '')
+RAHAL_STAY_CHECK_IN = os.getenv('RAHAL_STAY_CHECK_IN', '15:00')
+RAHAL_STAY_CHECK_OUT = os.getenv('RAHAL_STAY_CHECK_OUT', '12:00')
+RAHAL_STAY_GUARANTEE_AMOUNT = os.getenv('RAHAL_STAY_GUARANTEE_AMOUNT', '1000.00')
