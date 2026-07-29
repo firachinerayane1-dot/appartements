@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="fr">
+<body style="margin:0;background:#f4f1ea;font-family:Arial,Helvetica,sans-serif;color:#17233c">
+  <div style="max-width:760px;margin:0 auto;padding:28px 14px">
+    <div style="background:#ffffff;border-radius:18px;overflow:hidden;border:1px solid #e7e1d6">
+      <div style="background:#1f4b3f;padding:26px 34px;color:#ffffff">
+        <table role="presentation" style="width:100%;border-collapse:collapse">
+          <tr>
+            <td style="width:64px">
+              <div style="width:52px;height:52px;line-height:52px;text-align:center;border-radius:50%;background:#ffffff;color:#1f4b3f;font-family:Georgia,serif;font-size:30px;font-weight:bold">R</div>
+            </td>
+            <td>
+              <div style="font-size:22px;font-weight:bold;letter-spacing:1px">{{ marque|upper }}</div>
+              <div style="margin-top:4px;color:#dce9e3;font-size:13px">Résidence Amwaj · Sidi Rahal</div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="padding:34px">
+        <div style="text-align:center">
+          <p style="margin:0 0 8px;color:#b38643;font-size:12px;font-weight:bold;letter-spacing:1.4px">CONFIRMATION DE RÉSERVATION</p>
+          <h1 style="margin:0;color:#17233c;font-family:Georgia,serif;font-size:30px">Votre séjour est confirmé</h1>
+          <div style="margin:22px auto 0;padding:15px 20px;max-width:470px;border-radius:10px;background:#f6f1e7">
+            <span style="display:block;color:#667085;font-size:11px;font-weight:bold;letter-spacing:1px">NUMÉRO DE RÉSERVATION</span>
+            <strong style="display:block;margin-top:5px;color:#1f4b3f;font-size:25px">{{ reservation.numero_reservation }}</strong>
+          </div>
+        </div>
+
+        <p style="margin:30px 0 12px;font-size:16px">Cher(e) <strong>{{ nom_client|upper }}</strong>,</p>
+        <p style="margin:0;line-height:1.65;color:#475467">Merci d’avoir choisi {{ marque }}. Votre réservation est <strong style="color:#1f4b3f">CONFIRMÉE</strong> et votre paiement a bien été enregistré. La confirmation complète à imprimer est jointe à cet e-mail au format PDF.</p>
+
+        <h2 style="margin:34px 0 14px;color:#1f4b3f;font-family:Georgia,serif;font-size:22px">Détails de la réservation</h2>
+        <table role="presentation" style="width:100%;border-collapse:collapse;background:#f8faf9;border-radius:12px">
+          <tr>
+            <td style="padding:14px 18px;border-bottom:1px solid #e5e7eb;color:#667085">Date de réservation</td>
+            <td style="padding:14px 18px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:bold">{{ reservation.date_reservation|date:"d/m/Y" }}</td>
+          </tr>
+          <tr>
+            <td style="padding:14px 18px;border-bottom:1px solid #e5e7eb;color:#667085">Arrivée · Check-In {{ check_in }}</td>
+            <td style="padding:14px 18px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:bold">{{ reservation.date_debut|date:"d/m/Y" }}</td>
+          </tr>
+          <tr>
+            <td style="padding:14px 18px;border-bottom:1px solid #e5e7eb;color:#667085">Départ · Check-Out {{ check_out }}</td>
+            <td style="padding:14px 18px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:bold">{{ reservation.date_fin|date:"d/m/Y" }}</td>
+          </tr>
+          <tr>
+            <td style="padding:14px 18px;color:#667085">Nombre de nuitées</td>
+            <td style="padding:14px 18px;text-align:right;font-weight:bold">{{ reservation.get_duree }}</td>
+          </tr>
+        </table>
+
+        <h2 style="margin:34px 0 14px;color:#1f4b3f;font-family:Georgia,serif;font-size:22px">Hébergement</h2>
+        <div style="padding:20px;border:1px solid #e5e7eb;border-radius:12px">
+          <strong style="font-size:18px">{{ reservation.appartement }}</strong>
+          <p style="margin:8px 0;color:#667085;line-height:1.55">{{ reservation.appartement.description }}</p>
+          <span style="font-size:13px;color:#475467">Jusqu’à {{ reservation.appartement.capacite }} voyageur(s) · 1 logement</span>
+        </div>
+
+        <h2 style="margin:34px 0 14px;color:#1f4b3f;font-family:Georgia,serif;font-size:22px">Détails du tarif</h2>
+        <table role="presentation" style="width:100%;border-collapse:collapse;background:#e5efe9;border-radius:12px">
+          <tr><td style="padding:13px 18px">Total hébergement</td><td style="padding:13px 18px;text-align:right">{{ montant }} MAD</td></tr>
+          <tr><td style="padding:13px 18px">Total payé</td><td style="padding:13px 18px;text-align:right;color:#1f4b3f;font-weight:bold">{{ montant }} MAD</td></tr>
+          <tr><td style="padding:13px 18px">Montant dû</td><td style="padding:13px 18px;text-align:right;font-weight:bold">{{ solde }} MAD</td></tr>
+        </table>
+
+        <div style="margin:30px 0;padding:22px;border-radius:12px;background:#1f4b3f;color:#ffffff">
+          <span style="display:block;font-size:12px;letter-spacing:1px">MONTANT DE LA RÉSERVATION</span>
+          <strong style="display:block;margin-top:7px;font-size:28px">{{ montant }} MAD</strong>
+          <span style="display:block;margin-top:12px;color:#dce9e3;font-size:13px">Payé par {{ nom_client }} · Carte bancaire</span>
+        </div>
+
+        <h2 style="margin:34px 0 14px;color:#1f4b3f;font-family:Georgia,serif;font-size:22px">Conditions et politiques</h2>
+        <div style="padding:18px;border-radius:12px;background:#f8e8e4;color:#923b32">
+          <strong>Politique d’annulation</strong>
+          <div style="margin-top:6px;font-size:18px;font-weight:bold">NON ANNULABLE · NON REMBOURSABLE</div>
+        </div>
+        {% for politique in politiques %}
+          <div style="margin-top:18px">
+            <strong style="color:#1f4b3f">{{ politique.titre }}</strong>
+            <p style="margin:6px 0 0;color:#475467;line-height:1.6">{{ politique.texte }}</p>
+          </div>
+        {% endfor %}
+
+        <div style="margin-top:32px;padding:20px;background:#f6f1e7;border-radius:12px">
+          <strong style="color:#1f4b3f">Coordonnées {{ marque }}</strong>
+          <p style="margin:9px 0 0;line-height:1.65;color:#475467">
+            {{ adresse }}<br>
+            Coordonnées GPS : {{ coordonnees }}<br>
+            <a href="mailto:{{ email_contact }}" style="color:#1f4b3f">{{ email_contact }}</a>
+            {% if telephone_contact %}<br>Tél. : {{ telephone_contact }}{% endif %}
+          </p>
+        </div>
+        <p style="margin:26px 0 0;text-align:center;color:#98a2b3;font-size:12px">Cet e-mail a été envoyé depuis un système automatisé. Merci de ne pas y répondre.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

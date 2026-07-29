@@ -27,6 +27,7 @@ def _reservations_filtrees(debut, fin):
 
 @administrateur_required
 def index(request):
+    Reservation.expirer_en_attente()
     form = PeriodeForm(request.GET or None)
     debut, fin = _bornes(form)
     reservations = _reservations_filtrees(debut, fin)
@@ -60,6 +61,7 @@ def index(request):
 def export_excel(request):
     from openpyxl import Workbook
 
+    Reservation.expirer_en_attente()
     form = PeriodeForm(request.GET or None)
     debut, fin = _bornes(form)
     reservations = _reservations_filtrees(debut, fin).select_related('client', 'appartement')

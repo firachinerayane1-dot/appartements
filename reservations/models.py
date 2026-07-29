@@ -1,11 +1,15 @@
+from datetime import timedelta
 import secrets
 import string
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
+from django.template.loader import render_to_string
+from django.utils import timezone
 
 
 def generer_numero_reservation():
@@ -17,17 +21,21 @@ def generer_numero_reservation():
 
 
 class Reservation(models.Model):
+    DELAI_PAIEMENT = timedelta(hours=24)
+
     EN_ATTENTE = 'EN_ATTENTE'
     CONFIRMEE = 'CONFIRMEE'
     ANNULEE = 'ANNULEE'
     TERMINEE = 'TERMINEE'
     REJETEE = 'REJETEE'
+    EXPIREE = 'EXPIREE'
     STATUT_CHOICES = [
         (EN_ATTENTE, 'En attente'),
         (CONFIRMEE, 'Confirmée'),
         (ANNULEE, 'Annulée'),
         (TERMINEE, 'Terminée'),
         (REJETEE, 'Rejetée'),
+        (EXPIREE, 'Expirée'),
     ]
 
     client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='reservations')
@@ -35,6 +43,7 @@ class Reservation(models.Model):
     date_debut = models.DateField()
     date_fin = models.DateField()
     date_reservation = models.DateTimeField(auto_now_add=True)
+    politiques_acceptees_le = models.DateTimeField(null=True, blank=True, editable=False)
     numero_reservation = models.CharField(
         max_length=9,
         unique=True,
@@ -67,7 +76,57 @@ class Reservation(models.Model):
     def get_duree(self):
         return (self.date_fin - self.date_debut).days
 
+    @property
+    def date_expiration(self):
+        if not self.date_reservation:
+            return None
+        return self.date_reservation + self.DELAI_PAIEMENT
+
+    def est_expiree(self):
+        return (
+            self.statut == self.EN_ATTENTE
+            and self.date_expiration is not None
+            and timezone.now() >= self.date_expiration
+        )
+
+    def expirer_si_necessaire(self):
+        if self.est_expiree():
+            self.statut = self.EXPIREE
+            self.save(update_fields=('statut',))
+            return True
+        return self.statut == self.EXPIREE
+
+    @classmethod
+    def expirer_en_attente(cls):
+        limite = timezone.now() - cls.DELAI_PAIEMENT
+        return cls.objects.filter(
+            statut=cls.EN_ATTENTE,
+            date_reservation__lte=limite,
+        ).update(statut=cls.EXPIREE)
+
+    def accepter_politiques(self):
+        if self.expirer_si_necessaire():
+            raise ValidationError("Le délai de paiement de 24 heures est expiré.")
+        if self.statut != self.EN_ATTENTE:
+            raise ValidationError("Cette réservation ne peut plus être payée.")
+        if not self.politiques_acceptees_le:
+            self.politiques_acceptees_le = timezone.now()
+            self.save(update_fields=('politiques_acceptees_le',))
+        return self
+
+    def envoyer_email_politiques(self, lien_politiques):
+        contexte = {'reservation': self, 'lien_politiques': lien_politiques}
+        send_mail(
+            subject=f'Politiques de votre réservation {self.numero_reservation}',
+            message=render_to_string('reservations/emails/politiques.txt', contexte),
+            from_email=None,
+            recipient_list=[self.client.email],
+            html_message=render_to_string('reservations/emails/politiques.html', contexte),
+        )
+
     def confirmer(self):
+        if self.expirer_si_necessaire():
+            raise ValidationError("Le délai de paiement de 24 heures est expiré.")
         if self.statut != self.EN_ATTENTE:
             raise ValidationError("Seule une réservation en attente peut être confirmée.")
         self.statut = self.CONFIRMEE
@@ -75,7 +134,16 @@ class Reservation(models.Model):
         return self
 
     def annuler(self):
-        if self.statut in (self.ANNULEE, self.TERMINEE):
+        from payments.models import Paiement
+        paiement_effectue = (
+            self.pk
+            and Paiement.objects.filter(reservation=self, statut=Paiement.PAYE).exists()
+        )
+        if self.statut == self.CONFIRMEE or paiement_effectue:
+            raise ValidationError(
+                "Une réservation payée ne peut pas être annulée et son tarif n'est pas remboursable."
+            )
+        if self.statut in (self.ANNULEE, self.TERMINEE, self.REJETEE, self.EXPIREE):
             return self
         self.statut = self.ANNULEE
         self.save(update_fields=('statut',))
@@ -87,9 +155,15 @@ class Reservation(models.Model):
         return self
 
     def generer_paiement(self, methode):
+        if self.expirer_si_necessaire():
+            raise ValidationError("Le délai de paiement de 24 heures est expiré.")
         if self.statut != self.EN_ATTENTE:
             raise ValidationError("Le paiement exige une réservation en attente.")
         from payments.models import Paiement
+        if not self.politiques_acceptees_le:
+            raise ValidationError("Vous devez lire et accepter les politiques avant le paiement.")
+        if methode != Paiement.CARTE:
+            raise ValidationError("Le paiement est disponible uniquement par carte bancaire.")
         paiement, _ = Paiement.objects.get_or_create(
             reservation=self,
             defaults={'montant': self.montant_total, 'methode': methode},

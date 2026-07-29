@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Politiques de réservation · CasaStay{% endblock %}
+{% block content %}
+<main class="page-main">
+  <div class="shell" style="max-width:860px">
+    <div class="page-heading">
+      <div>
+        <p class="kicker">Avant le paiement</p>
+        <h1>Politiques de réservation</h1>
+        <p>Réservation n°{{ reservation.numero_reservation }} · {{ reservation.appartement }}</p>
+      </div>
+      <span class="status EN_ATTENTE">À accepter</span>
+    </div>
+    <section class="form-card">
+      <h2>Veuillez lire attentivement</h2>
+      <div class="surface" style="margin:1rem 0;background:var(--soft)">
+        <ul style="margin:0;padding-left:1.2rem;display:grid;gap:.7rem">
+          <li>Votre appartement est maintenu pendant 24 heures à compter de la création de la réservation.</li>
+          <li>Le paiement est disponible uniquement par carte bancaire.</li>
+          <li>Le paiement confirme définitivement la réservation.</li>
+          <li>Après le paiement, vous ne pourrez plus annuler la réservation.</li>
+          <li>Le tarif payé est non remboursable.</li>
+          <li>Sans paiement avant le {{ reservation.date_expiration|date:"d/m/Y à H:i" }}, la réservation expire et l’appartement redevient disponible.</li>
+        </ul>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <button class="button button-primary" type="submit">J’ai lu et j’accepte — Accéder au paiement</button>
+      </form>
+    </section>
+  </div>
+</main>
+{% endblock %}

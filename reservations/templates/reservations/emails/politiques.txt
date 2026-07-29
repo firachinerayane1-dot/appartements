@@ -1,0 +1,17 @@
+Bonjour {{ reservation.client.prenom }},
+
+Votre réservation n°{{ reservation.numero_reservation }} pour {{ reservation.appartement }} a bien été créée.
+
+Avant de payer, veuillez prendre connaissance des politiques suivantes :
+
+- L'appartement est maintenu pendant 24 heures à compter de la création de la réservation.
+- Le paiement est disponible uniquement par carte bancaire.
+- Le paiement confirme définitivement la réservation.
+- Après le paiement, la réservation ne peut plus être annulée.
+- Le tarif payé est non remboursable.
+- Sans paiement avant le {{ reservation.date_expiration|date:"d/m/Y à H:i" }}, la réservation expire et l'appartement redevient disponible.
+
+Lire et accepter les politiques :
+{{ lien_politiques }}
+
+CasaStay

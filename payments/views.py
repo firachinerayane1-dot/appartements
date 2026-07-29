@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -5,25 +7,54 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from accounts.mixins import administrateur_required
 from reservations.models import Reservation
+from services.confirmation_reservation import envoyer_email_confirmation
 from .forms import PaiementForm
 from .models import Paiement
+
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
 def payer(request, reservation_id):
     reservation = get_object_or_404(Reservation, pk=reservation_id, client=request.user)
+    if reservation.expirer_si_necessaire():
+        messages.error(
+            request,
+            "Le délai de paiement de 24 heures est expiré. L'appartement est de nouveau disponible.",
+        )
+        return redirect('reservations:detail', pk=reservation.pk)
     if reservation.statut != Reservation.EN_ATTENTE:
         messages.info(request, "Cette réservation n'est plus en attente de paiement.")
         return redirect('reservations:detail', pk=reservation.pk)
+    if not reservation.politiques_acceptees_le:
+        messages.info(request, "Vous devez lire et accepter les politiques avant d'accéder au paiement.")
+        return redirect('reservations:politiques', pk=reservation.pk)
     form = PaiementForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         try:
-            paiement = reservation.generer_paiement(form.cleaned_data['methode'])
+            paiement = reservation.generer_paiement(Paiement.CARTE)
             paiement.effectuer()
         except ValidationError as exc:
             form.add_error(None, exc.messages[0])
         else:
-            messages.success(request, "Paiement simulé avec succès.")
+            try:
+                envoyer_email_confirmation(paiement)
+            except Exception:
+                logger.exception(
+                    "Échec de l'envoi de la confirmation pour la réservation %s",
+                    reservation.numero_reservation,
+                )
+                messages.warning(
+                    request,
+                    "Paiement confirmé, mais l'e-mail de confirmation n'a pas pu être envoyé. "
+                    "Votre reçu reste disponible.",
+                )
+            else:
+                messages.success(
+                    request,
+                    "Paiement confirmé. La confirmation et son PDF ont été envoyés par e-mail.",
+                )
             return redirect('payments:recu', pk=paiement.pk)
     return render(request, 'payments/payer.html', {'form': form, 'reservation': reservation})
 

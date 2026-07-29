@@ -1,1 +1,75 @@
-{% extends "base.html" %}{% block title %}Réservation n°{{ reservation.numero_reservation }} · CasaStay{% endblock %}{% block content %}<main class="page-main"><div class="shell"><div class="page-heading"><div><p class="kicker">Réservation n°{{ reservation.numero_reservation }}</p><h1>{{ reservation.appartement }}</h1><p>Créée le {{ reservation.date_reservation|date:"d F Y à H:i" }}</p></div><span class="status {{ reservation.statut }}">{{ reservation.get_statut_display }}</span></div><div class="form-layout"><section class="form-card"><h2>Détails du séjour</h2><dl class="definition-grid"><div><dt>Numéro de réservation</dt><dd>{{ reservation.numero_reservation }}</dd></div><div><dt>Arrivée</dt><dd>{{ reservation.date_debut|date:"l d F Y" }}</dd></div><div><dt>Départ</dt><dd>{{ reservation.date_fin|date:"l d F Y" }}</dd></div><div><dt>Durée</dt><dd>{{ reservation.get_duree }} nuit{{ reservation.get_duree|pluralize }}</dd></div><div><dt>Montant total</dt><dd>{{ reservation.montant_total }} MAD</dd></div><div><dt>Client</dt><dd>{{ reservation.client }}</dd></div><div><dt>Statut</dt><dd>{{ reservation.get_statut_display }}</dd></div></dl><div style="display:flex;gap:.7rem;margin-top:1.5rem">{% if reservation.statut == 'EN_ATTENTE' %}<a class="button button-primary" href="{% url 'payments:payer' reservation.pk %}">Procéder au paiement</a>{% endif %}{% if reservation.statut == 'EN_ATTENTE' or reservation.statut == 'CONFIRMEE' %}<form method="post" action="{% url 'reservations:annuler' reservation.pk %}">{% csrf_token %}<button class="button button-danger" type="submit">Annuler la réservation</button></form>{% endif %}</div></section><aside class="summary-card"><p class="kicker light">CasaStay</p><h2>Besoin d’aide ?</h2><p>Vos dates, votre paiement et le statut restent disponibles depuis cette page.</p><a class="button button-light" href="{% url 'notifications:liste' %}">Voir mes notifications</a></aside></div></div></main>{% endblock %}
+{% extends "base.html" %}
+{% block title %}Réservation n°{{ reservation.numero_reservation }} · CasaStay{% endblock %}
+{% block content %}
+<main class="page-main">
+  <div class="shell">
+    <div class="page-heading">
+      <div>
+        <p class="kicker">Réservation n°{{ reservation.numero_reservation }}</p>
+        <h1>{{ reservation.appartement }}</h1>
+        <p>Créée le {{ reservation.date_reservation|date:"d F Y à H:i" }}</p>
+      </div>
+      <span class="status {{ reservation.statut }}">{{ reservation.get_statut_display }}</span>
+    </div>
+    <div class="form-layout">
+      <section class="form-card">
+        <h2>Détails du séjour</h2>
+        <dl class="definition-grid">
+          <div><dt>Numéro de réservation</dt><dd>{{ reservation.numero_reservation }}</dd></div>
+          <div><dt>Arrivée</dt><dd>{{ reservation.date_debut|date:"l d F Y" }}</dd></div>
+          <div><dt>Départ</dt><dd>{{ reservation.date_fin|date:"l d F Y" }}</dd></div>
+          <div><dt>Durée</dt><dd>{{ reservation.get_duree }} nuit{{ reservation.get_duree|pluralize }}</dd></div>
+          <div><dt>Montant total</dt><dd>{{ reservation.montant_total }} MAD</dd></div>
+          <div><dt>Client</dt><dd>{{ reservation.client }}</dd></div>
+          <div><dt>Statut</dt><dd>{{ reservation.get_statut_display }}</dd></div>
+          <div>
+            <dt>Politiques</dt>
+            <dd>
+              {% if reservation.politiques_acceptees_le %}
+                Acceptées le {{ reservation.politiques_acceptees_le|date:"d/m/Y à H:i" }}
+              {% else %}
+                En attente d’acceptation
+              {% endif %}
+            </dd>
+          </div>
+          {% if reservation.statut == 'EN_ATTENTE' %}
+            <div><dt>Paiement avant</dt><dd>{{ reservation.date_expiration|date:"d/m/Y à H:i" }}</dd></div>
+          {% endif %}
+        </dl>
+
+        {% if reservation.statut == 'CONFIRMEE' %}
+          <div class="surface" style="margin-top:1.5rem;background:#fff5f3">
+            <strong>Réservation définitive</strong>
+            <p style="margin:.4rem 0 0">Après paiement, cette réservation ne peut plus être annulée et son tarif n’est pas remboursable.</p>
+          </div>
+        {% elif reservation.statut == 'EXPIREE' %}
+          <div class="surface" style="margin-top:1.5rem;background:var(--soft)">
+            <strong>Délai expiré</strong>
+            <p style="margin:.4rem 0 0">Le paiement n’a pas été effectué dans les 24 heures. L’appartement est de nouveau disponible.</p>
+          </div>
+        {% endif %}
+
+        <div style="display:flex;gap:.7rem;margin-top:1.5rem;flex-wrap:wrap">
+          {% if reservation.statut == 'EN_ATTENTE' %}
+            {% if reservation.politiques_acceptees_le %}
+              <a class="button button-primary" href="{% url 'payments:payer' reservation.pk %}">Payer par carte</a>
+            {% else %}
+              <a class="button button-primary" href="{% url 'reservations:politiques' reservation.pk %}">Lire et accepter les politiques</a>
+            {% endif %}
+            <form method="post" action="{% url 'reservations:annuler' reservation.pk %}">
+              {% csrf_token %}
+              <button class="button button-danger" type="submit">Annuler la réservation</button>
+            </form>
+          {% endif %}
+        </div>
+      </section>
+      <aside class="summary-card">
+        <p class="kicker light">CasaStay</p>
+        <h2>Réservation maintenue 24 h</h2>
+        <p>Acceptez les politiques reçues par e-mail puis réglez par carte avant l’expiration du délai.</p>
+        <a class="button button-light" href="{% url 'notifications:liste' %}">Voir mes notifications</a>
+      </aside>
+    </div>
+  </div>
+</main>
+{% endblock %}
