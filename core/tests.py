@@ -11,6 +11,9 @@ class AccueilTests(TestCase):
         self.assertContains(response, 'Votre prochain séjour commence ici')
         self.assertNotContains(response, 'Notre sélection')
         self.assertNotContains(response, 'property-card')
+        self.assertNotContains(response, 'map-label')
+        self.assertNotContains(response, 'openstreetmap.org')
+        self.assertContains(response, 'Ouvrir dans Google Maps')
 
     def test_feuille_de_style_est_trouvee(self):
         self.assertIsNotNone(finders.find('css/site.css'))

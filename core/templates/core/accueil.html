@@ -41,7 +41,10 @@
 
   <section class="section shell location-section" id="localisation">
     <div class="location-copy"><p class="kicker">Nous trouver</p><h2>À la résidence Amwaj, Sidi Rahal</h2><p>Une adresse tournée vers les vacances sur la côte atlantique, dans un cadre privé et verdoyant.</p><div class="location-list"><span><b>Adresse</b> Résidence Amwaj, Sidi Rahal</span><span><b>Coordonnées</b> 33.455229, -8.0011702</span><span><b>Sur place</b> Piscine, jardins, terrain multisports et parking</span></div><a class="button button-dark" href="https://maps.app.goo.gl/q9qEuBE8mfuVFwrj8" target="_blank" rel="noopener">Obtenir l’itinéraire <span>↗</span></a></div>
-    <div class="map-card"><iframe title="Carte de la résidence Amwaj à Sidi Rahal" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=-8.0211702%2C33.442229%2C-7.9811702%2C33.468229&amp;layer=mapnik&amp;marker=33.455229%2C-8.0011702"></iframe><div class="map-label"><span class="brand-mark">R</span><div><strong>Résidence Amwaj</strong><small>Sidi Rahal, Maroc</small></div></div></div>
+    <a class="map-card location-visual" href="https://maps.app.goo.gl/q9qEuBE8mfuVFwrj8" target="_blank" rel="noopener" aria-label="Ouvrir la résidence Amwaj dans Google Maps">
+      <img src="{% static 'img/residence/piscine-jardin.jpeg' %}" alt="Piscine et jardins de la résidence Amwaj" loading="lazy">
+      <span class="location-marker"><span class="location-marker-icon" aria-hidden="true">●</span><strong>Résidence Amwaj</strong><small>Ouvrir dans Google Maps ↗</small></span>
+    </a>
   </section>
 
   <section class="section shell"><div class="cta-panel"><div><p class="kicker light">Envie de vous évader ?</p><h2>Votre prochain séjour commence ici, à Sidi Rahal.</h2><p>Consultez les disponibilités et choisissez les dates qui vous ressemblent.</p></div><a class="button button-light" href="{% url 'apartments:liste' %}">Voir les appartements <span>→</span></a></div></section>
