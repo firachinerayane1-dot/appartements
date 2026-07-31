@@ -15,8 +15,8 @@
   --gold: var(--terracotta);
   --gold-dark: var(--terracotta-dark);
   --soft: var(--sand);
-  --shadow: 0 22px 55px rgba(43, 42, 40, .10);
-  --radius: 6px;
+  --shadow: 0 24px 65px rgba(31, 45, 39, .12);
+  --radius: 10px;
   --shell: min(1180px, calc(100% - 2.5rem));
 }
 
@@ -36,7 +36,7 @@ button, input, select, textarea { font: inherit; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
 /* Navigation */
-.site-header { position: sticky; z-index: 50; top: 0; border-bottom: 1px solid rgba(224, 221, 214, .85); background: rgba(245, 243, 239, .94); backdrop-filter: blur(18px); }
+.site-header { position: sticky; z-index: 50; top: 0; border-bottom: 1px solid rgba(224, 221, 214, .72); background: rgba(245, 243, 239, .91); backdrop-filter: blur(20px); }
 .nav-shell { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
 .brand { display: inline-flex; align-items: center; gap: .72rem; color: var(--forest); font-size: 1.08rem; font-weight: 800; text-decoration: none; letter-spacing: -.025em; }
 .brand > span:last-child > span { color: var(--terracotta); font-family: Georgia, serif; font-style: italic; font-weight: 500; }
@@ -60,16 +60,18 @@ button, input, select, textarea { font: inherit; }
 .nav-toggle > span:not(.sr-only) { display: block; height: 2px; margin: 4px; background: var(--forest); }
 
 /* Accueil */
-.hero { position: relative; min-height: 740px; display: flex; align-items: flex-end; overflow: hidden; background: var(--forest); color: #fff; }
-.hero-backdrop { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(20, 49, 41, .92) 0%, rgba(20, 49, 41, .73) 48%, rgba(20, 49, 41, .12) 100%), url("../img/residence/piscine.jpeg") center/cover no-repeat; transform: scale(1.01); }
-.hero::after { content: ""; position: absolute; right: 4vw; top: 3rem; width: 250px; height: 250px; border: 1px solid rgba(255, 255, 255, .2); border-radius: 50%; }
+.hero { position: relative; min-height: 760px; display: flex; align-items: flex-end; overflow: hidden; background: var(--forest-dark); color: #fff; }
+.hero-backdrop { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(8, 27, 37, .91) 0%, rgba(12, 40, 42, .70) 48%, rgba(8, 22, 34, .16) 100%), linear-gradient(0deg, rgba(7, 28, 25, .48), transparent 45%), url("../img/residence/piscine-nuit.jpeg") center 58%/cover no-repeat; transform: scale(1.015); animation: hero-settle 1.4s cubic-bezier(.22, 1, .36, 1) both; }
+.hero::before { content: ""; position: absolute; z-index: 1; inset: auto 0 0; height: 130px; background: linear-gradient(transparent, rgba(8, 25, 28, .38)); pointer-events: none; }
+.hero::after { content: ""; position: absolute; right: 4vw; top: 3rem; width: 250px; height: 250px; border: 1px solid rgba(255, 255, 255, .18); border-radius: 50%; box-shadow: 0 0 0 55px rgba(255,255,255,.025); }
+@keyframes hero-settle { from { opacity: .68; transform: scale(1.07); } to { opacity: 1; transform: scale(1.015); } }
 .hero-content { position: relative; z-index: 1; padding-block: 7rem 4.5rem; }
 .kicker { margin: 0 0 .75rem; color: var(--terracotta-dark); font-size: .69rem; font-weight: 850; letter-spacing: .18em; text-transform: uppercase; }
 .kicker.light { color: #F0CDAE; }
 .hero h1 { max-width: 800px; margin: .35rem 0 1.35rem; font: 600 clamp(3.5rem, 7.4vw, 7rem)/.94 Georgia, serif; letter-spacing: -.055em; }
 .hero h1 em { display: block; color: #F0CDAE; font-weight: 400; }
 .hero-lead { max-width: 620px; margin: 0 0 2rem; color: rgba(255,255,255,.83); font-size: 1.08rem; }
-.hero-search { width: min(850px, 100%); display: grid; grid-template-columns: 1fr 1fr auto; gap: 0; padding: .65rem; border-radius: var(--radius); background: var(--cream); box-shadow: 0 24px 65px rgba(16, 35, 30, .28); }
+.hero-search { width: min(850px, 100%); display: grid; grid-template-columns: 1fr 1fr auto; gap: 0; padding: .65rem; border: 1px solid rgba(255,255,255,.42); border-radius: var(--radius); background: rgba(250,248,243,.97); box-shadow: 0 26px 75px rgba(5, 19, 20, .35); }
 .hero-search > div { padding: .35rem 1.1rem; border-right: 1px solid var(--line); }
 .hero-search label { display: block; color: var(--muted); font-size: .64rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 .hero-search input { width: 100%; padding: .3rem 0; border: 0; outline: 0; background: transparent; color: var(--ink); font-weight: 650; }
@@ -111,13 +113,18 @@ button, input, select, textarea { font: inherit; }
 
 .residence-intro { display: grid; grid-template-columns: 1.15fr .85fr; gap: 4rem; align-items: end; margin-bottom: 2.5rem; }
 .residence-intro > p { max-width: 470px; margin: 0; color: var(--muted); }
-.residence-gallery { display: grid; grid-template-columns: 1.15fr .85fr 1fr; grid-template-rows: 280px 280px; gap: .75rem; }
-.residence-gallery figure { position: relative; margin: 0; overflow: hidden; background: var(--sand); }
-.residence-gallery .gallery-wide { grid-column: span 2; }
-.residence-gallery .gallery-tall { grid-row: span 2; }
+.residence-gallery { display: grid; grid-template-columns: repeat(12, 1fr); grid-auto-rows: 230px; gap: .85rem; }
+.residence-gallery figure { position: relative; grid-column: span 4; margin: 0; overflow: hidden; border-radius: var(--radius); background: var(--sand); }
+.residence-gallery .gallery-main { grid-column: span 7; grid-row: span 2; }
+.residence-gallery .gallery-balcony, .residence-gallery .gallery-kitchen { grid-column: span 5; }
 .residence-gallery img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
-.residence-gallery figure:hover img { transform: scale(1.025); }
-.residence-gallery figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 2.2rem 1rem .8rem; background: linear-gradient(transparent, rgba(22,55,47,.8)); color: #fff; font-size: .76rem; font-weight: 700; }
+.residence-gallery figure:hover img { transform: scale(1.035); }
+.residence-gallery figcaption { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: .65rem; padding: 3rem 1rem .9rem; background: linear-gradient(transparent, rgba(12,35,31,.86)); color: #fff; font-size: .76rem; font-weight: 750; }
+.residence-gallery figcaption span { display: grid; place-items: center; width: 25px; height: 25px; border: 1px solid rgba(255,255,255,.5); border-radius: 50%; font: 700 .58rem Georgia, serif; }
+.residence-summary { display: flex; align-items: center; justify-content: space-between; gap: 2rem; padding: 1.4rem 0; border-bottom: 1px solid var(--line); }
+.residence-summary p { max-width: 420px; margin: 0; color: var(--forest); font: 600 1.05rem/1.45 Georgia, serif; }
+.residence-summary > div { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem; }
+.residence-summary span { padding: .42rem .7rem; border-radius: 99px; background: var(--sand); color: var(--muted); font-size: .7rem; font-weight: 700; }
 
 .location-section { display: grid; grid-template-columns: .85fr 1.15fr; gap: 5rem; align-items: center; }
 .location-copy > p:not(.kicker) { color: var(--muted); }
@@ -269,6 +276,7 @@ button, input, select, textarea { font: inherit; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+  .hero-backdrop { animation: none; }
   .scroll-reveal, .image-reveal { opacity: 1 !important; transform: none !important; filter: none !important; transition: none !important; }
 }
 
@@ -299,9 +307,11 @@ button, input, select, textarea { font: inherit; }
   .hero-search .button { grid-column: 1 / -1; }
   .hero-meta { flex-wrap: wrap; }
   .residence-intro { grid-template-columns: 1fr; gap: 1.3rem; }
-  .residence-gallery { grid-template-columns: 1fr 1fr; grid-template-rows: 260px 260px 260px; }
-  .residence-gallery .gallery-wide { grid-column: span 2; }
-  .residence-gallery .gallery-tall { grid-row: span 2; }
+  .residence-gallery { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 260px; }
+  .residence-gallery figure, .residence-gallery .gallery-balcony, .residence-gallery .gallery-kitchen { grid-column: span 1; }
+  .residence-gallery .gallery-main { grid-column: span 2; grid-row: span 2; }
+  .residence-summary { align-items: flex-start; flex-direction: column; }
+  .residence-summary > div { justify-content: flex-start; }
   .location-section { grid-template-columns: 1fr; }
   .map-card, .map-card iframe { height: 400px; min-height: 400px; }
   .footer-grid { grid-template-columns: 1.5fr 1fr; }
@@ -328,9 +338,8 @@ button, input, select, textarea { font: inherit; }
   .section-heading { align-items: start; flex-direction: column; }
   .property-grid, .feature-grid { grid-template-columns: 1fr; }
   .property-media { height: 245px; }
-  .residence-gallery { display: grid; grid-template-columns: 1fr; grid-template-rows: repeat(5, 260px); }
-  .residence-gallery .gallery-wide { grid-column: auto; }
-  .residence-gallery .gallery-tall { grid-row: auto; }
+  .residence-gallery { display: grid; grid-template-columns: 1fr; grid-auto-rows: 260px; }
+  .residence-gallery figure, .residence-gallery .gallery-main, .residence-gallery .gallery-balcony, .residence-gallery .gallery-kitchen { grid-column: auto; grid-row: auto; }
   .location-section { gap: 2rem; }
   .cta-panel { align-items: start; flex-direction: column; padding: 2.3rem 1.5rem; }
   .footer-grid { grid-template-columns: 1fr; }
