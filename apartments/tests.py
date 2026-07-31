@@ -134,6 +134,53 @@ class RechercheDisponibiliteTests(TestCase):
             f'{url}?date_debut=2027-08-10&amp;date_fin=2027-08-15',
         )
 
+    def test_photo_et_titre_transmettent_les_dates_au_detail(self):
+        response = self.client.get(
+            reverse('apartments:liste'),
+            {'date_debut': '2027-08-10', 'date_fin': '2027-08-15'},
+        )
+
+        url = reverse('apartments:detail', args=(self.libre.pk,))
+        self.assertContains(
+            response,
+            f'{url}?date_debut=2027-08-10&amp;date_fin=2027-08-15',
+            count=2,
+        )
+
+    def test_detail_sans_dates_est_protege_et_redirige_vers_accueil(self):
+        response = self.client.get(reverse('apartments:detail', args=(self.libre.pk,)))
+
+        self.assertRedirects(response, reverse('core:accueil'))
+        self.assertNotContains(response, self.libre.description, status_code=302)
+
+    def test_detail_affiche_les_dates_et_le_bouton_reserver_maintenant(self):
+        self.client.force_login(self.client_reservation)
+
+        response = self.client.get(
+            reverse('apartments:detail', args=(self.libre.pk,)),
+            {'date_debut': '2027-08-10', 'date_fin': '2027-08-15'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Du 10/08/2027 au 15/08/2027')
+        self.assertContains(response, 'Réserver maintenant')
+        self.assertContains(
+            response,
+            f"{reverse('reservations:reserver', args=(self.libre.pk,))}"
+            '?date_debut=2027-08-10&amp;date_fin=2027-08-15',
+        )
+
+    def test_detail_ne_montre_pas_un_appartement_indisponible(self):
+        response = self.client.get(
+            reverse('apartments:detail', args=(self.occupe.pk,)),
+            {'date_debut': '2027-08-10', 'date_fin': '2027-08-15'},
+        )
+
+        self.assertRedirects(
+            response,
+            f"{reverse('apartments:liste')}?date_debut=2027-08-10&date_fin=2027-08-15",
+        )
+
     def test_message_si_aucun_appartement_n_est_disponible(self):
         Appartement.objects.update(disponible=False)
 

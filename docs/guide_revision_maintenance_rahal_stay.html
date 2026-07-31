@@ -1,0 +1,1061 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Guide de révision et maintenance rapide — Rahal Stay</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 17mm 16mm 18mm 16mm;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: #17233c;
+      font-family: "Open Sans", "Liberation Sans", Arial, sans-serif;
+      font-size: 10.3pt;
+      line-height: 1.42;
+    }
+    h1, h2, h3, h4 {
+      color: #1f4b3f;
+      font-family: Montserrat, "Open Sans", sans-serif;
+      page-break-after: avoid;
+    }
+    h1 { font-size: 26pt; line-height: 1.13; margin: 0 0 7mm; }
+    h2 {
+      font-size: 19pt;
+      margin: 0 0 5mm;
+      padding-bottom: 2.5mm;
+      border-bottom: 2px solid #c89b55;
+    }
+    h3 { font-size: 13.5pt; margin: 6mm 0 2.5mm; }
+    h4 { font-size: 11pt; margin: 4mm 0 1.5mm; }
+    p { margin: 0 0 3.2mm; }
+    ul, ol { margin: 1.5mm 0 3.5mm 6mm; padding-left: 5mm; }
+    li { margin-bottom: 1.3mm; }
+    a { color: #1f4b3f; }
+    code {
+      font-family: "Source Code Pro", "Liberation Mono", monospace;
+      font-size: 8.9pt;
+      color: #17233c;
+      background: #f1f4f3;
+      padding: 0.2mm 0.8mm;
+    }
+    pre {
+      margin: 2mm 0 4mm;
+      padding: 3.5mm;
+      color: #f8faf9;
+      background: #17233c;
+      border-left: 4px solid #c89b55;
+      font-family: "Source Code Pro", "Liberation Mono", monospace;
+      font-size: 8.3pt;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      page-break-inside: avoid;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2.5mm 0 5mm;
+      font-size: 9.2pt;
+    }
+    thead { display: table-header-group; }
+    tr { page-break-inside: avoid; }
+    th {
+      padding: 2.5mm;
+      text-align: left;
+      color: #fff;
+      background: #1f4b3f;
+      border: 1px solid #1f4b3f;
+    }
+    td {
+      padding: 2.4mm;
+      vertical-align: top;
+      border: 1px solid #d9dfdc;
+    }
+    tbody tr:nth-child(even) td { background: #f6f8f7; }
+    .cover {
+      min-height: 245mm;
+      padding: 18mm 12mm;
+      color: #fff;
+      background: #1f4b3f;
+      page-break-after: always;
+    }
+    .brand {
+      display: inline-block;
+      margin-bottom: 24mm;
+      padding: 3mm 5mm;
+      color: #1f4b3f;
+      background: #fff;
+      border-radius: 3mm;
+      font-family: Montserrat, sans-serif;
+      font-size: 16pt;
+      font-weight: bold;
+    }
+    .cover h1 {
+      max-width: 145mm;
+      color: #fff;
+      font-size: 34pt;
+    }
+    .cover .subtitle {
+      max-width: 145mm;
+      margin-top: 8mm;
+      color: #e5efea;
+      font-size: 15pt;
+    }
+    .cover .meta {
+      margin-top: 50mm;
+      padding-top: 6mm;
+      border-top: 1px solid #84a197;
+      color: #e5efea;
+    }
+    .chapter { page-break-before: always; }
+    .chapter h2 { page-break-before: always; }
+    body > section:nth-of-type(2) h2 { page-break-before: always; }
+    .keep { page-break-inside: avoid; }
+    .intro {
+      color: #3c4a46;
+      font-size: 11.5pt;
+    }
+    .callout {
+      margin: 3mm 0 5mm;
+      padding: 3.5mm 4mm;
+      background: #e5efea;
+      border-left: 4px solid #1f4b3f;
+      page-break-inside: avoid;
+    }
+    .warning {
+      background: #fff4e2;
+      border-left-color: #c07a22;
+    }
+    .danger {
+      background: #f8e8e4;
+      border-left-color: #923b32;
+    }
+    .quick {
+      background: #f6f1e7;
+      border-left-color: #c89b55;
+    }
+    .label {
+      display: inline-block;
+      margin-right: 1.5mm;
+      padding: 0.8mm 2mm;
+      border-radius: 2mm;
+      color: #fff;
+      background: #1f4b3f;
+      font-size: 8pt;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .muted { color: #667085; }
+    .small { font-size: 8.7pt; }
+    .flow {
+      margin: 4mm 0 5mm;
+      padding: 4mm;
+      background: #f6f8f7;
+      border: 1px solid #d9dfdc;
+      text-align: center;
+      font-weight: bold;
+      page-break-inside: avoid;
+    }
+    .flow span { color: #c07a22; padding: 0 2mm; }
+    .cols {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+      border-spacing: 4mm 0;
+      margin-left: -4mm;
+    }
+    .col { display: table-cell; vertical-align: top; }
+    .card {
+      margin-bottom: 4mm;
+      padding: 3.5mm;
+      background: #f6f8f7;
+      border-top: 3px solid #1f4b3f;
+      page-break-inside: avoid;
+    }
+    .card h3 { margin-top: 0; }
+    .toc ol { margin-left: 3mm; }
+    .toc li { margin-bottom: 2mm; }
+    .check td:first-child { width: 9mm; text-align: center; font-size: 13pt; }
+  </style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="brand">RAHAL STAY</div>
+  <h1>Guide de révision et maintenance rapide</h1>
+  <p class="subtitle">
+    Comprendre chaque application, suivre les flux métier, diagnostiquer les incidents
+    et effectuer les opérations courantes du projet Django.
+  </p>
+  <div class="meta">
+    <p><strong>Projet :</strong> plateforme de réservation d’appartements à Sidi Rahal</p>
+    <p><strong>Périmètre analysé :</strong> code présent dans le dépôt au 30 juillet 2026</p>
+    <p><strong>Public :</strong> développeur, mainteneur, administrateur technique</p>
+  </div>
+</section>
+
+<section>
+  <h2>Mode d’emploi du guide</h2>
+  <p class="intro">
+    Ce document est conçu à deux vitesses : les encadrés et tableaux suffisent pour une
+    révision rapide ; les sections détaillées servent pendant une maintenance ou un diagnostic.
+  </p>
+
+  <div class="callout quick">
+    <strong>Lecture express en 10 minutes.</strong> Lire la fiche minute, l’architecture,
+    le flux de réservation, les risques connus et la checklist d’intervention.
+  </div>
+
+  <div class="toc">
+    <h3>Sommaire</h3>
+    <ol>
+      <li><a href="#fiche-minute">Fiche minute et architecture générale</a></li>
+      <li><a href="#core">Application <code>core</code> — accueil public</a></li>
+      <li><a href="#accounts">Application <code>accounts</code> — utilisateurs et accès</a></li>
+      <li><a href="#apartments">Application <code>apartments</code> — catalogue et disponibilité</a></li>
+      <li><a href="#reservations">Application <code>reservations</code> — cycle de réservation</a></li>
+      <li><a href="#payments">Application <code>payments</code> — paiement simulé et reçu</a></li>
+      <li><a href="#notifications">Application <code>notifications</code> — alertes internes</a></li>
+      <li><a href="#dashboard">Application <code>dashboard</code> — pilotage administrateur</a></li>
+      <li><a href="#services">Services transverses, e-mails et PDF</a></li>
+      <li><a href="#donnees">Modèle de données et règles essentielles</a></li>
+      <li><a href="#installation">Installation, configuration et démarrage</a></li>
+      <li><a href="#maintenance">Maintenance courante, sauvegardes et déploiement</a></li>
+      <li><a href="#diagnostic">Diagnostic rapide et points de vigilance</a></li>
+      <li><a href="#checklists">Checklists et aide-mémoire</a></li>
+    </ol>
+  </div>
+
+  <div class="callout">
+    <strong>Convention.</strong> « Application » désigne ici un module Django. Le projet
+    contient sept applications internes, deux services métier et le paquet de configuration
+    <code>webbap</code>.
+  </div>
+</section>
+
+<section id="fiche-minute" class="chapter">
+  <h2>1. Fiche minute et architecture générale</h2>
+
+  <h3>Résumé technique</h3>
+  <table>
+    <tbody>
+      <tr><th>Élément</th><th>Valeur</th></tr>
+      <tr><td>Framework</td><td>Django 6.0.7, Python, templates Django rendus côté serveur</td></tr>
+      <tr><td>Base de données</td><td>PostgreSQL si <code>DB_NAME</code> existe ; sinon SQLite dans <code>db.sqlite3</code></td></tr>
+      <tr><td>Authentification</td><td>E-mail/mot de passe et Google OAuth via <code>django-allauth</code></td></tr>
+      <tr><td>Fichiers</td><td>Statique dans <code>static/</code>, médias envoyés dans <code>media/</code></td></tr>
+      <tr><td>E-mails</td><td>SMTP si <code>EMAIL_HOST</code> est défini, sinon sortie console</td></tr>
+      <tr><td>Paiement</td><td>Simulation locale par carte ; aucune transaction bancaire externe</td></tr>
+      <tr><td>Rapports</td><td>Export Excel avec <code>openpyxl</code> ; confirmation PDF avec Pillow</td></tr>
+      <tr><td>Langue / fuseau</td><td>Français, <code>Africa/Casablanca</code>, dates stockées avec gestion de fuseau</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Carte des responsabilités</h3>
+  <table>
+    <thead><tr><th>Module</th><th>Responsabilité</th><th>Données principales</th></tr></thead>
+    <tbody>
+      <tr><td><code>core</code></td><td>Page d’accueil publique</td><td>Aucune</td></tr>
+      <tr><td><code>accounts</code></td><td>Compte, rôles, connexion, profil, Google OAuth</td><td><code>Utilisateur</code></td></tr>
+      <tr><td><code>apartments</code></td><td>Catalogue, photos, vacances, recherche de disponibilité</td><td><code>Appartement</code>, <code>Photo</code>, <code>PeriodeVacances</code></td></tr>
+      <tr><td><code>reservations</code></td><td>Création, politiques, statuts, annulation, expiration</td><td><code>Reservation</code></td></tr>
+      <tr><td><code>payments</code></td><td>Saisie factice, validation, confirmation, reçu</td><td><code>Paiement</code></td></tr>
+      <tr><td><code>notifications</code></td><td>Notifications internes et compteur de non-lues</td><td><code>Notification</code></td></tr>
+      <tr><td><code>dashboard</code></td><td>Indicateurs et export Excel administrateur</td><td>Aucune table propre</td></tr>
+      <tr><td><code>services</code></td><td>Orchestration métier et génération de confirmation</td><td>Aucune table propre</td></tr>
+      <tr><td><code>webbap</code></td><td>Configuration, routage racine, WSGI/ASGI</td><td>Paramètres globaux</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Architecture d’une requête</h3>
+  <div class="flow">
+    Navigateur <span>→</span> <code>webbap/urls.py</code> <span>→</span>
+    <code>application/urls.py</code> <span>→</span> vue <span>→</span>
+    formulaire / service / modèle <span>→</span> base <span>→</span> template HTML
+  </div>
+  <p>
+    Les vues contrôlent l’accès et l’affichage. Les formulaires valident les entrées.
+    Les services portent les opérations qui touchent plusieurs modèles. Les modèles conservent
+    les invariants importants, par exemple l’expiration ou la confirmation d’une réservation.
+  </p>
+
+  <h3>Rôles applicatifs</h3>
+  <table>
+    <thead><tr><th>Rôle</th><th>Accès</th><th>Règle spéciale</th></tr></thead>
+    <tbody>
+      <tr><td>Client régulier</td><td>Catalogue, réservations, paiement, profil, notifications</td><td>Bloqué sur les appartements concernés pendant une période de vacances</td></tr>
+      <tr><td>Enseignant</td><td>Mêmes fonctions client</td><td>Peut réserver pendant les vacances et bénéficie actuellement de 15 % de réduction</td></tr>
+      <tr><td>Administrateur</td><td>Tableau de bord, gestion, administration Django</td><td>Ne peut pas créer de réservation client</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout danger">
+    <strong>À retenir immédiatement.</strong> Le champ <code>role</code> et les drapeaux Django
+    <code>is_staff</code>/<code>is_superuser</code> sont distincts. L’accès au métier administrateur
+    dépend de <code>est_administrateur()</code> ; l’accès à <code>/admin/</code> dépend aussi de
+    <code>is_staff</code>.
+  </div>
+</section>
+
+<section id="core" class="chapter">
+  <h2>2. Application <code>core</code> — accueil public</h2>
+  <p class="intro">
+    <code>core</code> est la porte d’entrée la plus simple : elle rend la page d’accueil sans
+    base de données ni authentification.
+  </p>
+
+  <table>
+    <tbody>
+      <tr><th>Route</th><td><code>/</code></td></tr>
+      <tr><th>Vue</th><td><code>core.views.accueil</code></td></tr>
+      <tr><th>Template</th><td><code>core/templates/core/accueil.html</code></td></tr>
+      <tr><th>Dépendances</th><td>Template global, CSS/JavaScript et images statiques</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Fonctionnement</h3>
+  <p>
+    Une requête GET sur la racine appelle une vue qui rend directement le template. Les liens
+    conduisent vers la recherche d’appartements, les comptes et les sections de localisation
+    ou de services.
+  </p>
+
+  <h3>Maintenance rapide</h3>
+  <ul>
+    <li>Contenu éditorial et structure : modifier <code>core/templates/core/accueil.html</code>.</li>
+    <li>Style partagé : modifier <code>static/css/site.css</code>.</li>
+    <li>Comportement du menu et des messages : modifier <code>static/js/site.js</code>.</li>
+    <li>Après modification statique en production : exécuter <code>collectstatic</code> et invalider le cache si nécessaire.</li>
+  </ul>
+  <div class="callout warning">
+    <strong>Piège fréquent.</strong> Changer une image dans <code>media/</code> ne remplace pas une
+    image référencée dans <code>static/</code>. Les médias sont des contenus envoyés par l’application ;
+    les fichiers statiques font partie du code livré.
+  </div>
+</section>
+
+<section id="accounts" class="chapter">
+  <h2>3. Application <code>accounts</code> — utilisateurs et accès</h2>
+  <p class="intro">
+    Cette application remplace l’utilisateur Django standard par un utilisateur identifié par
+    son e-mail. Elle centralise les rôles, l’inscription, la connexion, le profil et l’adaptation
+    des comptes Google.
+  </p>
+
+  <h3>Modèle <code>Utilisateur</code></h3>
+  <table>
+    <thead><tr><th>Champ / méthode</th><th>Rôle</th></tr></thead>
+    <tbody>
+      <tr><td><code>email</code></td><td>Identifiant unique de connexion ; aucun nom d’utilisateur classique</td></tr>
+      <tr><td><code>nom</code>, <code>prenom</code>, <code>telephone</code></td><td>Identité et contact</td></tr>
+      <tr><td><code>role</code></td><td><code>CLIENT_REGULIER</code>, <code>ENSEIGNANT</code> ou <code>ADMINISTRATEUR</code></td></tr>
+      <tr><td><code>matricule</code></td><td>Obligatoire dans le formulaire lorsqu’un enseignant s’inscrit</td></tr>
+      <tr><td><code>taux_reduction()</code></td><td>Retourne 15 % pour un enseignant, 0 % sinon</td></tr>
+      <tr><td><code>is_active</code></td><td>Permet de désactiver un compte sans le supprimer</td></tr>
+      <tr><td><code>is_staff</code></td><td>Autorise l’accès à l’administration Django</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Flux de connexion</h3>
+  <div class="flow">
+    Inscription ou Google <span>→</span> création de <code>Utilisateur</code>
+    <span>→</span> session Django <span>→</span> redirection selon le rôle
+  </div>
+  <ul>
+    <li>Un client ou enseignant connecté arrive sur « Mes réservations ».</li>
+    <li>Un administrateur arrive sur le tableau de bord.</li>
+    <li>Le paramètre <code>next</code> est accepté uniquement s’il pointe vers l’hôte courant.</li>
+    <li>La déconnexion exige une requête POST, ce qui limite les déconnexions déclenchées par un lien externe.</li>
+  </ul>
+
+  <h3>Routes utiles</h3>
+  <table>
+    <thead><tr><th>URL</th><th>Fonction</th><th>Accès</th></tr></thead>
+    <tbody>
+      <tr><td><code>/accounts/inscription/</code></td><td>Créer un compte client ou enseignant</td><td>Public</td></tr>
+      <tr><td><code>/accounts/connexion/</code></td><td>Se connecter par e-mail</td><td>Public</td></tr>
+      <tr><td><code>/accounts/google/login/</code></td><td>Démarrer Google OAuth via allauth</td><td>Public si configuré</td></tr>
+      <tr><td><code>/accounts/profil/</code></td><td>Voir le profil</td><td>Connecté</td></tr>
+      <tr><td><code>/accounts/profil/modifier/</code></td><td>Modifier identité et contact</td><td>Connecté</td></tr>
+      <tr><td><code>/accounts/mot-de-passe-oublie/</code></td><td>Envoyer un lien de réinitialisation</td><td>Public</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Google OAuth</h3>
+  <p>
+    Le bouton Google n’est actif que si <code>GOOGLE_OAUTH_CLIENT_ID</code> et
+    <code>GOOGLE_OAUTH_CLIENT_SECRET</code> sont présents. L’adaptateur copie prénom, nom et
+    e-mail ; un nouvel utilisateur Google devient client régulier. Le callback local attendu est :
+  </p>
+  <pre>http://localhost:8000/accounts/google/login/callback/</pre>
+
+  <h3>Points de maintenance</h3>
+  <ul>
+    <li>Modifier les rôles ou la réduction dans <code>accounts/models.py</code>, puis adapter formulaires, tests et affichage.</li>
+    <li>Ne jamais proposer le rôle administrateur dans le formulaire public.</li>
+    <li>Préférer <code>is_active=False</code> à la suppression d’un client ayant des réservations protégées.</li>
+    <li>Tester l’envoi SMTP pour le mot de passe oublié ; avec le backend console, le lien apparaît seulement dans le terminal.</li>
+    <li>Mettre à jour les URI OAuth à chaque nouveau domaine ou passage en HTTPS.</li>
+  </ul>
+</section>
+
+<section id="apartments" class="chapter">
+  <h2>4. Application <code>apartments</code> — catalogue et disponibilité</h2>
+  <p class="intro">
+    Elle gère les logements, leurs photos, les périodes réservées aux enseignants et la recherche
+    des logements libres pour un intervalle de dates.
+  </p>
+
+  <h3>Modèles</h3>
+  <table>
+    <thead><tr><th>Modèle</th><th>Champs essentiels</th><th>Règle</th></tr></thead>
+    <tbody>
+      <tr><td><code>Appartement</code></td><td>Titre, description, prix/nuit, capacité, disponible</td><td>Prix positif, capacité ≥ 1</td></tr>
+      <tr><td><code>Photo</code></td><td>Image, légende, indicateur principale</td><td>Fichier placé sous <code>media/appartements/</code></td></tr>
+      <tr><td><code>PeriodeVacances</code></td><td>Appartement, début, fin, libellé</td><td>Fin strictement postérieure au début</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Recherche de disponibilité</h3>
+  <p>
+    Les intervalles utilisent la convention semi-ouverte : arrivée incluse, départ exclu.
+    Une réservation du 10 au 12 occupe donc les nuits du 10 et du 11 ; une nouvelle arrivée
+    le 12 est autorisée.
+  </p>
+  <div class="flow">
+    Dates valides <span>→</span> appartements actifs <span>−</span>
+    réservations confirmées <span>−</span> attentes de moins de 24 h
+    <span>−</span> vacances interdites au profil
+  </div>
+  <p>
+    Une réservation annulée, rejetée, terminée ou expirée ne bloque pas. Une attente vieille
+    de plus de 24 h ne bloque plus, même avant la mise à jour explicite de son statut.
+  </p>
+
+  <h3>Prix</h3>
+  <pre>montant = prix_par_nuit × nombre_de_nuits × (1 − taux_de_reduction)</pre>
+  <p>
+    Le résultat est arrondi à deux décimales. Actuellement, seul l’enseignant reçoit une réduction
+    de 15 %. Cette remise s’applique à toutes ses réservations, pas uniquement aux vacances.
+  </p>
+
+  <h3>Routes</h3>
+  <table>
+    <thead><tr><th>URL</th><th>Fonction</th><th>Accès</th></tr></thead>
+    <tbody>
+      <tr><td><code>/appartements/</code></td><td>Recherche paginée, 12 résultats/page</td><td>Public</td></tr>
+      <tr><td><code>/appartements/&lt;id&gt;/</code></td><td>Détail, photos et vacances</td><td>Public</td></tr>
+      <tr><td><code>/appartements/gestion/liste/</code></td><td>Liste de gestion</td><td>Administrateur</td></tr>
+      <tr><td><code>/appartements/gestion/creer/</code></td><td>Créer et joindre éventuellement une photo</td><td>Administrateur</td></tr>
+      <tr><td><code>/appartements/gestion/&lt;id&gt;/modifier/</code></td><td>Modifier et ajouter éventuellement une photo</td><td>Administrateur</td></tr>
+      <tr><td><code>/appartements/gestion/vacances/</code></td><td>Gérer les périodes</td><td>Administrateur</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Maintenance rapide</h3>
+  <ul>
+    <li>Mettre <code>disponible=False</code> pour retirer temporairement un logement sans supprimer son historique.</li>
+    <li>La suppression d’un appartement ayant des réservations est bloquée par <code>PROTECT</code>.</li>
+    <li>L’interface métier ajoute une photo à la fois ; l’administration Django permet une gestion plus complète.</li>
+    <li>Il n’existe pas de règle garantissant une seule photo « principale » : plusieurs peuvent être marquées.</li>
+    <li>Après déplacement de <code>MEDIA_ROOT</code>, vérifier les permissions d’écriture et le service des médias en production.</li>
+  </ul>
+</section>
+
+<section id="reservations" class="chapter">
+  <h2>5. Application <code>reservations</code> — cycle de réservation</h2>
+  <p class="intro">
+    C’est le cœur du métier. Elle crée une réservation de manière atomique, attribue un numéro,
+    bloque temporairement les dates, impose l’acceptation des politiques et contrôle l’annulation.
+  </p>
+
+  <h3>Cycle des statuts</h3>
+  <div class="flow">
+    <code>EN_ATTENTE</code>
+    <span>→ paiement →</span> <code>CONFIRMEE</code>
+    &nbsp; | &nbsp;
+    <span>→ 24 h →</span> <code>EXPIREE</code>
+    &nbsp; | &nbsp;
+    <span>→ annulation →</span> <code>ANNULEE</code>
+  </div>
+  <p>
+    Les statuts <code>TERMINEE</code> et <code>REJETEE</code> existent dans le modèle, mais aucun
+    automatisme du code analysé ne les attribue. Ils peuvent être positionnés depuis l’administration
+    ou par une future logique métier.
+  </p>
+
+  <h3>Création détaillée</h3>
+  <ol>
+    <li>L’utilisateur doit être authentifié et ne pas être administrateur.</li>
+    <li>L’appartement est relu avec verrou transactionnel.</li>
+    <li>La disponibilité est recalculée pour éviter deux réservations concurrentes.</li>
+    <li>Une période de vacances bloque le client régulier, mais pas l’enseignant.</li>
+    <li>Le montant est calculé et figé dans <code>montant_total</code>.</li>
+    <li>Un numéro aléatoire unique au format <code>aaAA00000</code> est créé.</li>
+    <li>La réservation démarre en attente et un e-mail de politiques est envoyé.</li>
+  </ol>
+
+  <div class="callout">
+    <strong>Transaction.</strong> Le verrouillage se trouve dans
+    <code>services/reservation_services.py</code>. PostgreSQL est préférable en production pour
+    bénéficier d’un vrai verrouillage par ligne ; SQLite a un comportement de verrouillage plus global.
+  </div>
+
+  <h3>Fenêtre de paiement de 24 heures</h3>
+  <p>
+    <code>date_expiration = date_reservation + 24 h</code>. Après cette limite, une réservation
+    en attente est marquée expirée quand un écran ou une opération appelle la logique d’expiration.
+    Les recherches de disponibilité ignorent directement les attentes trop anciennes.
+  </p>
+  <div class="callout warning">
+    <strong>Important.</strong> Il n’existe pas de tâche planifiée qui expire toutes les réservations
+    exactement à l’échéance. L’état est corrigé lors de l’ouverture de certaines pages ou opérations.
+    Pour un statut à jour en permanence, ajouter une commande de gestion exécutée périodiquement.
+  </div>
+
+  <h3>Annulation</h3>
+  <ul>
+    <li>Une réservation confirmée ne peut pas être annulée.</li>
+    <li>La présence d’un paiement payé interdit également l’annulation.</li>
+    <li>Une annulation valide crée une notification interne pour le client.</li>
+    <li>Les conditions affichées indiquent « non annulable, non remboursable » après paiement.</li>
+  </ul>
+
+  <h3>Routes principales</h3>
+  <table>
+    <thead><tr><th>URL</th><th>Fonction</th><th>Accès</th></tr></thead>
+    <tbody>
+      <tr><td><code>/reservations/appartement/&lt;id&gt;/reserver/</code></td><td>Créer une réservation</td><td>Client connecté</td></tr>
+      <tr><td><code>/reservations/mes-reservations/</code></td><td>Historique du client</td><td>Connecté</td></tr>
+      <tr><td><code>/reservations/&lt;id&gt;/</code></td><td>Détail et récapitulatif</td><td>Propriétaire ou administrateur</td></tr>
+      <tr><td><code>/reservations/&lt;id&gt;/politiques/</code></td><td>Lire puis accepter les politiques</td><td>Propriétaire</td></tr>
+      <tr><td><code>/reservations/&lt;id&gt;/annuler/</code></td><td>Annuler avant paiement</td><td>Propriétaire, POST</td></tr>
+      <tr><td><code>/reservations/gestion/liste/</code></td><td>Filtrer et gérer</td><td>Administrateur</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Maintenance rapide</h3>
+  <ul>
+    <li>Ne jamais modifier les dates ou le montant d’une réservation payée sans procédure métier explicite.</li>
+    <li>Pour rechercher une réservation, utiliser son numéro ou l’e-mail client dans <code>/admin/</code>.</li>
+    <li>Une suppression administrateur efface aussi son paiement associé par cascade.</li>
+    <li>En cas d’échec SMTP à la création, la réservation reste créée et l’utilisateur voit un avertissement.</li>
+    <li>Après modification d’une règle, ajouter un test dans <code>reservations/tests.py</code> : ce fichier couvre la majorité des scénarios critiques.</li>
+  </ul>
+</section>
+
+<section id="payments" class="chapter">
+  <h2>6. Application <code>payments</code> — paiement simulé et reçu</h2>
+  <p class="intro">
+    L’application simule un paiement par carte, confirme la réservation puis envoie une confirmation
+    et un PDF. Elle ne communique avec aucune banque et ne stocke pas les champs de carte.
+  </p>
+
+  <div class="callout danger">
+    <strong>Ce n’est pas un paiement réel.</strong> Le formulaire vérifie seulement le format :
+    16 chiffres, expiration au format MM/AA et CVV de 3 ou 4 chiffres. Il ne vérifie ni Luhn,
+    ni la date d’expiration, ni l’autorisation bancaire. Ne pas présenter cette version comme
+    un système d’encaissement en production.
+  </div>
+
+  <h3>Modèle <code>Paiement</code></h3>
+  <table>
+    <thead><tr><th>Élément</th><th>Comportement</th></tr></thead>
+    <tbody>
+      <tr><td>Relation</td><td>Un seul paiement par réservation grâce à <code>OneToOneField</code></td></tr>
+      <tr><td>Méthode</td><td>Uniquement <code>CARTE</code></td></tr>
+      <tr><td>Statuts</td><td><code>EN_ATTENTE</code>, <code>PAYE</code>, <code>ECHEC</code></td></tr>
+      <tr><td>Montant</td><td>Doit correspondre exactement au montant figé de la réservation</td></tr>
+      <tr><td>Effectuer</td><td>Verrouille la réservation, revalide toutes les conditions, marque payé et confirme</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Flux</h3>
+  <div class="flow">
+    Politiques acceptées <span>→</span> formulaire factice <span>→</span>
+    <code>Paiement.PAYE</code> <span>→</span> <code>Reservation.CONFIRMEE</code>
+    <span>→</span> e-mail + PDF <span>→</span> reçu web
+  </div>
+  <p>
+    La confirmation base de données est terminée avant l’envoi de l’e-mail. Un échec SMTP n’annule
+    donc pas le paiement ; un message avertit le client que son reçu reste disponible.
+  </p>
+
+  <h3>Routes</h3>
+  <table>
+    <thead><tr><th>URL</th><th>Fonction</th><th>Accès</th></tr></thead>
+    <tbody>
+      <tr><td><code>/paiements/reservation/&lt;reservation_id&gt;/</code></td><td>Payer</td><td>Propriétaire, réservation admissible</td></tr>
+      <tr><td><code>/paiements/recu/&lt;paiement_id&gt;/</code></td><td>Voir le reçu</td><td>Propriétaire, paiement payé</td></tr>
+      <tr><td><code>/paiements/gestion/</code></td><td>Filtrer les paiements</td><td>Administrateur</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Passage à une vraie passerelle</h3>
+  <ol>
+    <li>Créer l’intention de paiement côté serveur auprès du prestataire.</li>
+    <li>Ne jamais faire transiter le numéro de carte brut par Django ; utiliser le composant sécurisé du prestataire.</li>
+    <li>Confirmer uniquement depuis un webhook signé et idempotent.</li>
+    <li>Ajouter un identifiant externe, les erreurs, remboursements et journaux d’audit.</li>
+    <li>Repenser l’annulation, la politique de remboursement et les tests de concurrence.</li>
+  </ol>
+</section>
+
+<section id="notifications" class="chapter">
+  <h2>7. Application <code>notifications</code> — alertes internes</h2>
+  <p class="intro">
+    Elle fournit une boîte de notifications interne simple. Une notification appartient à un client,
+    possède une date d’envoi et peut être marquée comme lue.
+  </p>
+
+  <h3>Fonctionnement</h3>
+  <ul>
+    <li><code>envoyer()</code> renseigne <code>date_envoi</code> une seule fois.</li>
+    <li><code>marquer_lue()</code> rend l’opération idempotente.</li>
+    <li>Un context processor compte les notifications non lues à chaque page authentifiée.</li>
+    <li>Le marquage comme lu est limité au propriétaire et exige POST.</li>
+  </ul>
+
+  <table>
+    <thead><tr><th>URL</th><th>Fonction</th></tr></thead>
+    <tbody>
+      <tr><td><code>/notifications/</code></td><td>Liste complète du compte connecté</td></tr>
+      <tr><td><code>/notifications/&lt;id&gt;/lue/</code></td><td>Marquer une notification comme lue</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Limites actuelles</h3>
+  <ul>
+    <li>Le code métier analysé crée une notification lors d’une annulation, pas lors d’une confirmation.</li>
+    <li>Aucun e-mail ou push n’est envoyé par cette application ; les e-mails de réservation sont séparés.</li>
+    <li>Le compteur effectue une requête sur chaque page connectée. À grande échelle, prévoir cache ou annotation.</li>
+    <li>Il n’existe pas d’action « tout marquer comme lu » ni de purge automatique.</li>
+  </ul>
+</section>
+
+<section id="dashboard" class="chapter">
+  <h2>8. Application <code>dashboard</code> — pilotage administrateur</h2>
+  <p class="intro">
+    Le tableau de bord agrège les réservations et paiements sur une période. Sans dates fournies,
+    il couvre les 30 derniers jours jusqu’au lendemain de la date courante.
+  </p>
+
+  <h3>Indicateurs</h3>
+  <table>
+    <thead><tr><th>Indicateur</th><th>Calcul</th></tr></thead>
+    <tbody>
+      <tr><td>Taux d’occupation</td><td>Jours occupés par réservations confirmées/terminées ÷ appartements disponibles ÷ jours de période</td></tr>
+      <tr><td>Revenu total</td><td>Somme des paiements payés dont la date de paiement appartient à la période</td></tr>
+      <tr><td>Compteurs</td><td>Total, confirmées et annulées parmi les séjours chevauchant la période</td></tr>
+      <tr><td>Réservations par mois</td><td>Regroupement selon le mois de la date d’arrivée</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout warning">
+    <strong>Interprétation.</strong> Le revenu est filtré par date de paiement, alors que les compteurs
+    sont filtrés par chevauchement des dates de séjour. Deux chiffres de la même période ne décrivent
+    donc pas forcément le même ensemble de réservations.
+  </div>
+
+  <h3>Routes</h3>
+  <table>
+    <tbody>
+      <tr><th><code>/tableau-de-bord/</code></th><td>Indicateurs administrateur</td></tr>
+      <tr><th><code>/tableau-de-bord/export/</code></th><td>Fichier Excel des réservations de la période</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Maintenance rapide</h3>
+  <ul>
+    <li>Modifier les définitions d’indicateurs dans <code>dashboard/views.py</code> et documenter la nouvelle formule.</li>
+    <li>Le taux d’occupation additionne les jours ; il peut dépasser 100 % si les données contiennent des chevauchements anormaux.</li>
+    <li>L’export utilise <code>openpyxl</code> et conserve les dates comme cellules date.</li>
+    <li>Pour de gros volumes, remplacer la boucle de calcul des jours occupés par un calcul SQL ou une table d’agrégats.</li>
+  </ul>
+</section>
+
+<section id="services" class="chapter">
+  <h2>9. Services transverses, e-mails et PDF</h2>
+
+  <h3><code>services/reservation_services.py</code></h3>
+  <p>
+    Ce module est le point d’entrée métier recommandé pour créer une réservation et chercher
+    des appartements. Il évite de disperser les règles de disponibilité, de priorité enseignant
+    et de concurrence dans les vues.
+  </p>
+  <table>
+    <thead><tr><th>Fonction</th><th>Responsabilité</th></tr></thead>
+    <tbody>
+      <tr><td><code>creer_reservation(...)</code></td><td>Transaction, verrou, autorisation, disponibilité, vacances, prix, validation et création</td></tr>
+      <tr><td><code>chercher_appartements_disponibles(...)</code></td><td>Requête optimisée avec sous-requêtes d’existence pour les conflits</td></tr>
+    </tbody>
+  </table>
+
+  <h3><code>services/confirmation_reservation.py</code></h3>
+  <p>
+    Après paiement, ce service prépare le contexte, dessine deux pages A4 avec Pillow, les assemble
+    en PDF puis joint le document à un e-mail texte + HTML.
+  </p>
+  <ul>
+    <li>Page 1 : numéro, dates, hébergement, client, tarif et montant.</li>
+    <li>Page 2 : non-remboursement, garantie, attribution, départ tardif, non-présentation et coordonnées.</li>
+    <li>Polices recherchées : Noto Sans du projet/système, puis DejaVu Sans, puis police par défaut.</li>
+    <li>Nom de pièce jointe : <code>confirmation-reservation-&lt;numero&gt;.pdf</code>.</li>
+  </ul>
+
+  <h3>E-mails envoyés</h3>
+  <table>
+    <thead><tr><th>Événement</th><th>Contenu</th><th>Échec</th></tr></thead>
+    <tbody>
+      <tr><td>Réservation créée</td><td>Politiques et lien d’acceptation</td><td>Réservation conservée, avertissement écran</td></tr>
+      <tr><td>Paiement confirmé</td><td>Confirmation texte/HTML + PDF</td><td>Paiement conservé, reçu web disponible</td></tr>
+      <tr><td>Mot de passe oublié</td><td>Lien de réinitialisation Django</td><td>Dépend du backend e-mail configuré</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>Réessai manuel.</strong> Une confirmation peut être renvoyée depuis le shell Django avec
+    prudence : charger un paiement payé, puis appeler <code>envoyer_email_confirmation(paiement)</code>.
+    Vérifier d’abord l’adresse du destinataire pour éviter un envoi erroné.
+  </div>
+</section>
+
+<section id="donnees" class="chapter">
+  <h2>10. Modèle de données et règles essentielles</h2>
+
+  <h3>Relations</h3>
+  <div class="flow">
+    Utilisateur <span>1 → n</span> Réservation <span>n → 1</span> Appartement<br>
+    Réservation <span>1 → 0..1</span> Paiement<br>
+    Appartement <span>1 → n</span> Photo / Période de vacances<br>
+    Utilisateur <span>1 → n</span> Notification
+  </div>
+
+  <h3>Comportement lors d’une suppression</h3>
+  <table>
+    <thead><tr><th>Suppression demandée</th><th>Effet</th></tr></thead>
+    <tbody>
+      <tr><td>Utilisateur ayant des réservations</td><td>Bloquée : la réservation protège le client</td></tr>
+      <tr><td>Appartement ayant des réservations</td><td>Bloquée : la réservation protège l’appartement</td></tr>
+      <tr><td>Appartement sans réservation</td><td>Supprime aussi ses photos et périodes de vacances</td></tr>
+      <tr><td>Réservation</td><td>Supprime aussi son paiement éventuel</td></tr>
+      <tr><td>Utilisateur sans réservation</td><td>Supprime aussi ses notifications</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Invariants à ne pas casser</h3>
+  <ul>
+    <li>Date de fin strictement postérieure à la date de début.</li>
+    <li>Une seule réservation bloquante par appartement et intervalle.</li>
+    <li>Un administrateur ne réserve pas.</li>
+    <li>Un client régulier ne réserve pas pendant une période de vacances concernée.</li>
+    <li>Le paiement correspond au montant figé et exige les politiques acceptées.</li>
+    <li>Une réservation payée est confirmée et non annulable.</li>
+    <li>Numéro de réservation unique au format imposé.</li>
+  </ul>
+
+  <div class="callout warning">
+    <strong>Validation à deux niveaux.</strong> Certaines règles existent dans les formulaires et
+    modèles, mais la non-superposition des réservations est une règle applicative, pas une contrainte
+    d’exclusion en base. Tout nouveau chemin de création doit appeler le service métier.
+  </div>
+</section>
+
+<section id="installation" class="chapter">
+  <h2>11. Installation, configuration et démarrage</h2>
+
+  <h3>Démarrage local</h3>
+  <pre>cd /chemin/vers/appartements
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver</pre>
+  <p>Application : <code>http://127.0.0.1:8000/</code> — Administration : <code>http://127.0.0.1:8000/admin/</code>.</p>
+
+  <h3>Variables d’environnement</h3>
+  <table>
+    <thead><tr><th>Variable</th><th>Usage</th><th>Conseil production</th></tr></thead>
+    <tbody>
+      <tr><td><code>SECRET_KEY</code></td><td>Signature cryptographique Django</td><td>Longue, aléatoire, secrète ; aucun défaut</td></tr>
+      <tr><td><code>DEBUG</code></td><td>Mode de diagnostic</td><td><code>False</code></td></tr>
+      <tr><td><code>ALLOWED_HOSTS</code></td><td>Hôtes HTTP autorisés, séparés par virgules</td><td>Domaines exacts</td></tr>
+      <tr><td><code>DB_NAME/USER/PASSWORD/HOST/PORT</code></td><td>Active et configure PostgreSQL</td><td>Compte dédié, secret hors dépôt</td></tr>
+      <tr><td><code>GOOGLE_OAUTH_CLIENT_ID/SECRET</code></td><td>Connexion Google</td><td>Callback HTTPS enregistré</td></tr>
+      <tr><td><code>EMAIL_HOST/PORT/USER/PASSWORD</code></td><td>SMTP</td><td>Mot de passe d’application ou fournisseur transactionnel</td></tr>
+      <tr><td><code>EMAIL_USE_TLS</code></td><td>Chiffrement SMTP</td><td><code>True</code> avec le port adapté</td></tr>
+      <tr><td><code>DEFAULT_FROM_EMAIL</code></td><td>Expéditeur par défaut</td><td>Domaine autorisé par le fournisseur</td></tr>
+      <tr><td><code>RAHAL_STAY_*</code></td><td>Marque, adresse, contact, horaires, garantie</td><td>Vérifier avant toute confirmation client</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout danger">
+    <strong>Valeurs par défaut permissives.</strong> Sans variables, le code utilise une clé de
+    développement et <code>DEBUG=True</code>. Une production doit fournir explicitement les secrets
+    et paramètres de sécurité.
+  </div>
+
+  <h3>Choix de base</h3>
+  <p>
+    La seule présence d’une valeur non vide dans <code>DB_NAME</code> active PostgreSQL. Sinon,
+    Django utilise SQLite. Un serveur PostgreSQL arrêté provoque une erreur de connexion pour les
+    commandes qui accèdent aux données, même si <code>db.sqlite3</code> existe.
+  </p>
+
+  <h3>Commandes de contrôle</h3>
+  <pre>python manage.py check
+python manage.py showmigrations
+python manage.py makemigrations --check --dry-run
+python manage.py test
+python manage.py collectstatic --noinput</pre>
+  <div class="callout quick">
+    <strong>État observé pendant la rédaction.</strong> <code>manage.py check</code> ne signale
+    aucun problème et les 27 tests passent avec SQLite. L’environnement courant pointe vers un
+    PostgreSQL local non joignable. La base SQLite présente aussi trois migrations internes non
+    appliquées ; exécuter <code>migrate</code> sur la base réellement utilisée.
+  </div>
+</section>
+
+<section id="maintenance" class="chapter">
+  <h2>12. Maintenance courante, sauvegardes et déploiement</h2>
+
+  <h3>Avant chaque intervention</h3>
+  <table class="check">
+    <tbody>
+      <tr><td>☐</td><td>Identifier la base réellement ciblée par les variables d’environnement.</td></tr>
+      <tr><td>☐</td><td>Faire une sauvegarde avant migration ou modification de données.</td></tr>
+      <tr><td>☐</td><td>Vérifier <code>git status</code> et préserver les changements existants.</td></tr>
+      <tr><td>☐</td><td>Reproduire l’incident et noter l’URL, le rôle, le numéro de réservation et l’heure.</td></tr>
+      <tr><td>☐</td><td>Tester sur une copie ou un environnement de préproduction.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Cycle d’une modification de modèle</h3>
+  <pre>python manage.py makemigrations
+python manage.py sqlmigrate nom_application 000X
+python manage.py migrate
+python manage.py test</pre>
+  <p>
+    Versionner la migration avec le code. Ne pas modifier une ancienne migration déjà exécutée en
+    production sauf stratégie maîtrisée. Pour une colonne obligatoire sur une table remplie, préparer
+    une migration de données ou une transition en plusieurs étapes.
+  </p>
+
+  <h3>Sauvegarde SQLite</h3>
+  <pre># Application arrêtée :
+cp db.sqlite3 sauvegardes/db-AAAA-MM-JJ.sqlite3
+
+# Ou avec l’outil SQLite :
+sqlite3 db.sqlite3 ".backup sauvegardes/db-AAAA-MM-JJ.sqlite3"</pre>
+
+  <h3>Sauvegarde PostgreSQL</h3>
+  <pre>pg_dump --format=custom --file=rahal-stay-AAAA-MM-JJ.dump NOM_BASE
+
+# Restauration dans une base vide :
+pg_restore --clean --if-exists --dbname=NOM_BASE_CIBLE rahal-stay-AAAA-MM-JJ.dump</pre>
+  <p class="small muted">
+    Toujours tester une restauration. Une sauvegarde non restaurée au moins une fois n’est pas une
+    garantie de reprise.
+  </p>
+
+  <h3>Fichiers médias</h3>
+  <p>
+    La sauvegarde de base ne contient pas les images. Sauvegarder séparément <code>media/</code> et
+    conserver sa cohérence avec la base. En production, Django ne sert les médias que lorsque
+    <code>DEBUG=True</code> dans cette configuration : le serveur web ou un stockage objet doit les servir.
+  </p>
+
+  <h3>Checklist de déploiement</h3>
+  <table class="check">
+    <tbody>
+      <tr><td>☐</td><td><code>DEBUG=False</code>, clé secrète forte, hôtes exacts et HTTPS.</td></tr>
+      <tr><td>☐</td><td>PostgreSQL disponible, sauvegardé et migrations appliquées.</td></tr>
+      <tr><td>☐</td><td><code>collectstatic</code> exécuté ; statiques et médias servis correctement.</td></tr>
+      <tr><td>☐</td><td>SMTP testé avec une adresse de test ; expéditeur authentifié.</td></tr>
+      <tr><td>☐</td><td>Origines et callbacks Google OAuth en HTTPS configurés.</td></tr>
+      <tr><td>☐</td><td>Variables <code>RAHAL_STAY_*</code> relues dans le PDF de confirmation.</td></tr>
+      <tr><td>☐</td><td>Tests exécutés, puis test manuel inscription → réservation → paiement → e-mail.</td></tr>
+      <tr><td>☐</td><td>Journalisation, supervision, alertes et procédure de retour arrière prévues.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="diagnostic" class="chapter">
+  <h2>13. Diagnostic rapide et points de vigilance</h2>
+
+  <h3>Matrice d’incidents</h3>
+  <table>
+    <thead><tr><th>Symptôme</th><th>Causes probables</th><th>Contrôle / action</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Erreur de connexion à la base</td>
+        <td><code>DB_NAME</code> active PostgreSQL, serveur arrêté, hôte/port ou identifiants erronés</td>
+        <td>Relire l’environnement ; tester PostgreSQL ; ne pas supposer que SQLite est utilisée</td>
+      </tr>
+      <tr>
+        <td>« no such column/table »</td>
+        <td>Migrations non appliquées ou mauvaise base</td>
+        <td><code>showmigrations</code>, puis sauvegarde et <code>migrate</code></td>
+      </tr>
+      <tr>
+        <td>Le bouton Google est désactivé</td>
+        <td>Client ID ou secret absent</td>
+        <td>Vérifier les deux variables et redémarrer le processus</td>
+      </tr>
+      <tr>
+        <td>Erreur OAuth redirect_uri_mismatch</td>
+        <td>Callback exact non déclaré chez Google</td>
+        <td>Ajouter protocole, domaine, port et chemin exacts dans Google Cloud</td>
+      </tr>
+      <tr>
+        <td>Aucun e-mail reçu</td>
+        <td>Backend console, SMTP refusé, mot de passe d’application, spam</td>
+        <td>Contrôler variables, terminal et journaux ; envoyer un e-mail depuis le shell</td>
+      </tr>
+      <tr>
+        <td>Appartement absent des résultats</td>
+        <td>Inactif, réservation bloquante, attente récente, vacances et profil régulier</td>
+        <td>Contrôler les dates semi-ouvertes, statuts, date de création et rôle</td>
+      </tr>
+      <tr>
+        <td>Paiement inaccessible</td>
+        <td>Réservation expirée/non en attente ou politiques non acceptées</td>
+        <td>Ouvrir le détail, vérifier statut, échéance et <code>politiques_acceptees_le</code></td>
+      </tr>
+      <tr>
+        <td>Paiement confirmé mais pas d’e-mail</td>
+        <td>SMTP/PDF a échoué après la transaction</td>
+        <td>Le reçu reste valide ; corriger SMTP puis renvoyer la confirmation avec contrôle du destinataire</td>
+      </tr>
+      <tr>
+        <td>Image absente en production</td>
+        <td>Média non copié/servi, permissions, URL</td>
+        <td>Vérifier fichier sous <code>MEDIA_ROOT</code>, serveur média et droits</td>
+      </tr>
+      <tr>
+        <td>403 sur une page de gestion</td>
+        <td>Utilisateur authentifié sans rôle administrateur</td>
+        <td>Contrôler <code>role</code> ; pour <code>/admin/</code>, contrôler aussi <code>is_staff</code></td>
+      </tr>
+      <tr>
+        <td>Statut en attente après 24 h</td>
+        <td>Expiration paresseuse, aucune page déclenchante visitée</td>
+        <td>Ouvrir liste/détail ou mettre en place une commande planifiée</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Risques techniques prioritaires</h3>
+  <ol>
+    <li><strong>Paiement simulé :</strong> remplacer avant tout encaissement réel.</li>
+    <li><strong>Paramètres de développement par défaut :</strong> rendre les secrets obligatoires en production.</li>
+    <li><strong>Expiration non planifiée :</strong> ajouter une tâche périodique si les statuts doivent être exacts sans consultation.</li>
+    <li><strong>Journalisation minimale :</strong> configurer logs structurés, suivi des erreurs et corrélation par numéro de réservation.</li>
+    <li><strong>Tests concentrés :</strong> compléter les tests dédiés à payments, notifications et dashboard, actuellement presque vides.</li>
+    <li><strong>Pas de statut terminé automatique :</strong> décider quand un séjour devient <code>TERMINEE</code>.</li>
+    <li><strong>Médias locaux :</strong> prévoir stockage durable et sauvegarde en production.</li>
+  </ol>
+
+  <h3>Requêtes utiles dans le shell Django</h3>
+  <pre>python manage.py shell
+
+from reservations.models import Reservation
+from payments.models import Paiement
+
+Reservation.objects.filter(statut="EN_ATTENTE").count()
+Reservation.expirer_en_attente()
+Paiement.objects.filter(statut="PAYE").count()</pre>
+  <div class="callout warning">
+    <strong>Prudence.</strong> <code>Reservation.expirer_en_attente()</code> modifie les données.
+    L’exécuter uniquement sur la base identifiée, après vérification de l’heure et du fuseau.
+  </div>
+</section>
+
+<section id="checklists" class="chapter">
+  <h2>14. Checklists et aide-mémoire</h2>
+
+  <div class="cols">
+    <div class="col">
+      <div class="card">
+        <h3>Révision fonctionnelle</h3>
+        <ol>
+          <li>Compte et rôle</li>
+          <li>Appartement actif</li>
+          <li>Disponibilité et vacances</li>
+          <li>Réservation en attente 24 h</li>
+          <li>Politiques acceptées</li>
+          <li>Paiement simulé</li>
+          <li>Confirmation + PDF</li>
+          <li>Tableau de bord</li>
+        </ol>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <h3>Révision technique</h3>
+        <ol>
+          <li>URL → vue → template</li>
+          <li>Formulaire valide les entrées</li>
+          <li>Service orchestre le métier</li>
+          <li>Modèle protège l’invariant</li>
+          <li>Transaction protège la concurrence</li>
+          <li>Test verrouille le comportement</li>
+          <li>Migration fait évoluer la base</li>
+          <li>Variables adaptent l’environnement</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <h3>Test manuel après livraison</h3>
+  <table class="check">
+    <tbody>
+      <tr><td>☐</td><td>Accueil, CSS, images et navigation s’affichent sur mobile et bureau.</td></tr>
+      <tr><td>☐</td><td>Inscription client et enseignant ; matricule obligatoire pour l’enseignant.</td></tr>
+      <tr><td>☐</td><td>Connexion locale, déconnexion POST et réinitialisation du mot de passe.</td></tr>
+      <tr><td>☐</td><td>Connexion Google sur le domaine de l’environnement.</td></tr>
+      <tr><td>☐</td><td>Recherche avec dates valides, passées, inversées et chevauchantes.</td></tr>
+      <tr><td>☐</td><td>Vacances : client bloqué, enseignant autorisé et réduction exacte.</td></tr>
+      <tr><td>☐</td><td>Réservation créée, numéro généré et e-mail de politiques reçu.</td></tr>
+      <tr><td>☐</td><td>Paiement interdit avant acceptation et après expiration.</td></tr>
+      <tr><td>☐</td><td>Paiement simulé valide : reçu, statut confirmé, e-mail et PDF lisible.</td></tr>
+      <tr><td>☐</td><td>Annulation avant paiement autorisée ; après paiement refusée.</td></tr>
+      <tr><td>☐</td><td>Administrateur : appartements, vacances, réservations, paiements, export Excel.</td></tr>
+      <tr><td>☐</td><td>Utilisateur normal : aucune donnée d’un autre client accessible par changement d’ID.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Fichiers à ouvrir selon la panne</h3>
+  <table>
+    <thead><tr><th>Sujet</th><th>Fichiers principaux</th></tr></thead>
+    <tbody>
+      <tr><td>Configuration globale</td><td><code>webbap/settings.py</code>, <code>webbap/urls.py</code>, <code>.env.example</code></td></tr>
+      <tr><td>Compte / permissions</td><td><code>accounts/models.py</code>, <code>accounts/views.py</code>, <code>accounts/mixins.py</code></td></tr>
+      <tr><td>Disponibilité / prix</td><td><code>apartments/models.py</code>, <code>services/reservation_services.py</code></td></tr>
+      <tr><td>Réservation / expiration</td><td><code>reservations/models.py</code>, <code>reservations/views.py</code></td></tr>
+      <tr><td>Paiement / reçu</td><td><code>payments/models.py</code>, <code>payments/views.py</code>, <code>payments/forms.py</code></td></tr>
+      <tr><td>E-mail / PDF</td><td><code>services/confirmation_reservation.py</code>, <code>reservations/templates/reservations/emails/</code></td></tr>
+      <tr><td>Notifications</td><td><code>notifications/models.py</code>, <code>notifications/context_processors.py</code></td></tr>
+      <tr><td>Indicateurs / export</td><td><code>dashboard/views.py</code></td></tr>
+      <tr><td>Présentation</td><td><code>templates/base.html</code>, <code>static/css/site.css</code>, templates de l’application</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout quick">
+    <strong>Règle d’or.</strong> Avant de corriger une donnée, identifier l’environnement, sauvegarder,
+    comprendre l’invariant métier, reproduire le problème, appliquer la correction la plus petite,
+    puis exécuter les tests et le scénario utilisateur correspondant.
+  </div>
+
+  <p class="small muted">
+    Fin du guide — généré à partir du code du projet Rahal Stay, sans inclure les valeurs secrètes
+    du fichier <code>.env</code>.
+  </p>
+</section>
+
+</body>
+</html>

@@ -49,7 +49,16 @@ def reserver(request, appartement_id):
                     "dans les 24 heures pour accéder au paiement.",
                 )
             return redirect('reservations:detail', pk=reservation.pk)
-    return render(request, 'reservations/reserver.html', {'form': form, 'appartement': appartement})
+    return render(
+        request,
+        'reservations/reserver.html',
+        {
+            'form': form,
+            'appartement': appartement,
+            'date_debut': form['date_debut'].value(),
+            'date_fin': form['date_fin'].value(),
+        },
+    )
 
 
 @login_required

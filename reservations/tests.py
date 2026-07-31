@@ -167,7 +167,9 @@ class ReglesReservationTests(TestCase):
         reservation = creer_reservation(self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 12))
         self.client.force_login(self.enseignant)
         for url in (
-            reverse('apartments:liste'), reverse('apartments:detail', args=(self.appartement.pk,)),
+            reverse('apartments:liste'),
+            f"{reverse('apartments:detail', args=(self.appartement.pk,))}"
+            '?date_debut=2027-06-10&date_fin=2027-06-12',
             reverse('reservations:mes_reservations'), reverse('reservations:detail', args=(reservation.pk,)),
             reverse('notifications:liste'), reverse('reservations:politiques', args=(reservation.pk,)),
         ):

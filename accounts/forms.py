@@ -73,7 +73,16 @@ class ProfilForm(forms.ModelForm):
         fields = ('email', 'nom', 'prenom', 'telephone', 'matricule')
 
     def clean_matricule(self):
-        matricule = self.cleaned_data.get('matricule')
+        matricule = (self.cleaned_data.get('matricule') or '').strip() or None
         if self.instance.est_enseignant() and not matricule:
             raise forms.ValidationError("Le matricule est obligatoire pour un enseignant.")
         return matricule
+
+    def save(self, commit=True):
+        utilisateur = super().save(commit=False)
+        if utilisateur.matricule and not utilisateur.est_administrateur():
+            utilisateur.role = Utilisateur.ENSEIGNANT
+        if commit:
+            utilisateur.save()
+            self.save_m2m()
+        return utilisateur

@@ -43,18 +43,14 @@ class InscriptionTests(TestCase):
             '/accounts/google/login/callback/',
         )
 
-    def test_connexion_google_conserve_la_destination_demandee(self):
+    def test_connexion_google_ignore_la_destination_et_revient_a_l_accueil(self):
         destination = reverse('reservations:mes_reservations')
         response = self.client.get(
             reverse('accounts:connexion'),
             {'next': destination},
         )
 
-        self.assertContains(
-            response,
-            f'<input type="hidden" name="next" value="{destination}">',
-            html=True,
-        )
+        self.assertNotContains(response, 'name="next"')
 
     def test_adaptateur_google_remplit_un_nouveau_client(self):
         sociallogin = SocialLogin(
@@ -87,8 +83,45 @@ class InscriptionTests(TestCase):
             'nom': 'Nouveau', 'prenom': 'Client', 'telephone': '', 'matricule': '',
             'password1': 'Mot-de-passe-tres-solide-2027', 'password2': 'Mot-de-passe-tres-solide-2027',
         })
-        self.assertRedirects(response, reverse('reservations:mes_reservations'))
+        self.assertRedirects(response, reverse('core:accueil'))
         self.assertIn('_auth_user_id', self.client.session)
+
+    def test_connexion_redirige_vers_accueil_meme_avec_next(self):
+        utilisateur = Utilisateur.objects.create_user(
+            email='client@example.com',
+            password='mot-de-passe-solide',
+            nom='Client',
+            prenom='Test',
+        )
+
+        response = self.client.post(
+            f"{reverse('accounts:connexion')}?next={reverse('reservations:mes_reservations')}",
+            {'username': utilisateur.email, 'password': 'mot-de-passe-solide'},
+        )
+
+        self.assertRedirects(response, reverse('core:accueil'))
+
+    def test_ajouter_un_matricule_transforme_le_client_en_enseignant(self):
+        utilisateur = Utilisateur.objects.create_user(
+            email='profil@example.com',
+            password='mot-de-passe-solide',
+            nom='Profil',
+            prenom='Client',
+        )
+        self.client.force_login(utilisateur)
+
+        response = self.client.post(reverse('accounts:modifier_profil'), {
+            'email': utilisateur.email,
+            'nom': utilisateur.nom,
+            'prenom': utilisateur.prenom,
+            'telephone': '0600000000',
+            'matricule': ' FONDATION-123 ',
+        })
+
+        self.assertRedirects(response, reverse('accounts:profil'))
+        utilisateur.refresh_from_db()
+        self.assertEqual(utilisateur.matricule, 'FONDATION-123')
+        self.assertEqual(utilisateur.role, Utilisateur.ENSEIGNANT)
 
     def test_matricule_obligatoire_pour_enseignant(self):
         response = self.client.post(reverse('accounts:inscription'), {

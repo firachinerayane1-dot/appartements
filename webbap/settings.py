@@ -150,7 +150,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 LOGIN_URL = 'accounts:connexion'
-LOGIN_REDIRECT_URL = 'accounts:post_login'
+LOGIN_REDIRECT_URL = 'core:accueil'
 LOGOUT_REDIRECT_URL = 'accounts:connexion'
 
 AUTHENTICATION_BACKENDS = [
