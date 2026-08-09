@@ -33,7 +33,10 @@ class RechercheDisponibiliteForm(forms.Form):
 class AppartementForm(forms.ModelForm):
     class Meta:
         model = Appartement
-        fields = ('titre', 'description', 'capacite', 'disponible')
+        fields = (
+            'titre', 'description', 'prix_par_nuit', 'prix_fm6_par_nuit',
+            'capacite', 'disponible',
+        )
 
 
 class PeriodeVacancesForm(forms.ModelForm):

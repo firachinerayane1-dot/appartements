@@ -25,7 +25,7 @@ class Reservation(models.Model):
     MAX_NUITS_FM6_PAR_RESERVATION = 5
     MAX_NUITS_FM6_PAR_AN = 10
     MESSAGE_CHEVAUCHEMENT_ADHERENT = (
-        "Cet adhérent possède déjà une réservation pendant cette période."
+        "Ce client possède déjà une réservation pendant cette période."
     )
     MESSAGE_DUREE_FM6 = "Une réservation FM6 est limitée à 5 nuits."
     MESSAGE_QUOTA_ANNUEL_FM6 = (
@@ -90,9 +90,7 @@ class Reservation(models.Model):
             self._valider_quota_annuel_fm6()
 
     def _bloque_une_periode(self):
-        # Le matricule représente l'adhésion FM6 : la limitation personnelle
-        # ne s'applique donc pas aux clients réguliers.
-        if not self.client_id or not self.client.est_client_fm6():
+        if not self.client_id:
             return False
         if self.statut == self.CONFIRMEE:
             return True

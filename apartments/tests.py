@@ -26,12 +26,12 @@ class RechercheDisponibiliteTests(TestCase):
         cls.relais = cls.creer_appartement('Appartement avec départ le jour même')
         cls.annule = cls.creer_appartement('Appartement avec réservation annulée')
 
-        cls.creer_reservation(cls.occupe, date(2027, 8, 12), date(2027, 8, 18))
-        cls.creer_reservation(cls.relais, date(2027, 8, 5), date(2027, 8, 10))
+        cls.creer_reservation(cls.occupe, date(2027, 9, 12), date(2027, 9, 18))
+        cls.creer_reservation(cls.relais, date(2027, 9, 5), date(2027, 9, 10))
         cls.creer_reservation(
             cls.annule,
-            date(2027, 8, 12),
-            date(2027, 8, 18),
+            date(2027, 9, 12),
+            date(2027, 9, 18),
             statut=Reservation.ANNULEE,
         )
 
@@ -40,7 +40,8 @@ class RechercheDisponibiliteTests(TestCase):
         return Appartement.objects.create(
             titre=titre,
             description='Appartement de test',
-            prix_par_nuit=Decimal('500.00'),
+            prix_par_nuit=Decimal('700.00'),
+            prix_fm6_par_nuit=Decimal('500.00'),
             capacite=2,
         )
 
@@ -65,7 +66,7 @@ class RechercheDisponibiliteTests(TestCase):
     def test_les_deux_dates_sont_obligatoires(self):
         response = self.client.get(
             reverse('apartments:liste'),
-            {'date_debut': '2027-08-10', 'date_fin': ''},
+            {'date_debut': '2027-09-10', 'date_fin': ''},
         )
 
         self.assertEqual(response.context['page_obj'].paginator.count, 0)
@@ -74,7 +75,7 @@ class RechercheDisponibiliteTests(TestCase):
     def test_date_de_depart_doit_etre_posterieure(self):
         response = self.client.get(
             reverse('apartments:liste'),
-            {'date_debut': '2027-08-15', 'date_fin': '2027-08-10'},
+            {'date_debut': '2027-09-15', 'date_fin': '2027-09-10'},
         )
 
         self.assertEqual(response.context['page_obj'].paginator.count, 0)
@@ -100,7 +101,7 @@ class RechercheDisponibiliteTests(TestCase):
     def test_date_invalide_est_refusee(self):
         response = self.client.get(
             reverse('apartments:liste'),
-            {'date_debut': 'date-invalide', 'date_fin': '2027-08-15'},
+            {'date_debut': 'date-invalide', 'date_fin': '2027-09-15'},
         )
 
         self.assertEqual(response.context['page_obj'].paginator.count, 0)
@@ -113,7 +114,7 @@ class RechercheDisponibiliteTests(TestCase):
     def test_recherche_exclut_uniquement_les_chevauchements_bloquants(self):
         response = self.client.get(
             reverse('apartments:liste'),
-            {'date_debut': '2027-08-10', 'date_fin': '2027-08-15'},
+            {'date_debut': '2027-09-10', 'date_fin': '2027-09-15'},
         )
 
         appartements = list(response.context['page_obj'].object_list)
@@ -125,25 +126,25 @@ class RechercheDisponibiliteTests(TestCase):
     def test_bouton_reserver_transmet_les_dates(self):
         response = self.client.get(
             reverse('apartments:liste'),
-            {'date_debut': '2027-08-10', 'date_fin': '2027-08-15'},
+            {'date_debut': '2027-09-10', 'date_fin': '2027-09-15'},
         )
 
         url = reverse('reservations:reserver', args=(self.libre.pk,))
         self.assertContains(
             response,
-            f'{url}?date_debut=2027-08-10&amp;date_fin=2027-08-15',
+            f'{url}?date_debut=2027-09-10&amp;date_fin=2027-09-15',
         )
 
     def test_photo_et_titre_transmettent_les_dates_au_detail(self):
         response = self.client.get(
             reverse('apartments:liste'),
-            {'date_debut': '2027-08-10', 'date_fin': '2027-08-15'},
+            {'date_debut': '2027-09-10', 'date_fin': '2027-09-15'},
         )
 
         url = reverse('apartments:detail', args=(self.libre.pk,))
         self.assertContains(
             response,
-            f'{url}?date_debut=2027-08-10&amp;date_fin=2027-08-15',
+            f'{url}?date_debut=2027-09-10&amp;date_fin=2027-09-15',
             count=2,
         )
 
@@ -158,17 +159,17 @@ class RechercheDisponibiliteTests(TestCase):
 
         response = self.client.get(
             reverse('apartments:detail', args=(self.libre.pk,)),
-            {'date_debut': '2027-08-10', 'date_fin': '2027-08-15'},
+            {'date_debut': '2027-09-10', 'date_fin': '2027-09-15'},
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Du 10/08/2027 au 15/08/2027')
+        self.assertContains(response, 'Du 10/09/2027 au 15/09/2027')
         self.assertContains(response, '700,00 MAD')
         self.assertContains(response, 'Réserver maintenant')
         self.assertContains(
             response,
             f"{reverse('reservations:reserver', args=(self.libre.pk,))}"
-            '?date_debut=2027-08-10&amp;date_fin=2027-08-15',
+            '?date_debut=2027-09-10&amp;date_fin=2027-09-15',
         )
 
     def test_detail_affiche_le_tarif_de_500_dh_au_client_fm6(self):
@@ -184,7 +185,7 @@ class RechercheDisponibiliteTests(TestCase):
 
         response = self.client.get(
             reverse('apartments:detail', args=(self.libre.pk,)),
-            {'date_debut': '2027-08-10', 'date_fin': '2027-08-15'},
+            {'date_debut': '2027-09-10', 'date_fin': '2027-09-15'},
         )
 
         self.assertContains(response, '500,00 MAD')
@@ -193,12 +194,12 @@ class RechercheDisponibiliteTests(TestCase):
     def test_detail_ne_montre_pas_un_appartement_indisponible(self):
         response = self.client.get(
             reverse('apartments:detail', args=(self.occupe.pk,)),
-            {'date_debut': '2027-08-10', 'date_fin': '2027-08-15'},
+            {'date_debut': '2027-09-10', 'date_fin': '2027-09-15'},
         )
 
         self.assertRedirects(
             response,
-            f"{reverse('apartments:liste')}?date_debut=2027-08-10&date_fin=2027-08-15",
+            f"{reverse('apartments:liste')}?date_debut=2027-09-10&date_fin=2027-09-15",
         )
 
     def test_message_si_aucun_appartement_n_est_disponible(self):
@@ -206,7 +207,7 @@ class RechercheDisponibiliteTests(TestCase):
 
         response = self.client.get(
             reverse('apartments:liste'),
-            {'date_debut': '2027-08-10', 'date_fin': '2027-08-15'},
+            {'date_debut': '2027-09-10', 'date_fin': '2027-09-15'},
         )
 
         self.assertContains(response, "Aucun appartement n'est disponible pour cette période.")
@@ -216,16 +217,16 @@ class RechercheDisponibiliteTests(TestCase):
 
         response = self.client.get(
             reverse('reservations:reserver', args=(self.libre.pk,)),
-            {'date_debut': '2027-08-10', 'date_fin': '2027-08-15'},
+            {'date_debut': '2027-09-10', 'date_fin': '2027-09-15'},
         )
 
-        self.assertEqual(response.context['form'].initial['date_debut'], '2027-08-10')
-        self.assertEqual(response.context['form'].initial['date_fin'], '2027-08-15')
+        self.assertEqual(response.context['form'].initial['date_debut'], '2027-09-10')
+        self.assertEqual(response.context['form'].initial['date_fin'], '2027-09-15')
 
     def test_liste_et_photos_sont_chargees_en_deux_requetes(self):
         appartements = chercher_appartements_disponibles(
-            date(2027, 8, 10),
-            date(2027, 8, 15),
+            date(2027, 9, 10),
+            date(2027, 9, 15),
         ).prefetch_related(
             Prefetch(
                 'photos',

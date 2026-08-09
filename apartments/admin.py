@@ -14,7 +14,9 @@ class PhotoInline(admin.TabularInline):
 
 @admin.register(Appartement)
 class AppartementAdmin(admin.ModelAdmin):
-    list_display = ('titre', 'prix_par_nuit', 'capacite', 'disponible')
+    list_display = (
+        'titre', 'prix_par_nuit', 'prix_fm6_par_nuit', 'capacite', 'disponible',
+    )
     list_filter = ('disponible', 'capacite')
     search_fields = ('titre', 'description')
     inlines = (PeriodeVacancesInline, PhotoInline)

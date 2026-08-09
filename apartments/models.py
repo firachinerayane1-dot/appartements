@@ -14,10 +14,16 @@ class Appartement(models.Model):
     titre = models.CharField(max_length=150)
     description = models.TextField()
     prix_par_nuit = models.DecimalField(
+        verbose_name='tarif client régulier par nuit',
         max_digits=10,
         decimal_places=2,
         default=TARIF_CLIENT_REGULIER,
-        editable=False,
+    )
+    prix_fm6_par_nuit = models.DecimalField(
+        verbose_name='tarif client FM6 par nuit',
+        max_digits=10,
+        decimal_places=2,
+        default=TARIF_CLIENT_FM6,
     )
     capacite = models.PositiveIntegerField(default=1)
     disponible = models.BooleanField(default=True)
@@ -32,15 +38,14 @@ class Appartement(models.Model):
         if self.capacite is not None and self.capacite < 1:
             raise ValidationError({'capacite': "La capacité doit être d'au moins une personne."})
 
-    @classmethod
-    def tarif_pour_client(cls, client=None):
+    def tarif_pour_client(self, client=None):
         if (
             client
             and getattr(client, 'is_authenticated', False)
             and client.est_client_fm6()
         ):
-            return cls.TARIF_CLIENT_FM6
-        return cls.TARIF_CLIENT_REGULIER
+            return self.prix_fm6_par_nuit
+        return self.prix_par_nuit
 
     def is_disponible(self, date_debut, date_fin, exclude_reservation=None):
         if not self.disponible or not date_debut or not date_fin or date_fin <= date_debut:

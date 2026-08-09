@@ -14,6 +14,7 @@ from accounts.models import Utilisateur
 from apartments.models import Appartement, PeriodeVacances
 from payments.models import Paiement
 from services.reservation_services import (
+    MESSAGE_AOUT_RESERVE_FM6,
     chercher_appartements_disponibles,
     creer_reservation,
     modifier_reservation,
@@ -32,7 +33,11 @@ class ReglesReservationTests(TestCase):
             role=Utilisateur.CLIENT_FM6, matricule='FM6-1'
         )
         self.appartement = Appartement.objects.create(
-            titre='Studio', description='Centre-ville', prix_par_nuit=Decimal('100.00'), capacite=2
+            titre='Studio',
+            description='Centre-ville',
+            prix_par_nuit=Decimal('700.00'),
+            prix_fm6_par_nuit=Decimal('500.00'),
+            capacite=2,
         )
         PeriodeVacances.objects.create(
             appartement=self.appartement, libelle='Été', date_debut=date(2027, 7, 1), date_fin=date(2027, 9, 1)
@@ -49,7 +54,7 @@ class ReglesReservationTests(TestCase):
         self.assertEqual(reservation.statut, Reservation.EN_ATTENTE)
         self.assertEqual(reservation.montant_total, Decimal('1400.00'))
 
-    def test_client_fm6_peut_reserver_pendant_vacances_a_500_dh_la_nuit(self):
+    def test_client_fm6_paie_500_dh_la_nuit(self):
         reservation = creer_reservation(self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 12))
         self.assertEqual(reservation.statut, Reservation.EN_ATTENTE)
         self.assertEqual(reservation.montant_total, Decimal('1000.00'))
@@ -62,6 +67,28 @@ class ReglesReservationTests(TestCase):
         )
 
         self.assertEqual(montant, Decimal('1400.00'))
+
+    def test_tarifs_sont_propres_a_l_appartement_et_au_type_de_client(self):
+        appartement_premium = Appartement.objects.create(
+            titre='Premium',
+            description='Test des tarifs',
+            prix_par_nuit=Decimal('1000.00'),
+            prix_fm6_par_nuit=Decimal('700.00'),
+            capacite=4,
+        )
+
+        self.assertEqual(
+            appartement_premium.calculer_prix(
+                date(2027, 6, 10), date(2027, 6, 12), self.client_regulier
+            ),
+            Decimal('2000.00'),
+        )
+        self.assertEqual(
+            appartement_premium.calculer_prix(
+                date(2027, 6, 10), date(2027, 6, 12), self.enseignant
+            ),
+            Decimal('1400.00'),
+        )
 
     def test_numero_reservation_est_genere_automatiquement_et_unique(self):
         premiere = creer_reservation(
@@ -102,26 +129,94 @@ class ReglesReservationTests(TestCase):
 
         self.assertEqual(Reservation.objects.count(), 1)
 
-    def test_client_regulier_peut_reserver_deux_logements_sur_la_meme_periode(self):
+    def test_client_regulier_ne_peut_pas_reserver_deux_logements_sur_la_meme_periode(self):
         autre_appartement = Appartement.objects.create(
             titre='Appartement régulier', description='Ailleurs', capacite=2
         )
 
-        premiere = creer_reservation(
+        creer_reservation(
             self.client_regulier,
             self.appartement,
             date(2027, 7, 10),
             date(2027, 7, 15),
         )
-        seconde = creer_reservation(
-            self.client_regulier,
-            autre_appartement,
-            date(2027, 7, 12),
-            date(2027, 7, 18),
+        with self.assertRaisesMessage(
+            ValidationError,
+            Reservation.MESSAGE_CHEVAUCHEMENT_ADHERENT,
+        ):
+            creer_reservation(
+                self.client_regulier,
+                autre_appartement,
+                date(2027, 7, 12),
+                date(2027, 7, 17),
+            )
+
+        self.assertEqual(Reservation.objects.count(), 1)
+
+    def test_client_regulier_ne_voit_aucun_appartement_pour_aout(self):
+        self.assertFalse(
+            chercher_appartements_disponibles(
+                date(2027, 8, 10),
+                date(2027, 8, 12),
+                self.client_regulier,
+            ).exists()
         )
 
-        self.assertEqual(Reservation.objects.count(), 2)
-        self.assertNotEqual(premiere.appartement_id, seconde.appartement_id)
+    def test_creation_directe_en_aout_est_refusee_au_client_regulier(self):
+        with self.assertRaisesMessage(ValidationError, MESSAGE_AOUT_RESERVE_FM6):
+            creer_reservation(
+                self.client_regulier,
+                self.appartement,
+                date(2027, 8, 10),
+                date(2027, 8, 12),
+            )
+
+        self.assertFalse(Reservation.objects.exists())
+
+    def test_client_fm6_peut_reserver_en_aout(self):
+        reservation = creer_reservation(
+            self.enseignant,
+            self.appartement,
+            date(2027, 8, 10),
+            date(2027, 8, 12),
+        )
+
+        self.assertEqual(reservation.get_duree(), 2)
+
+    def test_bornes_du_mois_aout_respectent_le_depart_exclu(self):
+        juillet = creer_reservation(
+            self.client_regulier,
+            self.appartement,
+            date(2027, 7, 31),
+            date(2027, 8, 1),
+        )
+        septembre = creer_reservation(
+            self.client_regulier,
+            self.appartement,
+            date(2027, 9, 1),
+            date(2027, 9, 2),
+        )
+
+        self.assertEqual(juillet.get_duree(), 1)
+        self.assertEqual(septembre.get_duree(), 1)
+
+    def test_modification_vers_aout_est_refusee_au_client_regulier(self):
+        reservation = creer_reservation(
+            self.client_regulier,
+            self.appartement,
+            date(2027, 7, 10),
+            date(2027, 7, 12),
+        )
+
+        with self.assertRaisesMessage(ValidationError, MESSAGE_AOUT_RESERVE_FM6):
+            modifier_reservation(
+                reservation,
+                date_debut=date(2027, 8, 10),
+                date_fin=date(2027, 8, 12),
+            )
+
+        reservation.refresh_from_db()
+        self.assertEqual(reservation.date_debut, date(2027, 7, 10))
 
     def test_reservation_fm6_est_limitee_a_cinq_nuits(self):
         with self.assertRaisesMessage(ValidationError, Reservation.MESSAGE_DUREE_FM6):
