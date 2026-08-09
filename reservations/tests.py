@@ -38,9 +38,16 @@ class ReglesReservationTests(TestCase):
             appartement=self.appartement, libelle='Été', date_debut=date(2027, 7, 1), date_fin=date(2027, 9, 1)
         )
 
-    def test_vacances_bloquent_client_regulier(self):
-        with self.assertRaisesMessage(ValidationError, "qu'aux clients FM6"):
-            creer_reservation(self.client_regulier, self.appartement, date(2027, 7, 10), date(2027, 7, 12))
+    def test_client_regulier_peut_reserver_pendant_les_vacances(self):
+        reservation = creer_reservation(
+            self.client_regulier,
+            self.appartement,
+            date(2027, 7, 10),
+            date(2027, 7, 12),
+        )
+
+        self.assertEqual(reservation.statut, Reservation.EN_ATTENTE)
+        self.assertEqual(reservation.montant_total, Decimal('1400.00'))
 
     def test_client_fm6_peut_reserver_pendant_vacances_a_500_dh_la_nuit(self):
         reservation = creer_reservation(self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 12))
@@ -94,6 +101,142 @@ class ReglesReservationTests(TestCase):
             )
 
         self.assertEqual(Reservation.objects.count(), 1)
+
+    def test_client_regulier_peut_reserver_deux_logements_sur_la_meme_periode(self):
+        autre_appartement = Appartement.objects.create(
+            titre='Appartement régulier', description='Ailleurs', capacite=2
+        )
+
+        premiere = creer_reservation(
+            self.client_regulier,
+            self.appartement,
+            date(2027, 7, 10),
+            date(2027, 7, 15),
+        )
+        seconde = creer_reservation(
+            self.client_regulier,
+            autre_appartement,
+            date(2027, 7, 12),
+            date(2027, 7, 18),
+        )
+
+        self.assertEqual(Reservation.objects.count(), 2)
+        self.assertNotEqual(premiere.appartement_id, seconde.appartement_id)
+
+    def test_reservation_fm6_est_limitee_a_cinq_nuits(self):
+        with self.assertRaisesMessage(ValidationError, Reservation.MESSAGE_DUREE_FM6):
+            creer_reservation(
+                self.enseignant,
+                self.appartement,
+                date(2027, 1, 1),
+                date(2027, 1, 7),
+            )
+
+        self.assertFalse(Reservation.objects.exists())
+
+    def test_client_regulier_n_est_pas_soumis_aux_limites_fm6(self):
+        premiere = creer_reservation(
+            self.client_regulier,
+            self.appartement,
+            date(2027, 1, 1),
+            date(2027, 1, 7),
+        )
+        seconde = creer_reservation(
+            self.client_regulier,
+            self.appartement,
+            date(2027, 1, 7),
+            date(2027, 1, 13),
+        )
+
+        self.assertEqual(premiere.get_duree() + seconde.get_duree(), 12)
+
+    def test_fm6_peut_faire_dix_reservations_d_une_nuit_dans_l_annee(self):
+        for jour in range(1, 11):
+            creer_reservation(
+                self.enseignant,
+                self.appartement,
+                date(2027, 1, jour),
+                date(2027, 1, jour + 1),
+            )
+
+        self.assertEqual(Reservation.objects.count(), 10)
+        self.assertEqual(
+            sum(reservation.get_duree() for reservation in Reservation.objects.all()),
+            10,
+        )
+
+    def test_onzieme_nuit_fm6_de_l_annee_est_refusee(self):
+        creer_reservation(
+            self.enseignant, self.appartement, date(2027, 1, 1), date(2027, 1, 6)
+        )
+        creer_reservation(
+            self.enseignant, self.appartement, date(2027, 1, 6), date(2027, 1, 11)
+        )
+
+        message = Reservation.MESSAGE_QUOTA_ANNUEL_FM6.format(annee=2027)
+        with self.assertRaisesMessage(ValidationError, message):
+            creer_reservation(
+                self.enseignant,
+                self.appartement,
+                date(2027, 1, 11),
+                date(2027, 1, 12),
+            )
+
+        self.assertEqual(Reservation.objects.count(), 2)
+
+    def test_reservation_annulee_ne_consomme_pas_le_quota_annuel_fm6(self):
+        a_annuler = creer_reservation(
+            self.enseignant, self.appartement, date(2027, 1, 1), date(2027, 1, 6)
+        )
+        creer_reservation(
+            self.enseignant, self.appartement, date(2027, 1, 6), date(2027, 1, 11)
+        )
+        a_annuler.annuler()
+
+        remplacement = creer_reservation(
+            self.enseignant, self.appartement, date(2027, 2, 1), date(2027, 2, 6)
+        )
+
+        self.assertEqual(remplacement.get_duree(), 5)
+
+    def test_nuits_fm6_sont_imputees_a_leur_annee_civile(self):
+        reservation = creer_reservation(
+            self.enseignant,
+            self.appartement,
+            date(2027, 12, 29),
+            date(2028, 1, 3),
+        )
+
+        self.assertEqual(reservation.get_duree(), 5)
+        seconde = creer_reservation(
+            self.enseignant,
+            self.appartement,
+            date(2028, 1, 3),
+            date(2028, 1, 8),
+        )
+        self.assertEqual(seconde.get_duree(), 5)
+
+    def test_modification_ne_peut_pas_depasser_le_quota_annuel_fm6(self):
+        creer_reservation(
+            self.enseignant, self.appartement, date(2027, 1, 1), date(2027, 1, 4)
+        )
+        creer_reservation(
+            self.enseignant, self.appartement, date(2027, 1, 4), date(2027, 1, 7)
+        )
+        a_modifier = creer_reservation(
+            self.enseignant, self.appartement, date(2027, 1, 7), date(2027, 1, 11)
+        )
+
+        message = Reservation.MESSAGE_QUOTA_ANNUEL_FM6.format(annee=2027)
+        with self.assertRaisesMessage(ValidationError, message):
+            modifier_reservation(
+                a_modifier,
+                date_debut=date(2027, 1, 7),
+                date_fin=date(2027, 1, 12),
+            )
+
+        a_modifier.refresh_from_db()
+        self.assertEqual(a_modifier.date_fin, date(2027, 1, 11))
 
     def test_vue_affiche_le_conflit_adherent_sans_creation_partielle(self):
         autre_appartement = Appartement.objects.create(
@@ -358,5 +501,48 @@ class ConcurrenceReservationTests(TransactionTestCase):
         self.assertEqual(Reservation.objects.count(), 1)
         self.assertIn(
             Reservation.MESSAGE_CHEVAUCHEMENT_ADHERENT,
+            [resultat[1] for resultat in resultats if resultat[0] == 'refuse'],
+        )
+
+    def test_deux_requetes_concurrentes_ne_depassent_pas_le_quota_annuel(self):
+        creer_reservation(
+            self.adherent,
+            self.appartements[0],
+            date(2027, 1, 1),
+            date(2027, 1, 6),
+        )
+        creer_reservation(
+            self.adherent,
+            self.appartements[0],
+            date(2027, 1, 6),
+            date(2027, 1, 10),
+        )
+        barriere = Barrier(2)
+
+        def reserver(appartement_id, debut, fin):
+            close_old_connections()
+            try:
+                adherent = Utilisateur.objects.get(pk=self.adherent.pk)
+                appartement = Appartement.objects.get(pk=appartement_id)
+                barriere.wait(timeout=5)
+                reservation = creer_reservation(adherent, appartement, debut, fin)
+                return ('cree', reservation.pk)
+            except ValidationError as exc:
+                return ('refuse', exc.messages[0])
+            finally:
+                close_old_connections()
+
+        demandes = (
+            (self.appartements[0].pk, date(2027, 1, 10), date(2027, 1, 11)),
+            (self.appartements[1].pk, date(2027, 1, 11), date(2027, 1, 12)),
+        )
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            futures = [pool.submit(reserver, *demande) for demande in demandes]
+            resultats = [future.result() for future in futures]
+
+        self.assertEqual(sorted(resultat[0] for resultat in resultats), ['cree', 'refuse'])
+        self.assertEqual(Reservation.objects.count(), 3)
+        self.assertIn(
+            Reservation.MESSAGE_QUOTA_ANNUEL_FM6.format(annee=2027),
             [resultat[1] for resultat in resultats if resultat[0] == 'refuse'],
         )

@@ -6,7 +6,7 @@ from django.db import transaction
 from django.db.models import Exists, OuterRef, Q
 from django.utils import timezone
 
-from apartments.models import Appartement, PeriodeVacances
+from apartments.models import Appartement
 from reservations.models import Reservation
 
 
@@ -25,7 +25,7 @@ def _verrouiller_appartements(*appartement_ids):
 
 @transaction.atomic
 def creer_reservation(client, appartement, date_debut, date_fin):
-    """Point d'entrée unique appliquant disponibilité et priorité FM6."""
+    """Point d'entrée unique appliquant les règles de disponibilité."""
     if not client.is_authenticated or client.est_administrateur():
         raise PermissionDenied("Seul un client peut réserver.")
 
@@ -52,10 +52,6 @@ def creer_reservation(client, appartement, date_debut, date_fin):
 
     if not appartement.is_disponible(date_debut, date_fin):
         raise ValidationError("Cet appartement n'est pas disponible aux dates choisies.")
-
-    vacances = appartement.periodes_vacances.all()
-    if any(periode.chevauche(date_debut, date_fin) for periode in vacances) and not client.est_client_fm6():
-        raise ValidationError("Cet appartement n'est disponible qu'aux clients FM6 pendant cette période.")
 
     reservation.save()
     return reservation
@@ -90,10 +86,6 @@ def modifier_reservation(reservation, *, date_debut, date_fin, appartement=None)
     ):
         raise ValidationError("Cet appartement n'est pas disponible aux dates choisies.")
 
-    vacances = appartement.periodes_vacances.all()
-    if any(periode.chevauche(date_debut, date_fin) for periode in vacances) and not client.est_client_fm6():
-        raise ValidationError("Cet appartement n'est disponible qu'aux clients FM6 pendant cette période.")
-
     reservation.save(update_fields=('appartement', 'date_debut', 'date_fin', 'montant_total'))
     return reservation
 
@@ -118,15 +110,5 @@ def chercher_appartements_disponibles(date_debut, date_fin, client=None):
         ~Exists(reservations_en_conflit),
         disponible=True,
     )
-
-    # Cette règle métier existe déjà dans l'application : pendant les
-    # Pendant les vacances, certains appartements sont réservés aux clients FM6.
-    if client and client.is_authenticated and not client.est_client_fm6():
-        periodes_vacances_en_conflit = PeriodeVacances.objects.filter(
-            appartement_id=OuterRef('pk'),
-            date_debut__lt=date_fin,
-            date_fin__gt=date_debut,
-        )
-        appartements = appartements.filter(~Exists(periodes_vacances_en_conflit))
 
     return appartements
