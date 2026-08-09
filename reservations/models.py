@@ -115,7 +115,11 @@ class Reservation(models.Model):
         return self
 
     def envoyer_email_politiques(self, lien_politiques):
-        contexte = {'reservation': self, 'lien_politiques': lien_politiques}
+        contexte = {
+            'reservation': self,
+            'lien_politiques': lien_politiques,
+            'marque': settings.RAHAL_STAY_NAME,
+        }
         send_mail(
             subject=f'Politiques de votre réservation {self.numero_reservation}',
             message=render_to_string('reservations/emails/politiques.txt', contexte),
