@@ -118,7 +118,7 @@ class Reservation(models.Model):
         contexte = {
             'reservation': self,
             'lien_politiques': lien_politiques,
-            'marque': settings.RAHAL_STAY_NAME,
+            'marque': settings.FOSE_SAFAR_NAME,
         }
         send_mail(
             subject=f'Politiques de votre réservation {self.numero_reservation}',

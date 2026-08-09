@@ -789,7 +789,7 @@ python manage.py runserver</pre>
       <tr><td><code>EMAIL_HOST/PORT/USER/PASSWORD</code></td><td>SMTP</td><td>Mot de passe d’application ou fournisseur transactionnel</td></tr>
       <tr><td><code>EMAIL_USE_TLS</code></td><td>Chiffrement SMTP</td><td><code>True</code> avec le port adapté</td></tr>
       <tr><td><code>DEFAULT_FROM_EMAIL</code></td><td>Expéditeur par défaut</td><td>Domaine autorisé par le fournisseur</td></tr>
-      <tr><td><code>RAHAL_STAY_*</code></td><td>Marque, adresse, contact, horaires, garantie</td><td>Vérifier avant toute confirmation client</td></tr>
+      <tr><td><code>FOSE_SAFAR_*</code></td><td>Marque, adresse, contact, horaires, garantie</td><td>Vérifier avant toute confirmation client</td></tr>
     </tbody>
   </table>
 
@@ -853,10 +853,10 @@ cp db.sqlite3 sauvegardes/db-AAAA-MM-JJ.sqlite3
 sqlite3 db.sqlite3 ".backup sauvegardes/db-AAAA-MM-JJ.sqlite3"</pre>
 
   <h3>Sauvegarde PostgreSQL</h3>
-  <pre>pg_dump --format=custom --file=rahal-stay-AAAA-MM-JJ.dump NOM_BASE
+  <pre>pg_dump --format=custom --file=fose-safar-AAAA-MM-JJ.dump NOM_BASE
 
 # Restauration dans une base vide :
-pg_restore --clean --if-exists --dbname=NOM_BASE_CIBLE rahal-stay-AAAA-MM-JJ.dump</pre>
+pg_restore --clean --if-exists --dbname=NOM_BASE_CIBLE fose-safar-AAAA-MM-JJ.dump</pre>
   <p class="small muted">
     Toujours tester une restauration. Une sauvegarde non restaurée au moins une fois n’est pas une
     garantie de reprise.
@@ -877,7 +877,7 @@ pg_restore --clean --if-exists --dbname=NOM_BASE_CIBLE rahal-stay-AAAA-MM-JJ.dum
       <tr><td>☐</td><td><code>collectstatic</code> exécuté ; statiques et médias servis correctement.</td></tr>
       <tr><td>☐</td><td>SMTP testé avec une adresse de test ; expéditeur authentifié.</td></tr>
       <tr><td>☐</td><td>Origines et callbacks Google OAuth en HTTPS configurés.</td></tr>
-      <tr><td>☐</td><td>Variables <code>RAHAL_STAY_*</code> relues dans le PDF de confirmation.</td></tr>
+      <tr><td>☐</td><td>Variables <code>FOSE_SAFAR_*</code> relues dans le PDF de confirmation.</td></tr>
       <tr><td>☐</td><td>Tests exécutés, puis test manuel inscription → réservation → paiement → e-mail.</td></tr>
       <tr><td>☐</td><td>Journalisation, supervision, alertes et procédure de retour arrière prévues.</td></tr>
     </tbody>

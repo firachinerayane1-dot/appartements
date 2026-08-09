@@ -56,7 +56,7 @@ def _format_montant(montant):
 def _contexte_confirmation(paiement):
     reservation = paiement.reservation
     client = reservation.client
-    garantie = _format_montant(settings.RAHAL_STAY_GUARANTEE_AMOUNT)
+    garantie = _format_montant(settings.FOSE_SAFAR_GUARANTEE_AMOUNT)
     politiques = [
         {'titre': titre, 'texte': texte.format(garantie=garantie)}
         for titre, texte in POLITIQUES
@@ -71,13 +71,13 @@ def _contexte_confirmation(paiement):
         'solde': _format_montant(Decimal('0')),
         'garantie': garantie,
         'politiques': politiques,
-        'marque': settings.RAHAL_STAY_NAME,
-        'adresse': settings.RAHAL_STAY_ADDRESS,
-        'coordonnees': settings.RAHAL_STAY_COORDINATES,
-        'email_contact': settings.RAHAL_STAY_CONTACT_EMAIL,
-        'telephone_contact': settings.RAHAL_STAY_CONTACT_PHONE,
-        'check_in': settings.RAHAL_STAY_CHECK_IN,
-        'check_out': settings.RAHAL_STAY_CHECK_OUT,
+        'marque': settings.FOSE_SAFAR_NAME,
+        'adresse': settings.FOSE_SAFAR_ADDRESS,
+        'coordonnees': settings.FOSE_SAFAR_COORDINATES,
+        'email_contact': settings.FOSE_SAFAR_CONTACT_EMAIL,
+        'telephone_contact': settings.FOSE_SAFAR_CONTACT_PHONE,
+        'check_in': settings.FOSE_SAFAR_CHECK_IN,
+        'check_out': settings.FOSE_SAFAR_CHECK_OUT,
     }
 
 
@@ -142,7 +142,7 @@ def _entete(dessin, sous_titre):
 
     dessin.ellipse((MARGE, 62, MARGE + 78, 140), fill=VERT)
     dessin.text((MARGE + 23, 70), 'F', font=police_logo, fill=BLANC)
-    dessin.text((MARGE + 100, 70), settings.RAHAL_STAY_NAME.upper(), font=police_marque, fill=MARINE)
+    dessin.text((MARGE + 100, 70), settings.FOSE_SAFAR_NAME.upper(), font=police_marque, fill=MARINE)
     dessin.text((MARGE + 102, 112), sous_titre, font=police_sous_titre, fill=GRIS)
     dessin.line((MARGE, 165, LARGEUR_PAGE - MARGE, 165), fill=OR, width=4)
 
@@ -151,7 +151,7 @@ def _pied_de_page(dessin, page):
     police = _charger_police(17)
     y = HAUTEUR_PAGE - 70
     dessin.line((MARGE, y - 18, LARGEUR_PAGE - MARGE, y - 18), fill=GRIS_CLAIR, width=2)
-    dessin.text((MARGE, y), f'{settings.RAHAL_STAY_NAME} · Sidi Rahal', font=police, fill=GRIS)
+    dessin.text((MARGE, y), f'{settings.FOSE_SAFAR_NAME} · Sidi Rahal', font=police, fill=GRIS)
     numero = f'Page {page}/2'
     largeur = dessin.textlength(numero, font=police)
     dessin.text((LARGEUR_PAGE - MARGE - largeur, y), numero, font=police, fill=GRIS)
@@ -402,7 +402,7 @@ def generer_pdf_confirmation(paiement):
         append_images=pages[1:],
         resolution=150,
         title=f"Confirmation {contexte['reservation'].numero_reservation}",
-        author=settings.RAHAL_STAY_NAME,
+        author=settings.FOSE_SAFAR_NAME,
     )
     return flux.getvalue()
 
@@ -411,14 +411,14 @@ def envoyer_email_confirmation(paiement):
     contexte = _contexte_confirmation(paiement)
     numero = contexte['reservation'].numero_reservation
     expediteur = (
-        f"{settings.RAHAL_STAY_NAME} <{settings.EMAIL_HOST_USER}>"
+        f"{settings.FOSE_SAFAR_NAME} <{settings.EMAIL_HOST_USER}>"
         if settings.EMAIL_HOST_USER
         else settings.DEFAULT_FROM_EMAIL
     )
     email = EmailMultiAlternatives(
         subject=(
             f'Booking Reference Number {numero} - CONFIRMED, '
-            f'{settings.RAHAL_STAY_NAME.upper()}'
+            f'{settings.FOSE_SAFAR_NAME.upper()}'
         ),
         body=render_to_string('reservations/emails/confirmation.txt', contexte),
         from_email=expediteur,
