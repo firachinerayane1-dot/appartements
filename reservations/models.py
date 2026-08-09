@@ -22,6 +22,9 @@ def generer_numero_reservation():
 
 class Reservation(models.Model):
     DELAI_PAIEMENT = timedelta(hours=24)
+    MESSAGE_CHEVAUCHEMENT_ADHERENT = (
+        "Cet adhérent possède déjà une réservation pendant cette période."
+    )
 
     EN_ATTENTE = 'EN_ATTENTE'
     CONFIRMEE = 'CONFIRMEE'
@@ -68,10 +71,37 @@ class Reservation(models.Model):
         return f"{self.numero_reservation} — {self.client} — {self.appartement} ({self.date_debut})"
 
     def clean(self):
+        super().clean()
         if self.date_debut and self.date_fin and self.date_fin <= self.date_debut:
             raise ValidationError({'date_fin': "La date de fin doit être postérieure à la date de début."})
         if self.client_id and self.client.est_administrateur():
             raise ValidationError({'client': "Un administrateur ne peut pas effectuer de réservation."})
+        if self._bloque_une_periode() and self.reservations_adherent_en_conflit().exists():
+            raise ValidationError(self.MESSAGE_CHEVAUCHEMENT_ADHERENT)
+
+    def _bloque_une_periode(self):
+        if self.statut == self.CONFIRMEE:
+            return True
+        if self.statut != self.EN_ATTENTE:
+            return False
+        return not self.date_reservation or self.date_reservation > timezone.now() - self.DELAI_PAIEMENT
+
+    def reservations_adherent_en_conflit(self):
+        """Réservations actives du même adhérent sur une période semi-ouverte."""
+        if not self.client_id or not self.date_debut or not self.date_fin:
+            return type(self).objects.none()
+
+        limite_paiement = timezone.now() - self.DELAI_PAIEMENT
+        conflits = type(self).objects.filter(
+            Q(statut=self.CONFIRMEE)
+            | Q(statut=self.EN_ATTENTE, date_reservation__gt=limite_paiement),
+            client_id=self.client_id,
+            date_debut__lt=self.date_fin,
+            date_fin__gt=self.date_debut,
+        )
+        if self.pk:
+            conflits = conflits.exclude(pk=self.pk)
+        return conflits
 
     def get_duree(self):
         return (self.date_fin - self.date_debut).days

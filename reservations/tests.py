@@ -1,16 +1,23 @@
 from datetime import date, timedelta
 from decimal import Decimal
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
 
 from django.core import mail
 from django.core.exceptions import ValidationError
-from django.test import TestCase, override_settings
+from django.db import close_old_connections
+from django.test import TestCase, TransactionTestCase, override_settings, skipUnlessDBFeature
 from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import Utilisateur
 from apartments.models import Appartement, PeriodeVacances
 from payments.models import Paiement
-from services.reservation_services import chercher_appartements_disponibles, creer_reservation
+from services.reservation_services import (
+    chercher_appartements_disponibles,
+    creer_reservation,
+    modifier_reservation,
+)
 from .models import Reservation
 
 
@@ -64,8 +71,114 @@ class ReglesReservationTests(TestCase):
 
     def test_chevauchement_avec_reservation_existante_est_bloque(self):
         creer_reservation(self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 12))
-        with self.assertRaisesMessage(ValidationError, "pas disponible"):
+        with self.assertRaisesMessage(ValidationError, Reservation.MESSAGE_CHEVAUCHEMENT_ADHERENT):
             creer_reservation(self.enseignant, self.appartement, date(2027, 7, 11), date(2027, 7, 13))
+
+    def test_chevauchement_du_meme_adherent_sur_deux_appartements_est_bloque(self):
+        autre_appartement = Appartement.objects.create(
+            titre='Autre studio', description='Ailleurs', capacite=2
+        )
+        creer_reservation(
+            self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 15)
+        )
+
+        with self.assertRaisesMessage(
+            ValidationError,
+            Reservation.MESSAGE_CHEVAUCHEMENT_ADHERENT,
+        ):
+            creer_reservation(
+                self.enseignant,
+                autre_appartement,
+                date(2027, 7, 12),
+                date(2027, 7, 18),
+            )
+
+        self.assertEqual(Reservation.objects.count(), 1)
+
+    def test_vue_affiche_le_conflit_adherent_sans_creation_partielle(self):
+        autre_appartement = Appartement.objects.create(
+            titre='Studio disponible', description='Ailleurs', capacite=2
+        )
+        creer_reservation(
+            self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 15)
+        )
+        self.client.force_login(self.enseignant)
+
+        response = self.client.post(
+            reverse('reservations:reserver', args=(autre_appartement.pk,)),
+            {'date_debut': '2027-07-12', 'date_fin': '2027-07-18'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, Reservation.MESSAGE_CHEVAUCHEMENT_ADHERENT)
+        self.assertEqual(Reservation.objects.count(), 1)
+
+    def test_periodes_non_chevauchantes_du_meme_adherent_sont_acceptees(self):
+        premiere = creer_reservation(
+            self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 15)
+        )
+        seconde = creer_reservation(
+            self.enseignant, self.appartement, date(2027, 7, 15), date(2027, 7, 20)
+        )
+
+        self.assertEqual({premiere.pk, seconde.pk}, set(Reservation.objects.values_list('pk', flat=True)))
+
+    def test_reservation_annulee_ne_bloque_pas_la_meme_periode(self):
+        annulee = creer_reservation(
+            self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 15)
+        )
+        annulee.annuler()
+
+        nouvelle = creer_reservation(
+            self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 15)
+        )
+
+        self.assertEqual(nouvelle.statut, Reservation.EN_ATTENTE)
+
+    def test_modification_sans_conflit_est_acceptee(self):
+        reservation = creer_reservation(
+            self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 15)
+        )
+
+        modifiee = modifier_reservation(
+            reservation,
+            date_debut=date(2027, 7, 16),
+            date_fin=date(2027, 7, 20),
+        )
+
+        self.assertEqual(modifiee.date_debut, date(2027, 7, 16))
+        self.assertEqual(modifiee.date_fin, date(2027, 7, 20))
+
+    def test_modification_avec_conflit_est_refusee(self):
+        premiere = creer_reservation(
+            self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 15)
+        )
+        seconde = creer_reservation(
+            self.enseignant, self.appartement, date(2027, 7, 16), date(2027, 7, 20)
+        )
+
+        with self.assertRaisesMessage(
+            ValidationError,
+            Reservation.MESSAGE_CHEVAUCHEMENT_ADHERENT,
+        ):
+            modifier_reservation(
+                seconde,
+                date_debut=date(2027, 7, 14),
+                date_fin=date(2027, 7, 18),
+            )
+
+        seconde.refresh_from_db()
+        self.assertEqual(seconde.date_debut, date(2027, 7, 16))
+        self.assertEqual(premiere.date_fin, date(2027, 7, 15))
+
+    def test_reservation_ne_se_considere_pas_comme_son_propre_conflit(self):
+        reservation = creer_reservation(
+            self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 15)
+        )
+
+        reservation.full_clean()
+
+        self.assertFalse(reservation.reservations_adherent_en_conflit().exists())
 
     def test_paiement_confirme_et_interdit_ensuite_annulation(self):
         reservation = creer_reservation(self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 12))
@@ -194,3 +307,56 @@ class ReglesReservationTests(TestCase):
             reverse('payments:admin_liste'),
         ):
             self.assertEqual(self.client.get(url).status_code, 200, url)
+
+
+@skipUnlessDBFeature('has_select_for_update')
+class ConcurrenceReservationTests(TransactionTestCase):
+    reset_sequences = True
+
+    def setUp(self):
+        self.adherent = Utilisateur.objects.create_user(
+            email='concurrent@example.com',
+            password='mot-de-passe',
+            nom='Concurrent',
+            prenom='Client',
+            role=Utilisateur.CLIENT_FM6,
+            matricule='FM6-CONCURRENT',
+        )
+        self.appartements = [
+            Appartement.objects.create(titre=f'Studio {numero}', description='Test', capacite=2)
+            for numero in (1, 2)
+        ]
+
+    def test_deux_requetes_concurrentes_ne_creent_pas_de_chevauchement(self):
+        barriere = Barrier(2)
+
+        def reserver(appartement_id):
+            close_old_connections()
+            try:
+                adherent = Utilisateur.objects.get(pk=self.adherent.pk)
+                appartement = Appartement.objects.get(pk=appartement_id)
+                barriere.wait(timeout=5)
+                reservation = creer_reservation(
+                    adherent,
+                    appartement,
+                    date(2027, 10, 10),
+                    date(2027, 10, 15),
+                )
+                return ('cree', reservation.pk)
+            except ValidationError as exc:
+                return ('refuse', exc.messages[0])
+            finally:
+                close_old_connections()
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            resultats = list(pool.map(
+                reserver,
+                [appartement.pk for appartement in self.appartements],
+            ))
+
+        self.assertEqual(sorted(resultat[0] for resultat in resultats), ['cree', 'refuse'])
+        self.assertEqual(Reservation.objects.count(), 1)
+        self.assertIn(
+            Reservation.MESSAGE_CHEVAUCHEMENT_ADHERENT,
+            [resultat[1] for resultat in resultats if resultat[0] == 'refuse'],
+        )

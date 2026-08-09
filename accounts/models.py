@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.auth.base_user import BaseUserManager
+from django.core.exceptions import ValidationError
 
 
 class UtilisateurManager(BaseUserManager):
@@ -55,7 +56,13 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
     # Le code historique ENSEIGNANT est conservé en base pour éviter une rupture
     # des comptes existants, mais il représente désormais le type Client FM6.
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=CLIENT_REGULIER)
-    matricule = models.CharField(max_length=50, blank=True, null=True)
+    matricule = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        unique=True,
+        error_messages={'unique': "Ce numéro d'adhérent est déjà utilisé."},
+    )
     consentement_donnees_le = models.DateTimeField(blank=True, null=True, editable=False)
 
     # --- Django bookkeeping fields ---
@@ -70,6 +77,14 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.prenom} {self.nom} ({self.email})"
+
+    def clean(self):
+        super().clean()
+        self.matricule = (self.matricule or '').strip() or None
+        if self.est_client_fm6() and not self.matricule:
+            raise ValidationError({
+                'matricule': "Le matricule est obligatoire pour un client FM6.",
+            })
 
     # --- Business logic methods from your diagram ---
     def est_client_fm6(self):

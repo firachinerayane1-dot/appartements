@@ -54,10 +54,13 @@ class InscriptionForm(UserCreationForm):
     def clean(self):
         cleaned_data = super().clean()
         role = cleaned_data.get('role')
-        matricule = cleaned_data.get('matricule')
+        matricule = (cleaned_data.get('matricule') or '').strip() or None
 
         if role == Utilisateur.CLIENT_FM6 and not matricule:
             self.add_error('matricule', "Le matricule est obligatoire pour un client FM6.")
+        if role != Utilisateur.CLIENT_FM6:
+            matricule = None
+        cleaned_data['matricule'] = matricule
 
         return cleaned_data
 
