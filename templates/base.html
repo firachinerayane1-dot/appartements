@@ -17,7 +17,11 @@
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav"><span></span><span></span><span></span><span class="sr-only">Ouvrir le menu</span></button>
       <nav class="main-nav" id="main-nav" aria-label="Navigation principale">
         <a class="{% if request.resolver_match.namespace == 'core' %}active{% endif %}" href="{% url 'core:accueil' %}">Accueil</a>
-        <a class="{% if request.resolver_match.namespace == 'apartments' %}active{% endif %}" href="{% url 'apartments:liste' %}">Appartements</a>
+        {% if user.is_authenticated and user.est_administrateur %}
+          <a class="{% if request.resolver_match.namespace == 'apartments' %}active{% endif %}" href="{% url 'apartments:admin_liste' %}">Gestion des appartements</a>
+        {% else %}
+          <a class="{% if request.resolver_match.namespace == 'apartments' %}active{% endif %}" href="{% url 'apartments:liste' %}">Appartements</a>
+        {% endif %}
         {% if user.is_authenticated %}
           {% if user.est_administrateur %}
             <a class="{% if request.resolver_match.namespace == 'dashboard' %}active{% endif %}" href="{% url 'dashboard:index' %}">Tableau de bord</a>
@@ -45,7 +49,7 @@
   <footer class="site-footer">
     <div class="shell footer-grid">
       <div><a class="brand brand-light" href="{% url 'core:accueil' %}"><span class="brand-mark">F</span><span>FOSE <span>Safar</span></span></a><p>Des appartements lumineux dans une résidence privée avec piscine et jardins, à Sidi Rahal.</p></div>
-      <div><h2>Explorer</h2><a href="{% url 'apartments:liste' %}">Nos appartements</a><a href="{% url 'core:accueil' %}#localisation">Localisation</a><a href="{% url 'core:accueil' %}#services">Nos services</a></div>
+      <div><h2>Explorer</h2>{% if user.is_authenticated and user.est_administrateur %}<a href="{% url 'apartments:admin_liste' %}">Gérer les appartements</a>{% else %}<a href="{% url 'apartments:liste' %}">Nos appartements</a>{% endif %}<a href="{% url 'core:accueil' %}#localisation">Localisation</a><a href="{% url 'core:accueil' %}#services">Nos services</a></div>
       <div><h2>Votre espace</h2>{% if user.is_authenticated %}<a href="{% url 'accounts:profil' %}">Mon profil</a>{% if user.est_administrateur %}<a href="{% url 'dashboard:index' %}">Administration</a>{% else %}<a href="{% url 'reservations:mes_reservations' %}">Mes réservations</a>{% endif %}{% else %}<a href="{% url 'accounts:connexion' %}">Se connecter</a><a href="{% url 'accounts:inscription' %}">Créer un compte</a>{% endif %}</div>
       <div><h2>Localisation</h2><p>Résidence Amwaj<br>Sidi Rahal, Maroc</p><a href="https://maps.app.goo.gl/q9qEuBE8mfuVFwrj8" target="_blank" rel="noopener">Voir l’itinéraire ↗</a></div>
     </div>

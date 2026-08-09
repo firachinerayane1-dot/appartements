@@ -13,6 +13,9 @@ from .models import Appartement, PeriodeVacances, Photo
 
 
 def liste(request):
+    if request.user.is_authenticated and request.user.est_administrateur():
+        return redirect('apartments:admin_liste')
+
     form = RechercheDisponibiliteForm(request.GET or None)
     appartements = Appartement.objects.none()
     dates_recherche = None
@@ -74,7 +77,15 @@ def detail(request, pk):
 
 @administrateur_required
 def admin_liste(request):
-    return render(request, 'apartments/admin_liste.html', {'appartements': Appartement.objects.all()})
+    photos = Photo.objects.order_by('-principale', 'pk')
+    appartements = Appartement.objects.prefetch_related(
+        Prefetch('photos', queryset=photos, to_attr='photos_admin')
+    )
+    return render(
+        request,
+        'apartments/admin_liste.html',
+        {'appartements': appartements},
+    )
 
 
 @administrateur_required
