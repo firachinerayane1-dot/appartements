@@ -193,6 +193,7 @@ button, input, select, textarea { font: inherit; }
 .booking-card { position: sticky; top: 100px; border-top: 3px solid var(--terracotta); }
 .price-big { font-size: 1.8rem; font-weight: 850; color: var(--forest); }
 .price-big small { font-size: .75rem; color: var(--muted); }
+.fm6-tariff-note { width: max-content; padding: .35rem .6rem; border-radius: 99px; background: #E4F0E9; color: #236044 !important; font-size: .7rem !important; font-weight: 800; }
 .info-pills { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1.2rem 0; }
 .info-pills span { padding: .5rem .7rem; border-radius: 2px; background: var(--sand); color: #585751; font-size: .78rem; }
 .prose { color: #585751; font-size: .97rem; line-height: 1.85; }

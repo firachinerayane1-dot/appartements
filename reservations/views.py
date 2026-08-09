@@ -55,6 +55,7 @@ def reserver(request, appartement_id):
         {
             'form': form,
             'appartement': appartement,
+            'tarif_nuit': Appartement.tarif_pour_client(request.user),
             'date_debut': form['date_debut'].value(),
             'date_fin': form['date_fin'].value(),
         },

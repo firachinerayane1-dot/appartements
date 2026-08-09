@@ -11,12 +11,12 @@ class UtilisateurAdmin(UserAdmin):
 
     # Filters shown in the sidebar
     list_filter = ('role', 'is_staff', 'is_active')
-    readonly_fields = ('last_login', 'date_joined')
+    readonly_fields = ('last_login', 'date_joined', 'consentement_donnees_le')
 
     # Fields shown when viewing/editing an existing user
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Informations personnelles', {'fields': ('nom', 'prenom', 'telephone', 'role', 'matricule')}),
+        ('Informations personnelles', {'fields': ('nom', 'prenom', 'telephone', 'role', 'matricule', 'consentement_donnees_le')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Dates importantes', {'fields': ('last_login', 'date_joined')}),
     )

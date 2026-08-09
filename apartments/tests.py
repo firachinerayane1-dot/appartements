@@ -163,12 +163,32 @@ class RechercheDisponibiliteTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Du 10/08/2027 au 15/08/2027')
+        self.assertContains(response, '700,00 MAD')
         self.assertContains(response, 'Réserver maintenant')
         self.assertContains(
             response,
             f"{reverse('reservations:reserver', args=(self.libre.pk,))}"
             '?date_debut=2027-08-10&amp;date_fin=2027-08-15',
         )
+
+    def test_detail_affiche_le_tarif_de_500_dh_au_client_fm6(self):
+        client_fm6 = Utilisateur.objects.create_user(
+            email='client-fm6@example.com',
+            password='mot-de-passe',
+            nom='Client',
+            prenom='FM6',
+            role=Utilisateur.CLIENT_FM6,
+            matricule='FM6-123',
+        )
+        self.client.force_login(client_fm6)
+
+        response = self.client.get(
+            reverse('apartments:detail', args=(self.libre.pk,)),
+            {'date_debut': '2027-08-10', 'date_fin': '2027-08-15'},
+        )
+
+        self.assertContains(response, '500,00 MAD')
+        self.assertContains(response, 'Tarif réservé aux clients FM6')
 
     def test_detail_ne_montre_pas_un_appartement_indisponible(self):
         response = self.client.get(

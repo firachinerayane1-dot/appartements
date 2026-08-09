@@ -49,12 +49,12 @@ def profil(request):
 def modifier_profil(request):
     form = ProfilForm(request.POST or None, instance=request.user)
     if request.method == 'POST' and form.is_valid():
-        etait_enseignant = request.user.est_enseignant()
+        etait_client_fm6 = request.user.est_client_fm6()
         utilisateur = form.save()
-        if not etait_enseignant and utilisateur.est_enseignant():
+        if not etait_client_fm6 and utilisateur.est_client_fm6():
             messages.success(
                 request,
-                "Votre profil a été mis à jour et votre type de client est maintenant Enseignant.",
+                "Votre profil a été mis à jour et votre type de client est maintenant Client FM6.",
             )
         else:
             messages.success(request, "Votre profil a été mis à jour.")

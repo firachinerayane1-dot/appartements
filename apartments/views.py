@@ -29,7 +29,12 @@ def liste(request):
     return render(
         request,
         'apartments/liste.html',
-        {'form': form, 'page_obj': page, 'dates_recherche': dates_recherche},
+        {
+            'form': form,
+            'page_obj': page,
+            'dates_recherche': dates_recherche,
+            'tarif_nuit': Appartement.tarif_pour_client(request.user),
+        },
     )
 
 
@@ -58,7 +63,11 @@ def detail(request, pk):
     return render(
         request,
         'apartments/detail.html',
-        {'appartement': appartement, 'dates_recherche': dates_recherche},
+        {
+            'appartement': appartement,
+            'dates_recherche': dates_recherche,
+            'tarif_nuit': Appartement.tarif_pour_client(request.user),
+        },
     )
 
 

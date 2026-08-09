@@ -22,7 +22,7 @@ class ReglesReservationTests(TestCase):
         )
         self.enseignant = Utilisateur.objects.create_user(
             email='prof@example.com', password='mot-de-passe', nom='Prof', prenom='Emma',
-            role=Utilisateur.ENSEIGNANT, matricule='ENS-1'
+            role=Utilisateur.CLIENT_FM6, matricule='FM6-1'
         )
         self.appartement = Appartement.objects.create(
             titre='Studio', description='Centre-ville', prix_par_nuit=Decimal('100.00'), capacite=2
@@ -32,13 +32,22 @@ class ReglesReservationTests(TestCase):
         )
 
     def test_vacances_bloquent_client_regulier(self):
-        with self.assertRaisesMessage(ValidationError, "qu'aux enseignants"):
+        with self.assertRaisesMessage(ValidationError, "qu'aux clients FM6"):
             creer_reservation(self.client_regulier, self.appartement, date(2027, 7, 10), date(2027, 7, 12))
 
-    def test_enseignant_peut_reserver_pendant_vacances(self):
+    def test_client_fm6_peut_reserver_pendant_vacances_a_500_dh_la_nuit(self):
         reservation = creer_reservation(self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 12))
         self.assertEqual(reservation.statut, Reservation.EN_ATTENTE)
-        self.assertEqual(reservation.montant_total, Decimal('170.00'))
+        self.assertEqual(reservation.montant_total, Decimal('1000.00'))
+
+    def test_client_regulier_paie_700_dh_la_nuit(self):
+        montant = self.appartement.calculer_prix(
+            date(2027, 6, 10),
+            date(2027, 6, 12),
+            self.client_regulier,
+        )
+
+        self.assertEqual(montant, Decimal('1400.00'))
 
     def test_numero_reservation_est_genere_automatiquement_et_unique(self):
         premiere = creer_reservation(

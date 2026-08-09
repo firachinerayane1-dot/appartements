@@ -8,9 +8,17 @@ from django.utils import timezone
 
 
 class Appartement(models.Model):
+    TARIF_CLIENT_REGULIER = Decimal('700.00')
+    TARIF_CLIENT_FM6 = Decimal('500.00')
+
     titre = models.CharField(max_length=150)
     description = models.TextField()
-    prix_par_nuit = models.DecimalField(max_digits=10, decimal_places=2)
+    prix_par_nuit = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=TARIF_CLIENT_REGULIER,
+        editable=False,
+    )
     capacite = models.PositiveIntegerField(default=1)
     disponible = models.BooleanField(default=True)
 
@@ -21,10 +29,18 @@ class Appartement(models.Model):
         return self.titre
 
     def clean(self):
-        if self.prix_par_nuit is not None and self.prix_par_nuit <= 0:
-            raise ValidationError({'prix_par_nuit': "Le prix doit être strictement positif."})
         if self.capacite is not None and self.capacite < 1:
             raise ValidationError({'capacite': "La capacité doit être d'au moins une personne."})
+
+    @classmethod
+    def tarif_pour_client(cls, client=None):
+        if (
+            client
+            and getattr(client, 'is_authenticated', False)
+            and client.est_client_fm6()
+        ):
+            return cls.TARIF_CLIENT_FM6
+        return cls.TARIF_CLIENT_REGULIER
 
     def is_disponible(self, date_debut, date_fin, exclude_reservation=None):
         if not self.disponible or not date_debut or not date_fin or date_fin <= date_debut:
@@ -46,9 +62,7 @@ class Appartement(models.Model):
         nuits = (date_fin - date_debut).days
         if nuits <= 0:
             raise ValidationError("La date de fin doit être postérieure à la date de début.")
-        total = self.prix_par_nuit * nuits
-        reduction = Decimal(str(client.taux_reduction())) if client else Decimal('0')
-        return (total * (Decimal('1') - reduction)).quantize(Decimal('0.01'))
+        return (self.tarif_pour_client(client) * nuits).quantize(Decimal('0.01'))
 
 
 class PeriodeVacances(models.Model):
