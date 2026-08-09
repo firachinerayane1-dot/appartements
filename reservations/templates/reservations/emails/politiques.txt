@@ -14,4 +14,4 @@ Avant de payer, veuillez prendre connaissance des politiques suivantes :
 Lire et accepter les politiques :
 {{ lien_politiques }}
 
-CasaStay
+{{ marque }}

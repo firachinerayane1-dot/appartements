@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Réservation n°{{ reservation.numero_reservation }} · CasaStay{% endblock %}
+{% block title %}Réservation n°{{ reservation.numero_reservation }} · FOSE Safar{% endblock %}
 {% block content %}
 <main class="page-main">
   <div class="shell">
@@ -64,7 +64,7 @@
         </div>
       </section>
       <aside class="summary-card">
-        <p class="kicker light">CasaStay</p>
+        <p class="kicker light">FOSE Safar</p>
         <h2>Réservation maintenue 24 h</h2>
         <p>Acceptez les politiques reçues par e-mail puis réglez par carte avant l’expiration du délai.</p>
         <a class="button button-light" href="{% url 'notifications:liste' %}">Voir mes notifications</a>

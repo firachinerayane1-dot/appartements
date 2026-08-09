@@ -141,7 +141,7 @@ def _entete(dessin, sous_titre):
     police_sous_titre = _charger_police(19)
 
     dessin.ellipse((MARGE, 62, MARGE + 78, 140), fill=VERT)
-    dessin.text((MARGE + 23, 70), 'R', font=police_logo, fill=BLANC)
+    dessin.text((MARGE + 23, 70), 'F', font=police_logo, fill=BLANC)
     dessin.text((MARGE + 100, 70), settings.RAHAL_STAY_NAME.upper(), font=police_marque, fill=MARINE)
     dessin.text((MARGE + 102, 112), sous_titre, font=police_sous_titre, fill=GRIS)
     dessin.line((MARGE, 165, LARGEUR_PAGE - MARGE, 165), fill=OR, width=4)
@@ -359,7 +359,7 @@ def _page_politiques(contexte):
     dessin.text((MARGE + 28, y + 70), f"CHECK-OUT : {contexte['check_out']}", font=_charger_police(22, gras=True), fill=MARINE)
     y += 165
 
-    dessin.text((MARGE, y), 'Coordonnées Rahal Stay', font=police_section, fill=VERT)
+    dessin.text((MARGE, y), f"Coordonnées {contexte['marque']}", font=police_section, fill=VERT)
     y += 46
     coordonnees = [
         contexte['adresse'],
@@ -378,7 +378,7 @@ def _page_politiques(contexte):
         (MARGE, y),
         (
             "Ce document et l'e-mail associé sont générés automatiquement. "
-            "Pour toute demande supplémentaire, contactez Rahal Stay en indiquant "
+            f"Pour toute demande supplémentaire, contactez {contexte['marque']} en indiquant "
             f"le numéro de réservation {contexte['reservation'].numero_reservation}."
         ),
         _charger_police(18),
@@ -416,7 +416,10 @@ def envoyer_email_confirmation(paiement):
         else settings.DEFAULT_FROM_EMAIL
     )
     email = EmailMultiAlternatives(
-        subject=f'Booking Reference Number {numero} - CONFIRMED, RAHAL STAY',
+        subject=(
+            f'Booking Reference Number {numero} - CONFIRMED, '
+            f'{settings.RAHAL_STAY_NAME.upper()}'
+        ),
         body=render_to_string('reservations/emails/confirmation.txt', contexte),
         from_email=expediteur,
         to=[contexte['client'].email],
