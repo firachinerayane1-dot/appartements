@@ -26,6 +26,8 @@ def liste(request):
         Prefetch('photos', queryset=photos_cartes, to_attr='photos_carte')
     )
     page = Paginator(appartements, 12).get_page(request.GET.get('page'))
+    for appartement in page.object_list:
+        appartement.tarif_affiche = appartement.tarif_pour_client(request.user)
     return render(
         request,
         'apartments/liste.html',
@@ -33,7 +35,6 @@ def liste(request):
             'form': form,
             'page_obj': page,
             'dates_recherche': dates_recherche,
-            'tarif_nuit': Appartement.tarif_pour_client(request.user),
         },
     )
 
@@ -66,7 +67,7 @@ def detail(request, pk):
         {
             'appartement': appartement,
             'dates_recherche': dates_recherche,
-            'tarif_nuit': Appartement.tarif_pour_client(request.user),
+            'tarif_nuit': appartement.tarif_pour_client(request.user),
         },
     )
 

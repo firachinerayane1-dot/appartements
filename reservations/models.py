@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import date, timedelta
 import secrets
 import string
 
@@ -22,6 +22,15 @@ def generer_numero_reservation():
 
 class Reservation(models.Model):
     DELAI_PAIEMENT = timedelta(hours=24)
+    MAX_NUITS_FM6_PAR_RESERVATION = 5
+    MAX_NUITS_FM6_PAR_AN = 10
+    MESSAGE_CHEVAUCHEMENT_ADHERENT = (
+        "Ce client possède déjà une réservation pendant cette période."
+    )
+    MESSAGE_DUREE_FM6 = "Une réservation FM6 est limitée à 5 nuits."
+    MESSAGE_QUOTA_ANNUEL_FM6 = (
+        "Ce client FM6 dépasserait son quota de 10 nuits pour l'année {annee}."
+    )
 
     EN_ATTENTE = 'EN_ATTENTE'
     CONFIRMEE = 'CONFIRMEE'
@@ -68,10 +77,80 @@ class Reservation(models.Model):
         return f"{self.numero_reservation} — {self.client} — {self.appartement} ({self.date_debut})"
 
     def clean(self):
+        super().clean()
         if self.date_debut and self.date_fin and self.date_fin <= self.date_debut:
             raise ValidationError({'date_fin': "La date de fin doit être postérieure à la date de début."})
         if self.client_id and self.client.est_administrateur():
             raise ValidationError({'client': "Un administrateur ne peut pas effectuer de réservation."})
+        if self._bloque_une_periode() and self.reservations_adherent_en_conflit().exists():
+            raise ValidationError(self.MESSAGE_CHEVAUCHEMENT_ADHERENT)
+        if self._compte_dans_quota_fm6():
+            if self.get_duree() > self.MAX_NUITS_FM6_PAR_RESERVATION:
+                raise ValidationError(self.MESSAGE_DUREE_FM6)
+            self._valider_quota_annuel_fm6()
+
+    def _bloque_une_periode(self):
+        if not self.client_id:
+            return False
+        if self.statut == self.CONFIRMEE:
+            return True
+        if self.statut != self.EN_ATTENTE:
+            return False
+        return not self.date_reservation or self.date_reservation > timezone.now() - self.DELAI_PAIEMENT
+
+    def reservations_adherent_en_conflit(self):
+        """Réservations actives du même adhérent sur une période semi-ouverte."""
+        if not self.client_id or not self.date_debut or not self.date_fin:
+            return type(self).objects.none()
+
+        limite_paiement = timezone.now() - self.DELAI_PAIEMENT
+        conflits = type(self).objects.filter(
+            Q(statut=self.CONFIRMEE)
+            | Q(statut=self.EN_ATTENTE, date_reservation__gt=limite_paiement),
+            client_id=self.client_id,
+            date_debut__lt=self.date_fin,
+            date_fin__gt=self.date_debut,
+        )
+        if self.pk:
+            conflits = conflits.exclude(pk=self.pk)
+        return conflits
+
+    def _compte_dans_quota_fm6(self):
+        if not self.client_id or not self.client.est_client_fm6():
+            return False
+        if self.statut in (self.CONFIRMEE, self.TERMINEE):
+            return True
+        if self.statut != self.EN_ATTENTE:
+            return False
+        return not self.date_reservation or self.date_reservation > timezone.now() - self.DELAI_PAIEMENT
+
+    def _valider_quota_annuel_fm6(self):
+        """Impute chaque nuit FM6 à son année civile, départ exclu."""
+        derniere_nuit = self.date_fin - timedelta(days=1)
+        limite_paiement = timezone.now() - self.DELAI_PAIEMENT
+
+        for annee in range(self.date_debut.year, derniere_nuit.year + 1):
+            debut_annee = date(annee, 1, 1)
+            fin_annee = date(annee + 1, 1, 1)
+            nuits_nouvelles = (
+                min(self.date_fin, fin_annee) - max(self.date_debut, debut_annee)
+            ).days
+            reservations = type(self).objects.filter(
+                Q(statut__in=(self.CONFIRMEE, self.TERMINEE))
+                | Q(statut=self.EN_ATTENTE, date_reservation__gt=limite_paiement),
+                client_id=self.client_id,
+                date_debut__lt=fin_annee,
+                date_fin__gt=debut_annee,
+            )
+            if self.pk:
+                reservations = reservations.exclude(pk=self.pk)
+
+            nuits_existantes = sum(
+                (min(reservation.date_fin, fin_annee) - max(reservation.date_debut, debut_annee)).days
+                for reservation in reservations.only('date_debut', 'date_fin')
+            )
+            if nuits_existantes + nuits_nouvelles > self.MAX_NUITS_FM6_PAR_AN:
+                raise ValidationError(self.MESSAGE_QUOTA_ANNUEL_FM6.format(annee=annee))
 
     def get_duree(self):
         return (self.date_fin - self.date_debut).days

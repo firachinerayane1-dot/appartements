@@ -1,4 +1,5 @@
 from allauth.socialaccount.models import SocialAccount, SocialLogin
+from django.db import IntegrityError, transaction
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
@@ -148,3 +149,58 @@ class InscriptionTests(TestCase):
             'consentement_donnees': 'on',
         })
         self.assertContains(response, 'matricule est obligatoire')
+
+    def test_numero_adherent_deja_utilise_est_refuse_sans_creer_de_compte(self):
+        Utilisateur.objects.create_user(
+            email='fm6-existant@example.com',
+            password='mot-de-passe-solide',
+            nom='Existant',
+            prenom='FM6',
+            role=Utilisateur.CLIENT_FM6,
+            matricule='FM6-UNIQUE-1',
+        )
+
+        response = self.client.post(reverse('accounts:inscription'), {
+            'role': Utilisateur.CLIENT_FM6,
+            'email': 'fm6-duplicata@example.com',
+            'nom': 'Duplicata',
+            'prenom': 'FM6',
+            'matricule': ' FM6-UNIQUE-1 ',
+            'password1': 'Mot-de-passe-tres-solide-2027',
+            'password2': 'Mot-de-passe-tres-solide-2027',
+            'consentement_donnees': 'on',
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Ce numéro d&#x27;adhérent est déjà utilisé.")
+        self.assertFalse(Utilisateur.objects.filter(email='fm6-duplicata@example.com').exists())
+
+    def test_numero_adherent_inexistant_est_accepte_et_normalise(self):
+        response = self.client.post(reverse('accounts:inscription'), {
+            'role': Utilisateur.CLIENT_FM6,
+            'email': 'fm6-nouveau@example.com',
+            'nom': 'Nouveau',
+            'prenom': 'FM6',
+            'matricule': ' FM6-NOUVEAU-1 ',
+            'password1': 'Mot-de-passe-tres-solide-2027',
+            'password2': 'Mot-de-passe-tres-solide-2027',
+            'consentement_donnees': 'on',
+        })
+
+        self.assertRedirects(response, reverse('core:accueil'))
+        self.assertEqual(
+            Utilisateur.objects.get(email='fm6-nouveau@example.com').matricule,
+            'FM6-NOUVEAU-1',
+        )
+
+    def test_base_de_donnees_impose_l_unicite_du_numero_adherent(self):
+        Utilisateur.objects.create_user(
+            email='premier@example.com', password='mot-de-passe', nom='Premier', prenom='FM6',
+            role=Utilisateur.CLIENT_FM6, matricule='FM6-DB-1',
+        )
+
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Utilisateur.objects.create_user(
+                email='second@example.com', password='mot-de-passe', nom='Second', prenom='FM6',
+                role=Utilisateur.CLIENT_FM6, matricule='FM6-DB-1',
+            )
