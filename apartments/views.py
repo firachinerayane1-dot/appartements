@@ -3,6 +3,7 @@ from django.core.paginator import Paginator
 from django.db.models import Prefetch
 from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from accounts.mixins import administrateur_required
@@ -28,13 +29,46 @@ def liste(request):
     return render(
         request,
         'apartments/liste.html',
-        {'form': form, 'page_obj': page, 'dates_recherche': dates_recherche},
+        {
+            'form': form,
+            'page_obj': page,
+            'dates_recherche': dates_recherche,
+            'tarif_nuit': Appartement.tarif_pour_client(request.user),
+        },
     )
 
 
 def detail(request, pk):
+    dates_recherche = None
+    est_administrateur = request.user.is_authenticated and request.user.est_administrateur()
+
+    if not est_administrateur:
+        form = RechercheDisponibiliteForm(request.GET or None)
+        if not form.is_valid():
+            messages.info(
+                request,
+                "Sélectionnez d'abord vos dates d'arrivée et de départ pour consulter un appartement.",
+            )
+            return redirect('core:accueil')
+
+        debut, fin = form.cleaned_data['date_debut'], form.cleaned_data['date_fin']
+        if not chercher_appartements_disponibles(debut, fin, request.user).filter(pk=pk).exists():
+            messages.warning(request, "Cet appartement n'est pas disponible pour les dates sélectionnées.")
+            return redirect(
+                f"{reverse('apartments:liste')}?date_debut={debut:%Y-%m-%d}&date_fin={fin:%Y-%m-%d}"
+            )
+        dates_recherche = {'date_debut': debut, 'date_fin': fin}
+
     appartement = get_object_or_404(Appartement.objects.prefetch_related('photos', 'periodes_vacances'), pk=pk)
-    return render(request, 'apartments/detail.html', {'appartement': appartement})
+    return render(
+        request,
+        'apartments/detail.html',
+        {
+            'appartement': appartement,
+            'dates_recherche': dates_recherche,
+            'tarif_nuit': Appartement.tarif_pour_client(request.user),
+        },
+    )
 
 
 @administrateur_required

@@ -27,19 +27,24 @@
   </div></div></section>
 
   <section class="section shell residence-section" id="residence">
-    <div class="residence-intro"><div><p class="kicker">En images</p><h2>Découvrez votre prochain lieu de vacances</h2></div><p>De l’intérieur lumineux aux jardins de la résidence, découvrez les espaces qui rythmeront votre séjour à Sidi Rahal.</p></div>
+    <div class="residence-intro"><div><p class="kicker">L’appartement en images</p><h2>Des espaces lumineux, pensés pour se retrouver</h2></div><p>Du salon ouvert sur les jardins aux chambres paisibles, chaque espace accompagne les moments simples d’un séjour à Sidi Rahal.</p></div>
     <div class="residence-gallery">
-      <figure class="gallery-wide"><img src="{% static 'img/residence/salon.jpeg' %}" alt="Salon lumineux de l’appartement" loading="lazy"><figcaption>Un intérieur lumineux</figcaption></figure>
-      <figure class="gallery-tall"><img src="{% static 'img/residence/piscine-jardin.jpeg' %}" alt="Piscine et jardin de la résidence Amwaj" loading="lazy"><figcaption>Jardins paysagers</figcaption></figure>
-      <figure><img src="{% static 'img/residence/balcon.jpeg' %}" alt="Balcon avec vue sur la résidence" loading="lazy"><figcaption>Vue depuis le balcon</figcaption></figure>
-      <figure><img src="{% static 'img/residence/terrain-sport.jpeg' %}" alt="Terrain multisports de la résidence" loading="lazy"><figcaption>Terrain multisports</figcaption></figure>
-      <figure><img src="{% static 'img/residence/parking.jpeg' %}" alt="Accès au parking de la résidence" loading="lazy"><figcaption>Accès et parking</figcaption></figure>
+      <figure class="gallery-main"><img src="{% static 'img/residence/salon-appartement.jpeg' %}" alt="Salon lumineux avec espace repas" loading="lazy"><figcaption><span>01</span> Salon &amp; salle à manger</figcaption></figure>
+      <figure class="gallery-balcony"><img src="{% static 'img/residence/balcon-appartement.jpeg' %}" alt="Balcon donnant sur les jardins et la piscine" loading="lazy"><figcaption><span>02</span> Balcon sur les jardins</figcaption></figure>
+      <figure class="gallery-kitchen"><img src="{% static 'img/residence/cuisine-appartement.jpeg' %}" alt="Cuisine moderne et équipée" loading="lazy"><figcaption><span>03</span> Cuisine équipée</figcaption></figure>
+      <figure><img src="{% static 'img/residence/chambre-king.jpeg' %}" alt="Chambre double avec rangements" loading="lazy"><figcaption><span>04</span> Chambre double</figcaption></figure>
+      <figure><img src="{% static 'img/residence/chambre-simple.jpeg' %}" alt="Chambre lumineuse ouverte sur le balcon" loading="lazy"><figcaption><span>05</span> Chambre côté jardin</figcaption></figure>
+      <figure><img src="{% static 'img/residence/piscine-nuit.jpeg' %}" alt="Piscine illuminée de la résidence Amwaj la nuit" loading="lazy"><figcaption><span>06</span> La résidence à la nuit tombée</figcaption></figure>
     </div>
+    <div class="residence-summary"><p>Un appartement prêt à vivre, dans un environnement calme et verdoyant.</p><div><span>Intérieurs lumineux</span><span>Vue sur jardin</span><span>Piscine commune</span><span>Résidence sécurisée</span></div></div>
   </section>
 
   <section class="section shell location-section" id="localisation">
     <div class="location-copy"><p class="kicker">Nous trouver</p><h2>À la résidence Amwaj, Sidi Rahal</h2><p>Une adresse tournée vers les vacances sur la côte atlantique, dans un cadre privé et verdoyant.</p><div class="location-list"><span><b>Adresse</b> Résidence Amwaj, Sidi Rahal</span><span><b>Coordonnées</b> 33.455229, -8.0011702</span><span><b>Sur place</b> Piscine, jardins, terrain multisports et parking</span></div><a class="button button-dark" href="https://maps.app.goo.gl/q9qEuBE8mfuVFwrj8" target="_blank" rel="noopener">Obtenir l’itinéraire <span>↗</span></a></div>
-    <div class="map-card"><iframe title="Carte de la résidence Amwaj à Sidi Rahal" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=-8.0211702%2C33.442229%2C-7.9811702%2C33.468229&amp;layer=mapnik&amp;marker=33.455229%2C-8.0011702"></iframe><div class="map-label"><span class="brand-mark">R</span><div><strong>Résidence Amwaj</strong><small>Sidi Rahal, Maroc</small></div></div></div>
+    <a class="map-card location-visual" href="https://maps.app.goo.gl/q9qEuBE8mfuVFwrj8" target="_blank" rel="noopener" aria-label="Ouvrir la résidence Amwaj dans Google Maps">
+      <img src="{% static 'img/residence/piscine-jardin.jpeg' %}" alt="Piscine et jardins de la résidence Amwaj" loading="lazy">
+      <span class="location-marker"><span class="location-marker-icon" aria-hidden="true">●</span><strong>Résidence Amwaj</strong><small>Ouvrir dans Google Maps ↗</small></span>
+    </a>
   </section>
 
   <section class="section shell"><div class="cta-panel"><div><p class="kicker light">Envie de vous évader ?</p><h2>Votre prochain séjour commence ici, à Sidi Rahal.</h2><p>Consultez les disponibilités et choisissez les dates qui vous ressemblent.</p></div><a class="button button-light" href="{% url 'apartments:liste' %}">Voir les appartements <span>→</span></a></div></section>

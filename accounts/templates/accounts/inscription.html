@@ -25,11 +25,11 @@
         </div>
         <label for="{{ form.email.id_for_label }}">Adresse email</label>{{ form.email }}{{ form.email.errors }}
         <div class="form-grid"><div><label for="{{ form.telephone.id_for_label }}">Téléphone <small>(facultatif)</small></label>{{ form.telephone }}{{ form.telephone.errors }}</div><div><label for="{{ form.role.id_for_label }}">Type de client</label>{{ form.role }}{{ form.role.errors }}</div></div>
-        <div id="matricule-container"><label for="{{ form.matricule.id_for_label }}">Matricule enseignant</label>{{ form.matricule }}{{ form.matricule.errors }}</div>
+        <div id="matricule-container"><label for="{{ form.matricule.id_for_label }}">Matricule FM6</label>{{ form.matricule }}{{ form.matricule.errors }}</div>
         <label for="{{ form.password1.id_for_label }}">Mot de passe</label><div class="password-field">{{ form.password1 }}<button type="button" class="password-toggle" data-target="{{ form.password1.id_for_label }}">Afficher</button></div>{{ form.password1.errors }}
         <label for="{{ form.password2.id_for_label }}">Confirmer le mot de passe</label><div class="password-field">{{ form.password2 }}<button type="button" class="password-toggle" data-target="{{ form.password2.id_for_label }}">Afficher</button></div>{{ form.password2.errors }}
+        <label class="consent-checkbox" for="{{ form.consentement_donnees.id_for_label }}">{{ form.consentement_donnees }}<span>{{ form.consentement_donnees.label }}</span></label>{{ form.consentement_donnees.errors }}
         <button class="auth-submit" type="submit">Créer mon compte</button>
-        <p class="auth-legal">En créant un compte, vous acceptez les conditions d’utilisation et la politique de confidentialité.</p>
       </form>
     </div>
   </section>

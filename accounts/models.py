@@ -36,12 +36,13 @@ class UtilisateurManager(BaseUserManager):
 class Utilisateur(AbstractBaseUser, PermissionsMixin):
     # --- Roles, matching your class diagram's subclasses ---
     CLIENT_REGULIER = 'CLIENT_REGULIER'
-    ENSEIGNANT = 'ENSEIGNANT'
+    CLIENT_FM6 = 'ENSEIGNANT'
+    ENSEIGNANT = CLIENT_FM6  # Alias conservé pour les anciennes données.
     ADMINISTRATEUR = 'ADMINISTRATEUR'
 
     ROLE_CHOICES = [
         (CLIENT_REGULIER, 'Client Régulier'),
-        (ENSEIGNANT, 'Enseignant'),
+        (CLIENT_FM6, 'Client FM6'),
         (ADMINISTRATEUR, 'Administrateur'),
     ]
 
@@ -51,9 +52,11 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
     prenom = models.CharField(max_length=100)
     telephone = models.CharField(max_length=20, blank=True)
 
-    # --- Role system (replaces Client/ClientRegulier/Enseignant/Administrateur as separate tables) ---
+    # Le code historique ENSEIGNANT est conservé en base pour éviter une rupture
+    # des comptes existants, mais il représente désormais le type Client FM6.
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=CLIENT_REGULIER)
-    matricule = models.CharField(max_length=50, blank=True, null=True)  # only used when role = ENSEIGNANT
+    matricule = models.CharField(max_length=50, blank=True, null=True)
+    consentement_donnees_le = models.DateTimeField(blank=True, null=True, editable=False)
 
     # --- Django bookkeeping fields ---
     is_active = models.BooleanField(default=True)
@@ -69,8 +72,12 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
         return f"{self.prenom} {self.nom} ({self.email})"
 
     # --- Business logic methods from your diagram ---
+    def est_client_fm6(self):
+        return self.role == self.CLIENT_FM6
+
     def est_enseignant(self):
-        return self.role == self.ENSEIGNANT
+        """Alias de compatibilité pour l'ancien nom du type Client FM6."""
+        return self.est_client_fm6()
 
     def est_client_regulier(self):
         return self.role == self.CLIENT_REGULIER
@@ -78,16 +85,7 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
     def est_administrateur(self):
         return self.role == self.ADMINISTRATEUR or self.is_superuser
 
-    def taux_reduction(self):
-        """
-        Corresponds to the 'réduction' logic you mentioned for holiday bookings.
-        Returns a discount rate; we'll wire this into Appartement.calculerPrix() later.
-        """
-        if self.role == self.ENSEIGNANT:
-            return 0.15  # example: 15% off — adjust to your real business rule
-        return 0.0
-
     @property
     def type_client(self):
-        """Alias métier conservant le vocabulaire Client/Enseignant."""
+        """Type métier du client, hors compte administrateur."""
         return self.role if self.role != self.ADMINISTRATEUR else None

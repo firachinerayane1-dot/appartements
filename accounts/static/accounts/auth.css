@@ -101,6 +101,8 @@ body.auth-body {
 .errorlist { margin: -.25rem 0 .2rem; padding: 0; color: #b91c1c; font-size: .78rem; list-style: none; }
 .form-error { padding: .75rem; border-radius: .5rem; background: #fef2f2; color: #991b1b; font-size: .85rem; }
 .auth-legal { margin: .2rem 0 0; text-align: center; color: var(--auth-muted); font-size: .72rem; line-height: 1.5; }
+.consent-checkbox { display: grid !important; grid-template-columns: 20px 1fr; align-items: start; gap: .65rem; margin: .35rem 0 .15rem; color: var(--auth-muted) !important; font-weight: 600 !important; line-height: 1.45; cursor: pointer; }
+.auth-checkbox-input { width: 18px; height: 18px; margin: .15rem 0 0; accent-color: var(--auth-primary); cursor: pointer; }
 
 @media (max-width: 860px) {
   .auth-page { grid-template-columns: 1fr; }

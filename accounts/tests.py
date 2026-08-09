@@ -43,18 +43,14 @@ class InscriptionTests(TestCase):
             '/accounts/google/login/callback/',
         )
 
-    def test_connexion_google_conserve_la_destination_demandee(self):
+    def test_connexion_google_ignore_la_destination_et_revient_a_l_accueil(self):
         destination = reverse('reservations:mes_reservations')
         response = self.client.get(
             reverse('accounts:connexion'),
             {'next': destination},
         )
 
-        self.assertContains(
-            response,
-            f'<input type="hidden" name="next" value="{destination}">',
-            html=True,
-        )
+        self.assertNotContains(response, 'name="next"')
 
     def test_adaptateur_google_remplit_un_nouveau_client(self):
         sociallogin = SocialLogin(
@@ -86,13 +82,69 @@ class InscriptionTests(TestCase):
             'role': Utilisateur.CLIENT_REGULIER, 'email': 'nouveau@example.com',
             'nom': 'Nouveau', 'prenom': 'Client', 'telephone': '', 'matricule': '',
             'password1': 'Mot-de-passe-tres-solide-2027', 'password2': 'Mot-de-passe-tres-solide-2027',
+            'consentement_donnees': 'on',
         })
-        self.assertRedirects(response, reverse('reservations:mes_reservations'))
+        self.assertRedirects(response, reverse('core:accueil'))
         self.assertIn('_auth_user_id', self.client.session)
+        self.assertIsNotNone(
+            Utilisateur.objects.get(email='nouveau@example.com').consentement_donnees_le
+        )
 
-    def test_matricule_obligatoire_pour_enseignant(self):
+    def test_consentement_aux_politiques_et_aux_donnees_est_obligatoire(self):
         response = self.client.post(reverse('accounts:inscription'), {
-            'role': Utilisateur.ENSEIGNANT, 'email': 'prof@example.com', 'nom': 'Prof', 'prenom': 'Test',
+            'role': Utilisateur.CLIENT_REGULIER,
+            'email': 'sans-consentement@example.com',
+            'nom': 'Sans',
+            'prenom': 'Consentement',
+            'password1': 'Mot-de-passe-tres-solide-2027',
+            'password2': 'Mot-de-passe-tres-solide-2027',
+        })
+
+        self.assertContains(response, 'Vous devez accepter les politiques')
+        self.assertFalse(Utilisateur.objects.filter(email='sans-consentement@example.com').exists())
+
+    def test_connexion_redirige_vers_accueil_meme_avec_next(self):
+        utilisateur = Utilisateur.objects.create_user(
+            email='client@example.com',
+            password='mot-de-passe-solide',
+            nom='Client',
+            prenom='Test',
+        )
+
+        response = self.client.post(
+            f"{reverse('accounts:connexion')}?next={reverse('reservations:mes_reservations')}",
+            {'username': utilisateur.email, 'password': 'mot-de-passe-solide'},
+        )
+
+        self.assertRedirects(response, reverse('core:accueil'))
+
+    def test_ajouter_un_matricule_transforme_le_client_en_client_fm6(self):
+        utilisateur = Utilisateur.objects.create_user(
+            email='profil@example.com',
+            password='mot-de-passe-solide',
+            nom='Profil',
+            prenom='Client',
+        )
+        self.client.force_login(utilisateur)
+
+        response = self.client.post(reverse('accounts:modifier_profil'), {
+            'email': utilisateur.email,
+            'nom': utilisateur.nom,
+            'prenom': utilisateur.prenom,
+            'telephone': '0600000000',
+            'matricule': ' FONDATION-123 ',
+        })
+
+        self.assertRedirects(response, reverse('accounts:profil'))
+        utilisateur.refresh_from_db()
+        self.assertEqual(utilisateur.matricule, 'FONDATION-123')
+        self.assertEqual(utilisateur.role, Utilisateur.CLIENT_FM6)
+        self.assertEqual(utilisateur.get_role_display(), 'Client FM6')
+
+    def test_matricule_obligatoire_pour_client_fm6(self):
+        response = self.client.post(reverse('accounts:inscription'), {
+            'role': Utilisateur.CLIENT_FM6, 'email': 'fm6@example.com', 'nom': 'FM6', 'prenom': 'Test',
             'password1': 'Mot-de-passe-tres-solide-2027', 'password2': 'Mot-de-passe-tres-solide-2027',
+            'consentement_donnees': 'on',
         })
         self.assertContains(response, 'matricule est obligatoire')

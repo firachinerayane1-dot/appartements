@@ -11,7 +11,7 @@ from reservations.models import Reservation
 
 @transaction.atomic
 def creer_reservation(client, appartement, date_debut, date_fin):
-    """Point d'entrée unique appliquant disponibilité et priorité enseignant."""
+    """Point d'entrée unique appliquant disponibilité et priorité FM6."""
     if not client.is_authenticated or client.est_administrateur():
         raise PermissionDenied("Seul un client peut réserver.")
 
@@ -20,8 +20,8 @@ def creer_reservation(client, appartement, date_debut, date_fin):
         raise ValidationError("Cet appartement n'est pas disponible aux dates choisies.")
 
     vacances = appartement.periodes_vacances.all()
-    if any(periode.chevauche(date_debut, date_fin) for periode in vacances) and not client.est_enseignant():
-        raise ValidationError("Cet appartement n'est disponible qu'aux enseignants pendant cette période.")
+    if any(periode.chevauche(date_debut, date_fin) for periode in vacances) and not client.est_client_fm6():
+        raise ValidationError("Cet appartement n'est disponible qu'aux clients FM6 pendant cette période.")
 
     reservation = Reservation(
         client=client,
@@ -58,8 +58,8 @@ def chercher_appartements_disponibles(date_debut, date_fin, client=None):
     )
 
     # Cette règle métier existe déjà dans l'application : pendant les
-    # vacances, certains appartements sont réservés aux enseignants.
-    if client and client.is_authenticated and not client.est_enseignant():
+    # Pendant les vacances, certains appartements sont réservés aux clients FM6.
+    if client and client.is_authenticated and not client.est_client_fm6():
         periodes_vacances_en_conflit = PeriodeVacances.objects.filter(
             appartement_id=OuterRef('pk'),
             date_debut__lt=date_fin,

@@ -1,5 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+from django.utils import timezone
+
 from .models import Utilisateur
 from django.contrib.auth.forms import AuthenticationForm
 
@@ -11,14 +13,24 @@ class InscriptionForm(UserCreationForm):
     role = forms.ChoiceField(
         choices=[
             (Utilisateur.CLIENT_REGULIER, 'Client Régulier'),
-            (Utilisateur.ENSEIGNANT, 'Enseignant'),
+            (Utilisateur.CLIENT_FM6, 'Client FM6'),
         ],
         label="Vous êtes",
+    )
+    consentement_donnees = forms.BooleanField(
+        required=True,
+        label="J’ai lu les politiques et j’accepte que mes données soient traitées.",
+        error_messages={
+            'required': "Vous devez accepter les politiques et le traitement de vos données.",
+        },
     )
 
     class Meta:
         model = Utilisateur
-        fields = ('role', 'email', 'nom', 'prenom', 'telephone', 'matricule')
+        fields = (
+            'role', 'email', 'nom', 'prenom', 'telephone', 'matricule',
+            'consentement_donnees',
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -33,22 +45,27 @@ class InscriptionForm(UserCreationForm):
         }
         for nom, field in self.fields.items():
             field.widget.attrs.update(attributs.get(nom, {}))
-            field.widget.attrs['class'] = 'auth-input'
+            field.widget.attrs['class'] = (
+                'auth-checkbox-input'
+                if isinstance(field.widget, forms.CheckboxInput)
+                else 'auth-input'
+            )
 
     def clean(self):
         cleaned_data = super().clean()
         role = cleaned_data.get('role')
         matricule = cleaned_data.get('matricule')
 
-        if role == Utilisateur.ENSEIGNANT and not matricule:
-            self.add_error('matricule', "Le matricule est obligatoire pour les enseignants.")
+        if role == Utilisateur.CLIENT_FM6 and not matricule:
+            self.add_error('matricule', "Le matricule est obligatoire pour un client FM6.")
 
         return cleaned_data
 
     def save(self, commit=True):
         utilisateur = super().save(commit=False)
-        if utilisateur.role != Utilisateur.ENSEIGNANT:
+        if utilisateur.role != Utilisateur.CLIENT_FM6:
             utilisateur.matricule = None
+        utilisateur.consentement_donnees_le = timezone.now()
         if commit:
             utilisateur.save()
         return utilisateur
@@ -73,7 +90,16 @@ class ProfilForm(forms.ModelForm):
         fields = ('email', 'nom', 'prenom', 'telephone', 'matricule')
 
     def clean_matricule(self):
-        matricule = self.cleaned_data.get('matricule')
-        if self.instance.est_enseignant() and not matricule:
-            raise forms.ValidationError("Le matricule est obligatoire pour un enseignant.")
+        matricule = (self.cleaned_data.get('matricule') or '').strip() or None
+        if self.instance.est_client_fm6() and not matricule:
+            raise forms.ValidationError("Le matricule est obligatoire pour un client FM6.")
         return matricule
+
+    def save(self, commit=True):
+        utilisateur = super().save(commit=False)
+        if utilisateur.matricule and not utilisateur.est_administrateur():
+            utilisateur.role = Utilisateur.CLIENT_FM6
+        if commit:
+            utilisateur.save()
+            self.save_m2m()
+        return utilisateur
