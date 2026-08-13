@@ -1,20 +1,129 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Nos appartements · FOSE Safar{% endblock %}
+{% block body_class %}apartments-page{% endblock %}
 {% block content %}
 <main>
-  <section class="page-hero"><div class="shell page-hero-row"><div><p class="kicker">Séjourner à Sidi Rahal</p><h1>Choisissez votre appartement</h1><p>Retrouvez nos logements au sein de la résidence privée Amwaj et vérifiez leur disponibilité selon vos dates.</p></div>{% if dates_recherche %}<span class="status">{{ page_obj.paginator.count }} résultat{{ page_obj.paginator.count|pluralize }}</span>{% endif %}</div></section>
-  <div class="shell">
-    <form class="surface filter-bar" method="get">{{ form.as_p }}<button class="button button-primary" type="submit">Rechercher</button>{% if request.GET %}<a class="button button-ghost" href="{% url 'apartments:liste' %}">Effacer</a>{% endif %}</form>
-    {% if not dates_recherche %}
-    <div class="empty-state"><span class="empty-icon">⌕</span><h3>Sélectionnez vos dates de séjour</h3><p>Veuillez sélectionner une date d'arrivée et une date de départ pour afficher les appartements disponibles.</p></div>
-    {% else %}
-    <div class="property-grid">
+  <section class="apartments-hero">
+    <div class="apartments-hero-backdrop" aria-hidden="true"></div>
+    <div class="apartments-hero-glow" aria-hidden="true"></div>
+    <div class="shell apartments-hero-layout">
+      <div class="apartments-hero-copy">
+        <p class="kicker light">Résidence Amwaj · Sidi Rahal</p>
+        <h1>Votre appartement,<br><em>entre piscine et océan.</em></h1>
+        <p>Des intérieurs lumineux, un balcon ouvert sur les jardins et tout le calme d’une résidence privée.</p>
+        <div class="apartments-hero-pills" aria-label="Points forts de la résidence">
+          <span><b>01</b> Piscine</span>
+          <span><b>02</b> Jardins</span>
+          <span><b>03</b> Parking</span>
+        </div>
+      </div>
+      <aside class="apartments-hero-card" aria-label="Aperçu de l’appartement">
+        <img src="{% static 'img/residence/salon-appartement.jpeg' %}" alt="Salon lumineux de l’un des appartements FOSE Safar">
+        <div>
+          <span>À l’intérieur</span>
+          <strong>Des espaces faits pour se retrouver</strong>
+        </div>
+      </aside>
+    </div>
+    <a class="hero-scroll-cue" href="#recherche" aria-label="Aller à la recherche de disponibilités"><span></span>Découvrir</a>
+  </section>
+
+  <section class="apartments-search-section" id="recherche">
+    <div class="shell">
+      <form class="apartments-search" method="get">
+        <div class="apartments-search-intro">
+          <span class="search-step">01</span>
+          <div><strong>Planifiez votre séjour</strong><small>Choisissez vos dates pour voir les logements libres.</small></div>
+        </div>
+        <div class="date-field">
+          <label for="{{ form.date_debut.id_for_label }}">{{ form.date_debut.label }}</label>
+          {{ form.date_debut }}
+          {{ form.date_debut.errors }}
+        </div>
+        <span class="date-arrow" aria-hidden="true">→</span>
+        <div class="date-field">
+          <label for="{{ form.date_fin.id_for_label }}">{{ form.date_fin.label }}</label>
+          {{ form.date_fin }}
+          {{ form.date_fin.errors }}
+        </div>
+        <button class="button apartments-search-button" type="submit"><span>Voir les disponibilités</span><span aria-hidden="true">↗</span></button>
+        {% if request.GET %}<a class="search-reset" href="{% url 'apartments:liste' %}" aria-label="Effacer les dates">×</a>{% endif %}
+        {{ form.non_field_errors }}
+      </form>
+    </div>
+  </section>
+
+  {% if dates_recherche %}
+  <section class="catalog-section shell" aria-labelledby="catalog-title">
+    <div class="catalog-heading">
+      <div>
+        <p class="kicker">Sélection disponible</p>
+        <h2 id="catalog-title">Trouvez votre pied-à-terre</h2>
+        <p>Du {{ dates_recherche.date_debut|date:'d M' }} au {{ dates_recherche.date_fin|date:'d M Y' }}</p>
+      </div>
+      <span class="catalog-count"><b>{{ page_obj.paginator.count }}</b> appartement{{ page_obj.paginator.count|pluralize }} disponible{{ page_obj.paginator.count|pluralize }}</span>
+    </div>
+
+    <div class="property-grid catalog-grid">
       {% for appartement in page_obj %}
-      <article class="property-card"><a class="property-media" href="{% url 'apartments:detail' appartement.pk %}?date_debut={{ dates_recherche.date_debut|date:'Y-m-d' }}&amp;date_fin={{ dates_recherche.date_fin|date:'Y-m-d' }}">{% with photo=appartement.photos_carte.0 %}{% if photo %}<img src="{{ photo.image.url }}" alt="{{ photo.legende|default:appartement.titre }}">{% else %}<div class="property-placeholder"><span>FOSE Safar</span></div>{% endif %}{% endwith %}<span class="availability-tag">Disponible</span></a><div class="property-content"><p class="property-location">Appartement n°{{ appartement.pk }} · Amwaj, Sidi Rahal</p><h3><a href="{% url 'apartments:detail' appartement.pk %}?date_debut={{ dates_recherche.date_debut|date:'Y-m-d' }}&amp;date_fin={{ dates_recherche.date_fin|date:'Y-m-d' }}">{{ appartement.titre }}</a></h3><p>{{ appartement.description|truncatewords:22 }}</p><div class="property-footer"><span>{{ appartement.capacite }} voyageur{{ appartement.capacite|pluralize }}</span><strong>{{ appartement.tarif_affiche }} <small>MAD / nuit</small></strong></div>{% if dates_recherche and not user.est_administrateur %}<a class="button button-primary" style="width:100%;margin-top:1rem" href="{% url 'reservations:reserver' appartement.pk %}?date_debut={{ dates_recherche.date_debut|date:'Y-m-d' }}&amp;date_fin={{ dates_recherche.date_fin|date:'Y-m-d' }}">Réserver</a>{% endif %}</div></article>
-      {% empty %}<div class="empty-state span-all"><span class="empty-icon">⌕</span><h3>Aucun appartement n'est disponible pour cette période.</h3><p>Essayez une autre période.</p></div>{% endfor %}
+      <article class="property-card catalog-card">
+        <a class="property-media property-media-mosaic" href="{% url 'apartments:detail' appartement.pk %}?date_debut={{ dates_recherche.date_debut|date:'Y-m-d' }}&amp;date_fin={{ dates_recherche.date_fin|date:'Y-m-d' }}" aria-label="Découvrir {{ appartement.titre }}">
+          {% for photo in appartement.photos_carte|slice:":3" %}
+          <img class="property-photo property-photo-{{ forloop.counter }}" src="{{ photo.image.url }}" alt="{% if forloop.first %}{{ photo.legende|default:appartement.titre }}{% else %}Vue {{ forloop.counter }} de {{ appartement.titre }}{% endif %}" {% if not forloop.first %}loading="lazy"{% endif %}>
+          {% empty %}
+          <div class="property-placeholder"><span>FOSE Safar</span></div>
+          {% endfor %}
+          <span class="availability-tag"><i></i> Disponible</span>
+          <span class="photo-count" aria-hidden="true">Voir les photos <b>↗</b></span>
+        </a>
+        <div class="property-content">
+          <div class="property-overline"><p class="property-location">Appartement n°{{ appartement.pk }} · Amwaj</p><span>Jusqu’à {{ appartement.capacite }} pers.</span></div>
+          <h3><a href="{% url 'apartments:detail' appartement.pk %}?date_debut={{ dates_recherche.date_debut|date:'Y-m-d' }}&amp;date_fin={{ dates_recherche.date_fin|date:'Y-m-d' }}">{{ appartement.titre }}</a></h3>
+          <p>{{ appartement.description|truncatewords:24 }}</p>
+          <div class="property-amenities" aria-label="Équipements principaux"><span>Cuisine équipée</span><span>Piscine</span><span>Balcon</span></div>
+          <div class="property-footer"><span>Pour une nuit</span><strong>{{ appartement.tarif_affiche }} <small>MAD</small></strong></div>
+          {% if not user.est_administrateur %}<a class="button property-book-button" href="{% url 'reservations:reserver' appartement.pk %}?date_debut={{ dates_recherche.date_debut|date:'Y-m-d' }}&amp;date_fin={{ dates_recherche.date_fin|date:'Y-m-d' }}"><span>Réserver cet appartement</span><span aria-hidden="true">→</span></a>{% endif %}
+        </div>
+      </article>
+      {% empty %}
+      <div class="empty-state catalog-empty span-all"><span class="empty-icon">⌕</span><h3>Aucun appartement n'est disponible pour cette période.</h3><p>Essayez une autre période : quelques jours de décalage peuvent suffire.</p><a class="button button-ghost" href="#recherche">Modifier mes dates</a></div>
+      {% endfor %}
     </div>
     {% if page_obj.paginator.num_pages > 1 %}<nav class="pagination" aria-label="Pagination">{% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&date_debut={{ request.GET.date_debut }}&date_fin={{ request.GET.date_fin }}">← Précédent</a>{% endif %}<span>Page <strong>{{ page_obj.number }}</strong> sur {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&date_debut={{ request.GET.date_debut }}&date_fin={{ request.GET.date_fin }}">Suivant →</a>{% endif %}</nav>{% endif %}
-    {% endif %}
-  </div>
+  </section>
+  {% else %}
+  <section class="dates-prompt shell" aria-labelledby="dates-prompt-title">
+    <span class="dates-prompt-number">02</span>
+    <div><p class="kicker">À vous de choisir</p><h2 id="dates-prompt-title">Quand souhaitez-vous vous évader ?</h2><p>Veuillez sélectionner une date d'arrivée et une date de départ pour afficher les appartements disponibles.</p></div>
+    <button type="button" class="dates-prompt-action" data-focus-dates><span>Choisir mes dates</span><b aria-hidden="true">↑</b></button>
+  </section>
+  {% endif %}
+
+  <section class="stay-gallery-section" aria-labelledby="stay-gallery-title">
+    <div class="shell stay-gallery-heading">
+      <div><p class="kicker light">Un avant-goût du séjour</p><h2 id="stay-gallery-title">La douceur de vivre,<br><em>du matin jusqu’au soir.</em></h2></div>
+      <p>Faites défiler les images pour explorer les intérieurs et les espaces de la résidence.</p>
+    </div>
+    <div class="stay-gallery-wrap">
+      <button class="gallery-control gallery-control-prev" type="button" aria-label="Images précédentes">←</button>
+      <div class="stay-gallery" tabindex="0" aria-label="Galerie de la résidence">
+        <figure class="stay-gallery-item stay-gallery-wide"><img src="{% static 'img/residence/piscine.jpeg' %}" alt="Piscine de la résidence Amwaj" loading="lazy"><figcaption><span>01</span><strong>Au bord de l’eau</strong><small>Piscine &amp; jardins</small></figcaption></figure>
+        <figure class="stay-gallery-item"><img src="{% static 'img/residence/chambre-king.jpeg' %}" alt="Chambre double lumineuse" loading="lazy"><figcaption><span>02</span><strong>Bien dormir</strong><small>Chambre double</small></figcaption></figure>
+        <figure class="stay-gallery-item"><img src="{% static 'img/residence/balcon-appartement.jpeg' %}" alt="Balcon avec vue sur la résidence" loading="lazy"><figcaption><span>03</span><strong>Prendre l’air</strong><small>Balcon sur jardin</small></figcaption></figure>
+        <figure class="stay-gallery-item stay-gallery-wide"><img src="{% static 'img/residence/cuisine-appartement.jpeg' %}" alt="Cuisine équipée de l’appartement" loading="lazy"><figcaption><span>04</span><strong>Comme à la maison</strong><small>Cuisine équipée</small></figcaption></figure>
+        <figure class="stay-gallery-item"><img src="{% static 'img/residence/terrain-sport.jpeg' %}" alt="Terrain multisports de la résidence" loading="lazy"><figcaption><span>05</span><strong>Bouger ensemble</strong><small>Terrain multisports</small></figcaption></figure>
+        <figure class="stay-gallery-item"><img src="{% static 'img/residence/piscine-nuit.jpeg' %}" alt="Piscine illuminée à la nuit tombée" loading="lazy"><figcaption><span>06</span><strong>À la nuit tombée</strong><small>Calme &amp; lumière</small></figcaption></figure>
+      </div>
+      <button class="gallery-control gallery-control-next" type="button" aria-label="Images suivantes">→</button>
+    </div>
+    <div class="shell gallery-progress" aria-hidden="true"><span></span></div>
+  </section>
+
+  <section class="catalog-assurance shell" aria-label="Les avantages FOSE Safar">
+    <article><span>01</span><div><strong>Réservation sereine</strong><p>Vos dates et votre séjour sont récapitulés avant confirmation.</p></div></article>
+    <article><span>02</span><div><strong>Résidence privée</strong><p>Un environnement calme avec piscine, jardins et parking.</p></div></article>
+    <article><span>03</span><div><strong>Des photos fidèles</strong><p>Les images présentées montrent les espaces de votre séjour.</p></div></article>
+  </section>
 </main>
 {% endblock %}
