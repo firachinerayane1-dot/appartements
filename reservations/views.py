@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_http_methods, require_POST
 
 from accounts.mixins import administrateur_required
@@ -20,7 +21,11 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def reserver(request, appartement_id):
-    appartement = get_object_or_404(Appartement, pk=appartement_id, disponible=True)
+    appartement = get_object_or_404(
+        Appartement.objects.prefetch_related('photos'),
+        pk=appartement_id,
+        disponible=True,
+    )
     form = ReservationForm(request.POST or None, initial={'date_debut': request.GET.get('date_debut'), 'date_fin': request.GET.get('date_fin')})
     if request.method == 'POST' and form.is_valid():
         try:
@@ -50,6 +55,19 @@ def reserver(request, appartement_id):
                     "dans les 24 heures pour accéder au paiement.",
                 )
             return redirect('reservations:detail', pk=reservation.pk)
+    debut_valeur = form['date_debut'].value()
+    fin_valeur = form['date_fin'].value()
+    debut_affiche = debut_valeur if hasattr(debut_valeur, 'strftime') else parse_date(debut_valeur or '')
+    fin_affiche = fin_valeur if hasattr(fin_valeur, 'strftime') else parse_date(fin_valeur or '')
+    dates_preselectionnees = bool(debut_affiche and fin_affiche and fin_affiche > debut_affiche)
+    montant_estime = None
+    if dates_preselectionnees:
+        montant_estime = appartement.calculer_prix(
+            debut_affiche,
+            fin_affiche,
+            request.user,
+        )
+
     return render(
         request,
         'reservations/reserver.html',
@@ -59,6 +77,11 @@ def reserver(request, appartement_id):
             'tarif_nuit': appartement.tarif_pour_client(request.user),
             'date_debut': form['date_debut'].value(),
             'date_fin': form['date_fin'].value(),
+            'date_debut_affichee': debut_affiche,
+            'date_fin_affichee': fin_affiche,
+            'dates_preselectionnees': dates_preselectionnees,
+            'duree_sejour': (fin_affiche - debut_affiche).days if dates_preselectionnees else None,
+            'montant_estime': montant_estime,
         },
     )
 

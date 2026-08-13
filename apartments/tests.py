@@ -60,7 +60,9 @@ class RechercheDisponibiliteTests(TestCase):
         response = self.client.get(reverse('apartments:liste'))
 
         self.assertEqual(response.context['page_obj'].paginator.count, 0)
-        self.assertContains(response, "Veuillez sélectionner une date d'arrivée et une date de départ")
+        self.assertContains(response, 'Planifiez votre séjour')
+        self.assertContains(response, 'Voir les disponibilités')
+        self.assertNotContains(response, 'Quand souhaitez-vous vous évader')
         self.assertNotContains(response, self.libre.titre)
 
     def test_les_deux_dates_sont_obligatoires(self):
@@ -222,6 +224,11 @@ class RechercheDisponibiliteTests(TestCase):
 
         self.assertEqual(response.context['form'].initial['date_debut'], '2027-09-10')
         self.assertEqual(response.context['form'].initial['date_fin'], '2027-09-15')
+        self.assertContains(response, 'Confirmez votre séjour')
+        self.assertContains(response, '5 nuits')
+        self.assertContains(response, 'type="hidden" name="date_debut" value="2027-09-10"')
+        self.assertContains(response, 'type="hidden" name="date_fin" value="2027-09-15"')
+        self.assertNotContains(response, 'Choisissez vos dates')
 
     def test_liste_et_photos_sont_chargees_en_deux_requetes(self):
         appartements = chercher_appartements_disponibles(
