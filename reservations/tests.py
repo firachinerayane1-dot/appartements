@@ -444,6 +444,10 @@ class ReglesReservationTests(TestCase):
             mail.outbox[0].body,
         )
         self.assertIn("non remboursable", mail.outbox[0].body)
+        self.assertIn("Garantie", mail.outbox[0].body)
+        self.assertIn("Départ tardif", mail.outbox[0].body)
+        self.assertIn("Non-présentation", mail.outbox[0].body)
+        self.assertIn("Check-in", mail.outbox[0].body)
 
     def test_politiques_sont_obligatoires_avant_paiement(self):
         reservation = creer_reservation(
@@ -458,6 +462,11 @@ class ReglesReservationTests(TestCase):
 
         page_politiques = self.client.get(reverse('reservations:politiques', args=(reservation.pk,)))
         self.assertContains(page_politiques, "J’ai lu et j’accepte")
+        self.assertContains(page_politiques, "Garantie")
+        self.assertContains(page_politiques, "Attribution du logement")
+        self.assertContains(page_politiques, "Départ tardif")
+        self.assertContains(page_politiques, "Non-présentation")
+        self.assertContains(page_politiques, "1 000,00 MAD")
         response = self.client.post(reverse('reservations:politiques', args=(reservation.pk,)))
         self.assertRedirects(response, reverse('payments:payer', args=(reservation.pk,)))
 

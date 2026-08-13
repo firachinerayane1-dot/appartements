@@ -1,75 +1,108 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Réservation n°{{ reservation.numero_reservation }} · FOSE Safar{% endblock %}
+{% block body_class %}reservation-detail-page{% endblock %}
 {% block content %}
-<main class="page-main">
-  <div class="shell">
-    <div class="page-heading">
-      <div>
-        <p class="kicker">Réservation n°{{ reservation.numero_reservation }}</p>
-        <h1>{{ reservation.appartement }}</h1>
-        <p>Créée le {{ reservation.date_reservation|date:"d F Y à H:i" }}</p>
+<main>
+  <section class="reservation-detail-hero">
+    <div class="reservation-detail-backdrop" aria-hidden="true"></div>
+    <div class="shell reservation-detail-hero-content">
+      {% if not user.est_administrateur %}<a class="reservation-detail-back" href="{% url 'reservations:mes_reservations' %}">← Mes réservations</a>{% endif %}
+      <div class="reservation-detail-heading">
+        <div>
+          <p class="kicker light">Réservation n°{{ reservation.numero_reservation }}</p>
+          <h1>Votre séjour à<br><em>Sidi Rahal.</em></h1>
+          <p>{{ reservation.appartement }} · Résidence Amwaj</p>
+        </div>
+        <div class="reservation-hero-status">
+          <span class="status {{ reservation.statut }}"><i></i>{{ reservation.get_statut_display }}</span>
+          <small>Demande créée le {{ reservation.date_reservation|date:"d F Y à H:i" }}</small>
+        </div>
       </div>
-      <span class="status {{ reservation.statut }}">{{ reservation.get_statut_display }}</span>
+
+      <ol class="reservation-progress" aria-label="Progression de la réservation">
+        <li class="complete"><span>✓</span><div><small>Étape 1</small><strong>Demande créée</strong></div></li>
+        <li class="{% if reservation.politiques_acceptees_le or reservation.statut == 'CONFIRMEE' %}complete{% elif reservation.statut == 'EN_ATTENTE' %}active{% endif %}"><span>{% if reservation.politiques_acceptees_le or reservation.statut == 'CONFIRMEE' %}✓{% else %}02{% endif %}</span><div><small>Étape 2</small><strong>Politiques</strong></div></li>
+        <li class="{% if reservation.statut == 'CONFIRMEE' %}complete{% elif reservation.statut == 'EN_ATTENTE' and reservation.politiques_acceptees_le %}active{% endif %}"><span>{% if reservation.statut == 'CONFIRMEE' %}✓{% else %}03{% endif %}</span><div><small>Étape 3</small><strong>Paiement</strong></div></li>
+      </ol>
     </div>
-    <div class="form-layout">
-      <section class="form-card">
-        <h2>Détails du séjour</h2>
-        <dl class="definition-grid">
+  </section>
+
+  <section class="reservation-detail-layout shell">
+    <div class="reservation-detail-main">
+      <article class="reservation-stay-card">
+        <div class="reservation-stay-image">
+          {% with photo=reservation.appartement.photos.all.0 %}
+          {% if photo %}<img src="{{ photo.image.url }}" alt="{{ photo.legende|default:reservation.appartement.titre }}">{% else %}<img src="{% static 'img/residence/salon-appartement.jpeg' %}" alt="Salon lumineux d’un appartement FOSE Safar">{% endif %}
+          {% endwith %}
+          <div><span>Votre appartement</span><strong>{{ reservation.appartement }}</strong><small>Amwaj · Sidi Rahal</small></div>
+        </div>
+        <div class="reservation-stay-content">
+          <div class="reservation-stay-title"><div><p class="kicker">Les dates du séjour</p><h2>{{ reservation.get_duree }} nuit{{ reservation.get_duree|pluralize }} à Amwaj</h2></div><span>{{ reservation.montant_total }} <small>MAD</small></span></div>
+          <div class="reservation-detail-timeline" aria-label="Du {{ reservation.date_debut|date:'d F Y' }} au {{ reservation.date_fin|date:'d F Y' }}">
+            <div><small>Arrivée</small><strong>{{ reservation.date_debut|date:"d" }}</strong><span>{{ reservation.date_debut|date:"F Y" }}</span><b>À partir de 15h00</b></div>
+            <span class="reservation-journey"><i></i><b>{{ reservation.get_duree }} nuit{{ reservation.get_duree|pluralize }}</b><i></i></span>
+            <div><small>Départ</small><strong>{{ reservation.date_fin|date:"d" }}</strong><span>{{ reservation.date_fin|date:"F Y" }}</span><b>Avant 12h00</b></div>
+          </div>
+          <div class="reservation-stay-amenities"><span>✓ Piscine</span><span>✓ Jardins</span><span>✓ Parking</span><span>✓ Résidence privée</span></div>
+        </div>
+      </article>
+
+      <article class="reservation-information-card">
+        <div class="reservation-section-heading"><div><p class="kicker">Informations</p><h2>Les détails de votre demande</h2></div><span>Mis à jour automatiquement</span></div>
+        <dl class="reservation-information-grid">
           <div><dt>Numéro de réservation</dt><dd>{{ reservation.numero_reservation }}</dd></div>
-          <div><dt>Arrivée</dt><dd>{{ reservation.date_debut|date:"l d F Y" }}</dd></div>
-          <div><dt>Départ</dt><dd>{{ reservation.date_fin|date:"l d F Y" }}</dd></div>
+          <div><dt>Appartement</dt><dd>{{ reservation.appartement }}</dd></div>
           <div><dt>Durée</dt><dd>{{ reservation.get_duree }} nuit{{ reservation.get_duree|pluralize }}</dd></div>
           <div><dt>Montant total</dt><dd>{{ reservation.montant_total }} MAD</dd></div>
           <div><dt>Client</dt><dd>{{ reservation.client }}</dd></div>
-          <div><dt>Statut</dt><dd>{{ reservation.get_statut_display }}</dd></div>
-          <div>
-            <dt>Politiques</dt>
-            <dd>
-              {% if reservation.politiques_acceptees_le %}
-                Acceptées le {{ reservation.politiques_acceptees_le|date:"d/m/Y à H:i" }}
-              {% else %}
-                En attente d’acceptation
-              {% endif %}
-            </dd>
-          </div>
-          {% if reservation.statut == 'EN_ATTENTE' %}
-            <div><dt>Paiement avant</dt><dd>{{ reservation.date_expiration|date:"d/m/Y à H:i" }}</dd></div>
-          {% endif %}
+          <div><dt>Politiques</dt><dd>{% if reservation.politiques_acceptees_le %}Acceptées le {{ reservation.politiques_acceptees_le|date:"d/m/Y à H:i" }}{% else %}En attente d’acceptation{% endif %}</dd></div>
+          {% if reservation.statut == 'EN_ATTENTE' %}<div class="reservation-information-wide"><dt>Échéance</dt><dd>Finalisez avant le {{ reservation.date_expiration|date:"d F Y à H:i" }}</dd></div>{% endif %}
         </dl>
-
-        {% if reservation.statut == 'CONFIRMEE' %}
-          <div class="surface" style="margin-top:1.5rem;background:#fff5f3">
-            <strong>Réservation définitive</strong>
-            <p style="margin:.4rem 0 0">Après paiement, cette réservation ne peut plus être annulée et son tarif n’est pas remboursable.</p>
-          </div>
-        {% elif reservation.statut == 'EXPIREE' %}
-          <div class="surface" style="margin-top:1.5rem;background:var(--soft)">
-            <strong>Délai expiré</strong>
-            <p style="margin:.4rem 0 0">Le paiement n’a pas été effectué dans les 24 heures. L’appartement est de nouveau disponible.</p>
-          </div>
-        {% endif %}
-
-        <div style="display:flex;gap:.7rem;margin-top:1.5rem;flex-wrap:wrap">
-          {% if reservation.statut == 'EN_ATTENTE' %}
-            {% if reservation.politiques_acceptees_le %}
-              <a class="button button-primary" href="{% url 'payments:payer' reservation.pk %}">Payer par carte</a>
-            {% else %}
-              <a class="button button-primary" href="{% url 'reservations:politiques' reservation.pk %}">Lire et accepter les politiques</a>
-            {% endif %}
-            <form method="post" action="{% url 'reservations:annuler' reservation.pk %}">
-              {% csrf_token %}
-              <button class="button button-danger" type="submit">Annuler la réservation</button>
-            </form>
-          {% endif %}
-        </div>
-      </section>
-      <aside class="summary-card">
-        <p class="kicker light">FOSE Safar</p>
-        <h2>Réservation maintenue 24 h</h2>
-        <p>Acceptez les politiques reçues par e-mail puis réglez par carte avant l’expiration du délai.</p>
-        <a class="button button-light" href="{% url 'notifications:liste' %}">Voir mes notifications</a>
-      </aside>
+      </article>
     </div>
-  </div>
+
+    <aside class="reservation-action-card {{ reservation.statut }}">
+      <span class="reservation-action-icon" aria-hidden="true">{% if reservation.statut == 'CONFIRMEE' %}✓{% elif reservation.statut == 'EN_ATTENTE' %}!{% else %}i{% endif %}</span>
+      <p class="kicker">Prochaine étape</p>
+      {% if user.est_administrateur %}
+        <h2>Vue de gestion</h2>
+        <p>Consultez les informations de cette demande depuis l’espace d’administration.</p>
+        <a class="button reservation-primary-action" href="{% url 'reservations:admin_liste' %}">Toutes les réservations <span>→</span></a>
+      {% elif reservation.statut == 'EN_ATTENTE' %}
+        {% if reservation.politiques_acceptees_le %}
+          <h2>Finalisez le paiement</h2>
+          <p>Vos politiques sont acceptées. Réglez maintenant par carte avant l’expiration du délai.</p>
+          <a class="button reservation-primary-action" href="{% url 'payments:payer' reservation.pk %}">Payer par carte <span>→</span></a>
+        {% else %}
+          <h2>Lisez les politiques</h2>
+          <p>Consultez et acceptez les conditions de séjour avant d’accéder au paiement sécurisé.</p>
+          <a class="button reservation-primary-action" href="{% url 'reservations:politiques' reservation.pk %}">Lire et accepter <span>→</span></a>
+        {% endif %}
+        <form method="post" action="{% url 'reservations:annuler' reservation.pk %}">{% csrf_token %}<button class="reservation-cancel-action" type="submit">Annuler cette demande</button></form>
+      {% elif reservation.statut == 'CONFIRMEE' %}
+        <h2>Votre séjour est confirmé</h2>
+        <p>Le paiement est validé. Votre réservation est définitive et son tarif n’est pas remboursable.</p>
+        <a class="button reservation-primary-action" href="{% url 'notifications:liste' %}">Voir mes notifications <span>→</span></a>
+      {% elif reservation.statut == 'EXPIREE' %}
+        <h2>Le délai est expiré</h2>
+        <p>Le paiement n’a pas été effectué dans les 24 heures. L’appartement est de nouveau disponible.</p>
+        <a class="button reservation-primary-action" href="{% url 'apartments:liste' %}">Rechercher un séjour <span>→</span></a>
+      {% elif reservation.statut == 'ANNULEE' %}
+        <h2>Demande annulée</h2>
+        <p>Cette réservation ne bloque plus les dates. Vous pouvez effectuer une nouvelle recherche à tout moment.</p>
+        <a class="button reservation-primary-action" href="{% url 'apartments:liste' %}">Nouvelle réservation <span>→</span></a>
+      {% elif reservation.statut == 'TERMINEE' %}
+        <h2>Séjour terminé</h2>
+        <p>Ce voyage appartient maintenant à votre historique de réservations.</p>
+        <a class="button reservation-primary-action" href="{% url 'apartments:liste' %}">Planifier un autre séjour <span>→</span></a>
+      {% else %}
+        <h2>{{ reservation.get_statut_display }}</h2>
+        <p>Consultez vos notifications pour suivre les dernières informations concernant cette demande.</p>
+        <a class="button reservation-primary-action" href="{% url 'notifications:liste' %}">Voir mes notifications <span>→</span></a>
+      {% endif %}
+      <div class="reservation-help"><span>?</span><p><strong>Besoin d’aide ?</strong>Votre numéro de référence est {{ reservation.numero_reservation }}.</p></div>
+    </aside>
+  </section>
 </main>
 {% endblock %}

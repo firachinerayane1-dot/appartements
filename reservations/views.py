@@ -3,15 +3,18 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_http_methods, require_POST
 
 from accounts.mixins import administrateur_required
-from apartments.models import Appartement
+from apartments.models import Appartement, Photo
 from services.reservation_services import creer_reservation
 from .forms import FiltreReservationAdminForm, ReservationForm
 from .models import Reservation
+from .policies import policies_context
 
 
 logger = logging.getLogger(__name__)
@@ -19,7 +22,11 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def reserver(request, appartement_id):
-    appartement = get_object_or_404(Appartement, pk=appartement_id, disponible=True)
+    appartement = get_object_or_404(
+        Appartement.objects.prefetch_related('photos'),
+        pk=appartement_id,
+        disponible=True,
+    )
     form = ReservationForm(request.POST or None, initial={'date_debut': request.GET.get('date_debut'), 'date_fin': request.GET.get('date_fin')})
     if request.method == 'POST' and form.is_valid():
         try:
@@ -49,6 +56,19 @@ def reserver(request, appartement_id):
                     "dans les 24 heures pour accéder au paiement.",
                 )
             return redirect('reservations:detail', pk=reservation.pk)
+    debut_valeur = form['date_debut'].value()
+    fin_valeur = form['date_fin'].value()
+    debut_affiche = debut_valeur if hasattr(debut_valeur, 'strftime') else parse_date(debut_valeur or '')
+    fin_affiche = fin_valeur if hasattr(fin_valeur, 'strftime') else parse_date(fin_valeur or '')
+    dates_preselectionnees = bool(debut_affiche and fin_affiche and fin_affiche > debut_affiche)
+    montant_estime = None
+    if dates_preselectionnees:
+        montant_estime = appartement.calculer_prix(
+            debut_affiche,
+            fin_affiche,
+            request.user,
+        )
+
     return render(
         request,
         'reservations/reserver.html',
@@ -58,6 +78,11 @@ def reserver(request, appartement_id):
             'tarif_nuit': appartement.tarif_pour_client(request.user),
             'date_debut': form['date_debut'].value(),
             'date_fin': form['date_fin'].value(),
+            'date_debut_affichee': debut_affiche,
+            'date_fin_affichee': fin_affiche,
+            'dates_preselectionnees': dates_preselectionnees,
+            'duree_sejour': (fin_affiche - debut_affiche).days if dates_preselectionnees else None,
+            'montant_estime': montant_estime,
         },
     )
 
@@ -65,13 +90,39 @@ def reserver(request, appartement_id):
 @login_required
 def mes_reservations(request):
     Reservation.expirer_en_attente()
-    reservations = request.user.reservations.select_related('appartement')
-    return render(request, 'reservations/mes_reservations.html', {'reservations': reservations})
+    photos = Photo.objects.order_by('-principale', 'pk')
+    reservations = list(
+        request.user.reservations.select_related('appartement').prefetch_related(
+            Prefetch(
+                'appartement__photos',
+                queryset=photos,
+                to_attr='photos_reservation',
+            )
+        )
+    )
+    return render(
+        request,
+        'reservations/mes_reservations.html',
+        {
+            'reservations': reservations,
+            'reservations_total': len(reservations),
+            'reservations_confirmees': sum(
+                reservation.statut == Reservation.CONFIRMEE
+                for reservation in reservations
+            ),
+            'reservations_en_attente': sum(
+                reservation.statut == Reservation.EN_ATTENTE
+                for reservation in reservations
+            ),
+        },
+    )
 
 
 @login_required
 def detail(request, pk):
-    queryset = Reservation.objects.select_related('appartement', 'client')
+    queryset = Reservation.objects.select_related('appartement', 'client').prefetch_related(
+        'appartement__photos'
+    )
     if not request.user.est_administrateur():
         queryset = queryset.filter(client=request.user)
     reservation = get_object_or_404(queryset, pk=pk)
@@ -108,7 +159,11 @@ def politiques(request, pk):
         messages.success(request, "Politiques acceptées. Vous pouvez maintenant payer par carte bancaire.")
         return redirect('payments:payer', reservation_id=reservation.pk)
 
-    return render(request, 'reservations/politiques.html', {'reservation': reservation})
+    return render(
+        request,
+        'reservations/politiques.html',
+        {'reservation': reservation, **policies_context(reservation)},
+    )
 
 
 @login_required

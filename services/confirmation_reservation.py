@@ -8,6 +8,8 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from PIL import Image, ImageDraw, ImageFont
 
+from reservations.policies import STAY_POLICIES, format_amount
+
 
 LARGEUR_PAGE = 1240
 HAUTEUR_PAGE = 1754
@@ -24,33 +26,8 @@ GRIS_CLAIR = '#E7E8EA'
 ROUGE_CLAIR = '#F8E8E4'
 ROUGE = '#923B32'
 
-POLITIQUES = [
-    (
-        'Garantie',
-        "Une garantie de {garantie} MAD est à remettre à l'arrivée sous forme "
-        "d'espèces ou de pré-autorisation sur carte bancaire. Elle est restituée "
-        "après vérification de l'état du logement et de ses équipements.",
-    ),
-    (
-        'Attribution',
-        "L'attribution du logement s'effectue le jour de l'arrivée selon les "
-        "disponibilités et l'organisation de la résidence.",
-    ),
-    (
-        'Départ tardif',
-        "Tout logement non libéré à partir de l'heure de départ est facturé à 50 % "
-        "au titre du Day-Use. Au-delà de 15 h, une nuit complète peut être facturée.",
-    ),
-    (
-        'Non-présentation',
-        "En cas de non-présentation, la réservation reste non modifiable, non "
-        "annulable et non remboursable.",
-    ),
-]
-
-
 def _format_montant(montant):
-    return f'{Decimal(montant):,.2f}'.replace(',', ' ').replace('.', ',')
+    return format_amount(montant)
 
 
 def _contexte_confirmation(paiement):
@@ -59,7 +36,7 @@ def _contexte_confirmation(paiement):
     garantie = _format_montant(settings.RAHAL_STAY_GUARANTEE_AMOUNT)
     politiques = [
         {'titre': titre, 'texte': texte.format(garantie=garantie)}
-        for titre, texte in POLITIQUES
+        for titre, texte in STAY_POLICIES
     ]
     return {
         'paiement': paiement,

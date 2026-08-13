@@ -92,12 +92,6 @@
     </div>
     {% if page_obj.paginator.num_pages > 1 %}<nav class="pagination" aria-label="Pagination">{% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&date_debut={{ request.GET.date_debut }}&date_fin={{ request.GET.date_fin }}">← Précédent</a>{% endif %}<span>Page <strong>{{ page_obj.number }}</strong> sur {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&date_debut={{ request.GET.date_debut }}&date_fin={{ request.GET.date_fin }}">Suivant →</a>{% endif %}</nav>{% endif %}
   </section>
-  {% else %}
-  <section class="dates-prompt shell" aria-labelledby="dates-prompt-title">
-    <span class="dates-prompt-number">02</span>
-    <div><p class="kicker">À vous de choisir</p><h2 id="dates-prompt-title">Quand souhaitez-vous vous évader ?</h2><p>Veuillez sélectionner une date d'arrivée et une date de départ pour afficher les appartements disponibles.</p></div>
-    <button type="button" class="dates-prompt-action" data-focus-dates><span>Choisir mes dates</span><b aria-hidden="true">↑</b></button>
-  </section>
   {% endif %}
 
   <section class="stay-gallery-section" aria-labelledby="stay-gallery-title">
