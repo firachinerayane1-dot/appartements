@@ -3,12 +3,13 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods, require_POST
 
 from accounts.mixins import administrateur_required
-from apartments.models import Appartement
+from apartments.models import Appartement, Photo
 from services.reservation_services import creer_reservation
 from .forms import FiltreReservationAdminForm, ReservationForm
 from .models import Reservation
@@ -65,8 +66,32 @@ def reserver(request, appartement_id):
 @login_required
 def mes_reservations(request):
     Reservation.expirer_en_attente()
-    reservations = request.user.reservations.select_related('appartement')
-    return render(request, 'reservations/mes_reservations.html', {'reservations': reservations})
+    photos = Photo.objects.order_by('-principale', 'pk')
+    reservations = list(
+        request.user.reservations.select_related('appartement').prefetch_related(
+            Prefetch(
+                'appartement__photos',
+                queryset=photos,
+                to_attr='photos_reservation',
+            )
+        )
+    )
+    return render(
+        request,
+        'reservations/mes_reservations.html',
+        {
+            'reservations': reservations,
+            'reservations_total': len(reservations),
+            'reservations_confirmees': sum(
+                reservation.statut == Reservation.CONFIRMEE
+                for reservation in reservations
+            ),
+            'reservations_en_attente': sum(
+                reservation.statut == Reservation.EN_ATTENTE
+                for reservation in reservations
+            ),
+        },
+    )
 
 
 @login_required

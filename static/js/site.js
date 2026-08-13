@@ -66,16 +66,23 @@ if (!reducedMotion && 'IntersectionObserver' in window) {
     '.dates-prompt > *',
     '.stay-gallery-heading > *',
     '.catalog-assurance article',
+    '.reservations-hero-copy > *',
+    '.reservations-hero-visual',
+    '.reservation-overview article',
+    '.reservation-list-heading > *',
+    '.reservation-card',
+    '.reservations-empty > *',
+    '.reservations-assurance .shell > *',
   ].join(','));
   revealItems.forEach((item, index) => {
     item.classList.add('scroll-reveal');
     const group = item.parentElement;
-    const siblings = group ? [...group.children].filter(child => child.matches('.property-card, .feature-grid article, .stat-card, .notification-card')) : [];
+    const siblings = group ? [...group.children].filter(child => child.matches('.property-card, .feature-grid article, .stat-card, .notification-card, .reservation-card, .reservation-overview article')) : [];
     const position = siblings.indexOf(item);
     if (position >= 0) item.style.setProperty('--reveal-delay', `${Math.min(position, 4) * 90}ms`);
   });
 
-  const imageItems = document.querySelectorAll('.residence-gallery figure, .map-card, .gallery, .stay-gallery-item');
+  const imageItems = document.querySelectorAll('.residence-gallery figure, .map-card, .gallery, .stay-gallery-item, .reservation-card-media, .reservations-empty-image');
   imageItems.forEach((item, index) => {
     item.classList.add('image-reveal');
     item.style.setProperty('--reveal-delay', `${Math.min(index, 4) * 80}ms`);
