@@ -66,6 +66,16 @@ if (!reducedMotion && 'IntersectionObserver' in window) {
     '.booking-hero-content > *',
     '.booking-confirm-card > *',
     '.booking-property-card',
+    '.reservation-detail-heading > *',
+    '.reservation-progress li',
+    '.reservation-stay-card',
+    '.reservation-information-card',
+    '.reservation-action-card > *',
+    '.policies-hero-content > *',
+    '.policies-document-heading > *',
+    '.policy-group',
+    '.policy-list article',
+    '.policies-accept-card > *',
   ].join(','));
   revealItems.forEach((item, index) => {
     item.classList.add('scroll-reveal');
@@ -75,7 +85,7 @@ if (!reducedMotion && 'IntersectionObserver' in window) {
     if (position >= 0) item.style.setProperty('--reveal-delay', `${Math.min(position, 4) * 90}ms`);
   });
 
-  const imageItems = document.querySelectorAll('.residence-gallery figure, .map-card, .gallery, .stay-gallery-item, .reservation-card-media, .reservations-empty-image, .booking-property-image');
+  const imageItems = document.querySelectorAll('.residence-gallery figure, .map-card, .gallery, .stay-gallery-item, .reservation-card-media, .reservations-empty-image, .booking-property-image, .reservation-stay-image');
   imageItems.forEach((item, index) => {
     item.classList.add('image-reveal');
     item.style.setProperty('--reveal-delay', `${Math.min(index, 4) * 80}ms`);

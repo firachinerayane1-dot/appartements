@@ -1,17 +1,27 @@
 Bonjour {{ reservation.client.prenom }},
 
 Votre réservation n°{{ reservation.numero_reservation }} pour {{ reservation.appartement }} a bien été créée.
+Séjour : du {{ reservation.date_debut|date:"d/m/Y" }} au {{ reservation.date_fin|date:"d/m/Y" }}.
 
-Avant de payer, veuillez prendre connaissance des politiques suivantes :
+Avant de payer, veuillez lire et accepter toutes les politiques suivantes.
 
-- L'appartement est maintenu pendant 24 heures à compter de la création de la réservation.
-- Le paiement est disponible uniquement par carte bancaire.
-- Le paiement confirme définitivement la réservation.
-- Après le paiement, la réservation ne peut plus être annulée.
-- Le tarif payé est non remboursable.
-- Sans paiement avant le {{ reservation.date_expiration|date:"d/m/Y à H:i" }}, la réservation expire et l'appartement redevient disponible.
+RÉSERVATION ET PAIEMENT
+{% for policy in booking_policies %}
+{{ forloop.counter }}. {{ policy.title }}
+{{ policy.text }}
+{% endfor %}
 
-Lire et accepter les politiques :
+PENDANT VOTRE SÉJOUR
+{% for policy in stay_policies %}
+{{ forloop.counter }}. {{ policy.title }}
+{{ policy.text }}
+{% endfor %}
+
+HORAIRES
+Arrivée / Check-in : {{ check_in }}
+Départ / Check-out : {{ check_out }}
+
+Pour accepter ces politiques et poursuivre vers le paiement :
 {{ lien_politiques }}
 
 {{ marque }}

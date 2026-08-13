@@ -14,6 +14,7 @@ from apartments.models import Appartement, Photo
 from services.reservation_services import creer_reservation
 from .forms import FiltreReservationAdminForm, ReservationForm
 from .models import Reservation
+from .policies import policies_context
 
 
 logger = logging.getLogger(__name__)
@@ -119,7 +120,9 @@ def mes_reservations(request):
 
 @login_required
 def detail(request, pk):
-    queryset = Reservation.objects.select_related('appartement', 'client')
+    queryset = Reservation.objects.select_related('appartement', 'client').prefetch_related(
+        'appartement__photos'
+    )
     if not request.user.est_administrateur():
         queryset = queryset.filter(client=request.user)
     reservation = get_object_or_404(queryset, pk=pk)
@@ -156,7 +159,11 @@ def politiques(request, pk):
         messages.success(request, "Politiques acceptées. Vous pouvez maintenant payer par carte bancaire.")
         return redirect('payments:payer', reservation_id=reservation.pk)
 
-    return render(request, 'reservations/politiques.html', {'reservation': reservation})
+    return render(
+        request,
+        'reservations/politiques.html',
+        {'reservation': reservation, **policies_context(reservation)},
+    )
 
 
 @login_required

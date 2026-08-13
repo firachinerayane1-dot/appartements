@@ -1,33 +1,65 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Politiques de réservation · FOSE Safar{% endblock %}
+{% block body_class %}policies-page{% endblock %}
 {% block content %}
-<main class="page-main">
-  <div class="shell" style="max-width:860px">
-    <div class="page-heading">
-      <div>
-        <p class="kicker">Avant le paiement</p>
-        <h1>Politiques de réservation</h1>
-        <p>Réservation n°{{ reservation.numero_reservation }} · {{ reservation.appartement }}</p>
-      </div>
-      <span class="status EN_ATTENTE">À accepter</span>
+<main>
+  <section class="policies-hero">
+    <div class="policies-hero-backdrop" aria-hidden="true"></div>
+    <div class="shell policies-hero-content">
+      <a class="policies-back-link" href="{% url 'reservations:detail' reservation.pk %}">← Retour à la réservation</a>
+      <p class="kicker light">Étape 2 sur 3</p>
+      <h1>Vos conditions<br><em>de séjour.</em></h1>
+      <p>Prenez connaissance des règles qui encadrent votre réservation avant de poursuivre vers le paiement.</p>
+      <div class="policies-reservation-meta"><span>N° {{ reservation.numero_reservation }}</span><span>{{ reservation.appartement }}</span><span>{{ reservation.date_debut|date:"d M" }} → {{ reservation.date_fin|date:"d M Y" }}</span></div>
     </div>
-    <section class="form-card">
-      <h2>Veuillez lire attentivement</h2>
-      <div class="surface" style="margin:1rem 0;background:var(--soft)">
-        <ul style="margin:0;padding-left:1.2rem;display:grid;gap:.7rem">
-          <li>Votre appartement est maintenu pendant 24 heures à compter de la création de la réservation.</li>
-          <li>Le paiement est disponible uniquement par carte bancaire.</li>
-          <li>Le paiement confirme définitivement la réservation.</li>
-          <li>Après le paiement, vous ne pourrez plus annuler la réservation.</li>
-          <li>Le tarif payé est non remboursable.</li>
-          <li>Sans paiement avant le {{ reservation.date_expiration|date:"d/m/Y à H:i" }}, la réservation expire et l’appartement redevient disponible.</li>
-        </ul>
+  </section>
+
+  <section class="policies-layout shell">
+    <div class="policies-document">
+      <div class="policies-document-heading">
+        <div><p class="kicker">À lire attentivement</p><h2>Politiques de réservation et de séjour</h2></div>
+        <span>7 règles essentielles</span>
       </div>
-      <form method="post">
-        {% csrf_token %}
-        <button class="button button-primary" type="submit">J’ai lu et j’accepte — Accéder au paiement</button>
-      </form>
-    </section>
-  </div>
+
+      <section class="policy-group" aria-labelledby="booking-policies-title">
+        <div class="policy-group-title"><span>01</span><div><h3 id="booking-policies-title">Réservation et paiement</h3><p>Les règles applicables avant et après la confirmation.</p></div></div>
+        <div class="policy-list">
+          {% for policy in booking_policies %}
+          <article><span>{{ forloop.counter|stringformat:"02d" }}</span><div><h4>{{ policy.title }}</h4><p>{{ policy.text }}</p></div></article>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="policy-group" aria-labelledby="stay-policies-title">
+        <div class="policy-group-title"><span>02</span><div><h3 id="stay-policies-title">Pendant votre séjour</h3><p>Les modalités d’accueil et d’utilisation du logement.</p></div></div>
+        <div class="policy-list">
+          {% for policy in stay_policies %}
+          <article><span>{{ forloop.counter|stringformat:"02d" }}</span><div><h4>{{ policy.title }}</h4><p>{{ policy.text }}</p></div></article>
+          {% endfor %}
+        </div>
+      </section>
+
+      <div class="policy-hours">
+        <div><small>Arrivée · Check-in</small><strong>{{ check_in }}</strong></div>
+        <span aria-hidden="true">→</span>
+        <div><small>Départ · Check-out</small><strong>{{ check_out }}</strong></div>
+      </div>
+    </div>
+
+    <aside class="policies-accept-card">
+      <span class="policies-lock" aria-hidden="true">✓</span>
+      <p class="kicker">Votre accord</p>
+      <h2>Prêt à continuer ?</h2>
+      <p>En validant, vous confirmez avoir lu et accepté l’ensemble des politiques affichées sur cette page.</p>
+      <dl>
+        <div><dt>Échéance</dt><dd>{{ reservation.date_expiration|date:"d/m/Y à H:i" }}</dd></div>
+        <div><dt>Garantie à l’arrivée</dt><dd>{{ guarantee }} MAD</dd></div>
+        <div><dt>Paiement</dt><dd>Carte bancaire</dd></div>
+      </dl>
+      <form method="post">{% csrf_token %}<button class="button policies-accept-button" type="submit"><span>J’ai lu et j’accepte</span><span aria-hidden="true">→</span></button></form>
+      <small>Vous serez ensuite redirigé vers le paiement.</small>
+    </aside>
+  </section>
 </main>
 {% endblock %}
