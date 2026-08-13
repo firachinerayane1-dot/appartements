@@ -239,3 +239,54 @@ class RechercheDisponibiliteTests(TestCase):
             resultat = list(appartements)
             for appartement in resultat:
                 list(appartement.photos_carte)
+
+    def test_administrateur_est_redirige_du_catalogue_vers_la_gestion(self):
+        administrateur = Utilisateur.objects.create_superuser(
+            email='admin-appartements@example.com',
+            password='mot-de-passe',
+            nom='Admin',
+            prenom='Appartements',
+        )
+        self.client.force_login(administrateur)
+
+        response = self.client.get(reverse('apartments:liste'))
+
+        self.assertRedirects(response, reverse('apartments:admin_liste'))
+        self.assertEqual(reverse('apartments:admin_liste'), '/appartements/gestion/')
+
+    def test_page_admin_affiche_modifier_et_supprimer(self):
+        administrateur = Utilisateur.objects.create_superuser(
+            email='gestion-appartements@example.com',
+            password='mot-de-passe',
+            nom='Gestion',
+            prenom='Admin',
+        )
+        self.client.force_login(administrateur)
+
+        response = self.client.get(reverse('apartments:admin_liste'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.libre.titre)
+        self.assertContains(response, reverse('apartments:modifier', args=(self.libre.pk,)))
+        self.assertContains(response, reverse('apartments:supprimer', args=(self.libre.pk,)))
+
+    def test_administrateur_peut_modifier_puis_supprimer_un_appartement(self):
+        administrateur = Utilisateur.objects.create_superuser(
+            email='actions-appartements@example.com',
+            password='mot-de-passe',
+            nom='Actions',
+            prenom='Admin',
+        )
+        appartement = self.creer_appartement('Appartement temporaire')
+        self.client.force_login(administrateur)
+
+        page_modification = self.client.get(
+            reverse('apartments:modifier', args=(appartement.pk,))
+        )
+        suppression = self.client.post(
+            reverse('apartments:supprimer', args=(appartement.pk,))
+        )
+
+        self.assertEqual(page_modification.status_code, 200)
+        self.assertRedirects(suppression, reverse('apartments:admin_liste'))
+        self.assertFalse(Appartement.objects.filter(pk=appartement.pk).exists())
