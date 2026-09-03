@@ -19,9 +19,9 @@ class InscriptionForm(UserCreationForm):
     )
     consentement_donnees = forms.BooleanField(
         required=True,
-        label="J’ai lu les politiques et j’accepte que mes données soient traitées.",
+        label="J’ai lu et compris la politique de confidentialité.",
         error_messages={
-            'required': "Vous devez accepter les politiques et le traitement de vos données.",
+            'required': "Vous devez lire et accepter la politique de confidentialité.",
         },
     )
 

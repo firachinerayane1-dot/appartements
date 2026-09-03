@@ -2,7 +2,7 @@
 {% load static %}
 {% block title %}Créer un compte · FOSE Safar{% endblock %}
 {% block body_class %}auth-body{% endblock %}
-{% block extra_head %}<link rel="stylesheet" href="{% static 'accounts/auth.css' %}?v=4">{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'accounts/auth.css' %}?v=5">{% endblock %}
 {% block content %}
 <main class="auth-page auth-signup">
   <section class="auth-showcase" aria-label="Présentation">
@@ -28,7 +28,7 @@
         <div id="matricule-container"><label for="{{ form.matricule.id_for_label }}">Matricule FM6</label>{{ form.matricule }}{{ form.matricule.errors }}</div>
         <label for="{{ form.password1.id_for_label }}">Mot de passe</label><div class="password-field">{{ form.password1 }}<button type="button" class="password-toggle" data-target="{{ form.password1.id_for_label }}">Afficher</button></div>{{ form.password1.errors }}
         <label for="{{ form.password2.id_for_label }}">Confirmer le mot de passe</label><div class="password-field">{{ form.password2 }}<button type="button" class="password-toggle" data-target="{{ form.password2.id_for_label }}">Afficher</button></div>{{ form.password2.errors }}
-        <label class="consent-checkbox" for="{{ form.consentement_donnees.id_for_label }}">{{ form.consentement_donnees }}<span>{{ form.consentement_donnees.label }}</span></label>{{ form.consentement_donnees.errors }}
+        <label class="consent-checkbox" for="{{ form.consentement_donnees.id_for_label }}">{{ form.consentement_donnees }}<span>J’ai lu et compris la <a href="{% url 'core:politique_confidentialite' %}">politique de confidentialité</a>.</span></label>{{ form.consentement_donnees.errors }}
         <button class="auth-submit" type="submit">Créer mon compte</button>
       </form>
     </div>

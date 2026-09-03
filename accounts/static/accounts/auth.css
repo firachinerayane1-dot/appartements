@@ -102,6 +102,8 @@ body.auth-body {
 .form-error { padding: .75rem; border-radius: .5rem; background: #fef2f2; color: #991b1b; font-size: .85rem; }
 .auth-legal { margin: .2rem 0 0; text-align: center; color: var(--auth-muted); font-size: .72rem; line-height: 1.5; }
 .consent-checkbox { display: grid !important; grid-template-columns: 20px 1fr; align-items: start; gap: .65rem; margin: .35rem 0 .15rem; color: var(--auth-muted) !important; font-weight: 600 !important; line-height: 1.45; cursor: pointer; }
+.consent-checkbox a { color: var(--auth-secondary); font-weight: 750; text-underline-offset: 2px; }
+.consent-checkbox a:hover { color: var(--auth-primary); }
 .auth-checkbox-input { width: 18px; height: 18px; margin: .15rem 0 0; accent-color: var(--auth-primary); cursor: pointer; }
 
 @media (max-width: 860px) {
