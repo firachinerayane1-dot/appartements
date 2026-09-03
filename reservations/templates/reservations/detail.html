@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Réservation n°{{ reservation.numero_reservation }} · FOSE Safar{% endblock %}
+{% block title %}Réservation n°{{ reservation.numero_reservation }} · FOSEH Safar{% endblock %}
 {% block body_class %}reservation-detail-page{% endblock %}
 {% block content %}
 <main>
@@ -33,7 +33,7 @@
       <article class="reservation-stay-card">
         <div class="reservation-stay-image">
           {% with photo=reservation.appartement.photos.all.0 %}
-          {% if photo %}<img src="{{ photo.image.url }}" alt="{{ photo.legende|default:reservation.appartement.titre }}">{% else %}<img src="{% static 'img/residence/salon-appartement.jpeg' %}" alt="Salon lumineux d’un appartement FOSE Safar">{% endif %}
+          {% if photo %}<img src="{{ photo.image.url }}" alt="{{ photo.legende|default:reservation.appartement.titre }}">{% else %}<img src="{% static 'img/residence/salon-appartement.jpeg' %}" alt="Salon lumineux d’un appartement FOSEH Safar">{% endif %}
           {% endwith %}
           <div><span>Votre appartement</span><strong>{{ reservation.appartement }}</strong><small>Amwaj · Sidi Rahal</small></div>
         </div>

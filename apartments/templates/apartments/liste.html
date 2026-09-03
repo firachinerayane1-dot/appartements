@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Nos appartements · FOSE Safar{% endblock %}
+{% block title %}Nos appartements · FOSEH Safar{% endblock %}
 {% block body_class %}apartments-page{% endblock %}
 {% block content %}
 <main>
@@ -19,7 +19,7 @@
         </div>
       </div>
       <aside class="apartments-hero-card" aria-label="Aperçu de l’appartement">
-        <img src="{% static 'img/residence/salon-appartement.jpeg' %}" alt="Salon lumineux de l’un des appartements FOSE Safar">
+        <img src="{% static 'img/residence/salon-appartement.jpeg' %}" alt="Salon lumineux de l’un des appartements FOSEH Safar">
         <div>
           <span>À l’intérieur</span>
           <strong>Des espaces faits pour se retrouver</strong>
@@ -72,7 +72,7 @@
           {% for photo in appartement.photos_carte|slice:":3" %}
           <img class="property-photo property-photo-{{ forloop.counter }}" src="{{ photo.image.url }}" alt="{% if forloop.first %}{{ photo.legende|default:appartement.titre }}{% else %}Vue {{ forloop.counter }} de {{ appartement.titre }}{% endif %}" {% if not forloop.first %}loading="lazy"{% endif %}>
           {% empty %}
-          <div class="property-placeholder"><span>FOSE Safar</span></div>
+          <div class="property-placeholder"><span>FOSEH Safar</span></div>
           {% endfor %}
           <span class="availability-tag"><i></i> Disponible</span>
           <span class="photo-count" aria-hidden="true">Voir les photos <b>↗</b></span>
@@ -114,7 +114,7 @@
     <div class="shell gallery-progress" aria-hidden="true"><span></span></div>
   </section>
 
-  <section class="catalog-assurance shell" aria-label="Les avantages FOSE Safar">
+  <section class="catalog-assurance shell" aria-label="Les avantages FOSEH Safar">
     <article><span>01</span><div><strong>Réservation sereine</strong><p>Vos dates et votre séjour sont récapitulés avant confirmation.</p></div></article>
     <article><span>02</span><div><strong>Résidence privée</strong><p>Un environnement calme avec piscine, jardins et parking.</p></div></article>
     <article><span>03</span><div><strong>Des photos fidèles</strong><p>Les images présentées montrent les espaces de votre séjour.</p></div></article>

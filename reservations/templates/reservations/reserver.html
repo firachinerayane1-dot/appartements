@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Confirmer {{ appartement.titre }} · FOSE Safar{% endblock %}
+{% block title %}Confirmer {{ appartement.titre }} · FOSEH Safar{% endblock %}
 {% block body_class %}booking-page{% endblock %}
 {% block content %}
 <main>
@@ -54,7 +54,7 @@
     <aside class="booking-property-card">
       <div class="booking-property-image">
         {% with photo=appartement.photos.all.0 %}
-        {% if photo %}<img src="{{ photo.image.url }}" alt="{{ photo.legende|default:appartement.titre }}">{% else %}<img src="{% static 'img/residence/salon-appartement.jpeg' %}" alt="Salon lumineux d’un appartement FOSE Safar">{% endif %}
+        {% if photo %}<img src="{{ photo.image.url }}" alt="{{ photo.legende|default:appartement.titre }}">{% else %}<img src="{% static 'img/residence/salon-appartement.jpeg' %}" alt="Salon lumineux d’un appartement FOSEH Safar">{% endif %}
         {% endwith %}
         <span>Résidence Amwaj</span>
       </div>
