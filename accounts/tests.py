@@ -101,8 +101,14 @@ class InscriptionTests(TestCase):
             'password2': 'Mot-de-passe-tres-solide-2027',
         })
 
-        self.assertContains(response, 'Vous devez accepter les politiques')
+        self.assertContains(response, 'Vous devez lire et accepter la politique de confidentialité')
         self.assertFalse(Utilisateur.objects.filter(email='sans-consentement@example.com').exists())
+
+    def test_inscription_affiche_le_lien_vers_la_politique_de_confidentialite(self):
+        response = self.client.get(reverse('accounts:inscription'))
+
+        self.assertContains(response, 'J’ai lu et compris la')
+        self.assertContains(response, reverse('core:politique_confidentialite'))
 
     def test_connexion_redirige_vers_accueil_meme_avec_next(self):
         utilisateur = Utilisateur.objects.create_user(
