@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Mes réservations · FOSE Safar{% endblock %}
+{% block title %}Mes réservations · FOSEH Safar{% endblock %}
 {% block body_class %}reservations-page{% endblock %}
 {% block content %}
 <main>
@@ -40,7 +40,7 @@
         <a class="reservation-card-media" href="{% url 'reservations:detail' r.pk %}" aria-label="Voir la réservation {{ r.numero_reservation }}">
           {% with photo=r.appartement.photos_reservation.0 %}
           {% if photo %}<img src="{{ photo.image.url }}" alt="{{ photo.legende|default:r.appartement.titre }}" {% if not forloop.first %}loading="lazy"{% endif %}>
-          {% else %}<img src="{% static 'img/residence/salon-appartement.jpeg' %}" alt="Salon lumineux d’un appartement FOSE Safar" {% if not forloop.first %}loading="lazy"{% endif %}>{% endif %}
+          {% else %}<img src="{% static 'img/residence/salon-appartement.jpeg' %}" alt="Salon lumineux d’un appartement FOSEH Safar" {% if not forloop.first %}loading="lazy"{% endif %}>{% endif %}
           {% endwith %}
           <span class="reservation-reference">N° {{ r.numero_reservation }}</span>
           <span class="status reservation-card-status {{ r.statut }}"><i></i>{{ r.get_statut_display }}</span>

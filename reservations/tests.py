@@ -495,9 +495,9 @@ class ReglesReservationTests(TestCase):
         confirmation = mail.outbox[0]
         self.assertEqual(
             confirmation.subject,
-            f'Booking Reference Number {reservation.numero_reservation} - CONFIRMED, FOSE SAFAR',
+            f'Booking Reference Number {reservation.numero_reservation} - CONFIRMED, FOSEH SAFAR',
         )
-        self.assertTrue(confirmation.from_email.startswith('FOSE Safar <'))
+        self.assertTrue(confirmation.from_email.startswith('FOSEH Safar <'))
         self.assertIn('NON ANNULABLE - NON REMBOURSABLE', confirmation.body)
         self.assertIn(reservation.appartement.titre, confirmation.body)
         self.assertEqual(len(confirmation.alternatives), 1)
