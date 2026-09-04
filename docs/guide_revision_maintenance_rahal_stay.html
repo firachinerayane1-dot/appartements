@@ -506,13 +506,15 @@
   <h3>Fenêtre de paiement de 24 heures</h3>
   <p>
     <code>date_expiration = date_reservation + 24 h</code>. Après cette limite, une réservation
-    en attente est marquée expirée quand un écran ou une opération appelle la logique d’expiration.
-    Les recherches de disponibilité ignorent directement les attentes trop anciennes.
+    en attente et non payée est marquée expirée. Une notification interne unique informe le client
+    que sa réservation a expiré et que le logement est de nouveau disponible. Les recherches de
+    disponibilité ignorent directement les attentes trop anciennes.
   </p>
-  <div class="callout warning">
-    <strong>Important.</strong> Il n’existe pas de tâche planifiée qui expire toutes les réservations
-    exactement à l’échéance. L’état est corrigé lors de l’ouverture de certaines pages ou opérations.
-    Pour un statut à jour en permanence, ajouter une commande de gestion exécutée périodiquement.
+  <div class="callout">
+    <strong>Tâche périodique.</strong> La commande
+    <code>python manage.py expirer_reservations</code> traite toutes les échéances dépassées.
+    La planifier toutes les cinq minutes avec le planificateur de l’hébergement. Les consultations
+    de pages continuent également d’appliquer cette logique si nécessaire.
   </div>
 
   <h3>Annulation</h3>
@@ -953,7 +955,7 @@ pg_restore --clean --if-exists --dbname=NOM_BASE_CIBLE rahal-stay-AAAA-MM-JJ.dum
   <ol>
     <li><strong>Paiement simulé :</strong> remplacer avant tout encaissement réel.</li>
     <li><strong>Paramètres de développement par défaut :</strong> rendre les secrets obligatoires en production.</li>
-    <li><strong>Expiration non planifiée :</strong> ajouter une tâche périodique si les statuts doivent être exacts sans consultation.</li>
+    <li><strong>Planification externe :</strong> vérifier en production que la commande <code>expirer_reservations</code> est exécutée périodiquement.</li>
     <li><strong>Journalisation minimale :</strong> configurer logs structurés, suivi des erreurs et corrélation par numéro de réservation.</li>
     <li><strong>Tests concentrés :</strong> compléter les tests dédiés à payments, notifications et dashboard, actuellement presque vides.</li>
     <li><strong>Pas de statut terminé automatique :</strong> décider quand un séjour devient <code>TERMINEE</code>.</li>

@@ -4,8 +4,8 @@ from .models import Notification
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('client', 'date_envoi', 'lue', 'message_court')
-    list_filter = ('lue', 'date_envoi')
+    list_display = ('client', 'categorie', 'reservation', 'date_envoi', 'lue', 'message_court')
+    list_filter = ('categorie', 'lue', 'date_envoi')
     search_fields = ('client__email', 'message')
 
     @admin.display(description='Message')

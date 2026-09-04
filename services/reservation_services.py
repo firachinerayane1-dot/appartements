@@ -51,11 +51,9 @@ def creer_reservation(client, appartement, date_debut, date_fin):
 
     # Les attentes périmées ne participent plus ni à la disponibilité du
     # logement, ni aux conflits de l'adhérent.
-    Reservation.objects.filter(
-        client=client,
-        statut=Reservation.EN_ATTENTE,
-        date_reservation__lte=timezone.now() - Reservation.DELAI_PAIEMENT,
-    ).update(statut=Reservation.EXPIREE)
+    Reservation.expirer_en_attente(
+        Reservation.objects.filter(client=client)
+    )
 
     reservation = Reservation(
         client=client,
@@ -85,11 +83,9 @@ def modifier_reservation(reservation, *, date_debut, date_fin, appartement=None)
     appartements = _verrouiller_appartements(reservation.appartement_id, appartement_id)
     appartement = appartements[appartement_id]
 
-    Reservation.objects.filter(
-        client=client,
-        statut=Reservation.EN_ATTENTE,
-        date_reservation__lte=timezone.now() - Reservation.DELAI_PAIEMENT,
-    ).exclude(pk=reservation.pk).update(statut=Reservation.EXPIREE)
+    Reservation.expirer_en_attente(
+        Reservation.objects.filter(client=client).exclude(pk=reservation.pk)
+    )
 
     reservation.client = client
     reservation.appartement = appartement
