@@ -1,37 +1,49 @@
 {% extends "base.html" %}
-{% block title %}Paiement par carte · FOSEH Safar{% endblock %}
+{% block title %}Paiement par virement · FOSEH Safar{% endblock %}
+{% block body_class %}transfer-page{% endblock %}
 {% block content %}
 <main class="page-main">
   <div class="shell">
-    <div class="page-heading">
+    <a class="transfer-back" href="{% url 'reservations:detail' reservation.pk %}">← Ma réservation</a>
+    <header class="transfer-heading">
+      <div><p class="kicker">Votre séjour se prépare</p><h1>Un virement.<br>Et bientôt, les vacances.</h1><p>Effectuez votre paiement, transmettez le reçu au support et laissez-nous confirmer votre séjour avec vous.</p></div>
+      <span class="transfer-step">02 / 03 <small>Paiement par virement</small></span>
+    </header>
+    <div class="transfer-deadline"><span aria-hidden="true">◷</span><div><strong>Vos dates sont bloquées jusqu’au {{ reservation.date_expiration|date:"d F Y à H:i" }}</strong><p>Sans validation par l’administration dans les 24 heures, la réservation expire et les dates sont remises à disposition.</p></div></div>
+    <div class="transfer-layout">
       <div>
-        <p class="kicker">Paiement sécurisé par carte</p>
-        <h1>Confirmez votre réservation</h1>
-        <p>Aucune donnée bancaire réelle n’est envoyée ou conservée dans cette simulation.</p>
+        <section class="transfer-card" aria-labelledby="bank-title">
+          <div class="transfer-card-title"><span class="transfer-icon" aria-hidden="true">↗</span><div><p class="kicker">Virement bancaire</p><h2 id="bank-title">Les coordonnées du compte</h2></div><span class="transfer-currency">MAD</span></div>
+          {% if banque_configuree %}
+          <dl class="transfer-bank-details">
+            <div><dt>Banque</dt><dd>{{ banque.nom }}</dd></div>
+            <div><dt>Titulaire du compte</dt><dd>{{ banque.titulaire }}</dd></div>
+            <div class="transfer-rib"><dt>RIB</dt><dd>{{ banque.rib }}</dd></div>
+            {% if banque.iban %}<div><dt>IBAN</dt><dd>{{ banque.iban }}</dd></div>{% endif %}
+            {% if banque.bic %}<div><dt>BIC / SWIFT</dt><dd>{{ banque.bic }}</dd></div>{% endif %}
+            <div><dt>Référence à indiquer dans le virement</dt><dd class="transfer-reference">{{ reservation.numero_reservation }}</dd></div>
+          </dl>
+          <p class="transfer-note">Vérifiez le titulaire et le RIB avant de valider votre virement. Le montant à verser est de <strong>{{ reservation.montant_total }} MAD</strong>.</p>
+          {% else %}
+          <div class="transfer-unavailable" role="status"><strong>Coordonnées bancaires en attente de publication</strong><p>Contactez le support pour obtenir les coordonnées officielles avant tout virement. Le délai de réservation reste applicable.</p></div>
+          {% endif %}
+        </section>
+        <section class="transfer-card" aria-labelledby="instructions-title">
+          <p class="kicker">Trois étapes simples</p><h2 id="instructions-title">Comment confirmer votre séjour</h2>
+          <ol class="transfer-instructions">
+            <li><span>1</span><div><h3>Effectuez le virement</h3><p>Versez {{ reservation.montant_total }} MAD et indiquez <strong>{{ reservation.numero_reservation }}</strong> comme référence. Conservez votre reçu bancaire.</p></div></li>
+            <li><span>2</span><div><h3>Envoyez votre reçu sur WhatsApp</h3><p>Transmettez votre <strong>numéro de réservation et le reçu du paiement</strong>. Le message est prérempli ; ajoutez vous-même le reçu en pièce jointe dans WhatsApp.</p></div></li>
+            <li><span>3</span><div><h3>Échangez avec notre support</h3><p>Le support vous contacte pour vérifier votre séjour. Après vérification du virement, l’administrateur valide votre réservation. Vous recevez alors la confirmation par email.</p></div></li>
+          </ol>
+          {% if whatsapp_url %}<a class="button transfer-whatsapp" href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer">Envoyer mon reçu sur WhatsApp <span aria-hidden="true">↗</span></a>{% else %}<p class="transfer-unavailable">Le contact WhatsApp sera disponible prochainement. Contactez le support à <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.</p>{% endif %}
+          <p class="transfer-note">Un reçu envoyé ne constitue pas une confirmation et ne prolonge pas le délai. Si votre virement est déjà parti mais que le délai expire, contactez le support avant tout nouveau paiement.</p>
+        </section>
       </div>
-      <span class="status EN_ATTENTE">Étape finale</span>
-    </div>
-    <div class="form-layout">
-      <form class="form-card" method="post">
-        {% csrf_token %}
-        <div class="surface" style="margin-bottom:1.2rem;background:#fff5f3">
-          <strong>Condition de paiement acceptée</strong>
-          <p style="margin:.4rem 0 0">Après paiement, vous ne pourrez plus annuler la réservation et le tarif ne sera pas remboursable.</p>
-        </div>
-        {{ form.as_p }}
-        <button class="button button-primary" type="submit">Payer {{ reservation.montant_total }} MAD par carte</button>
-        <p style="color:var(--muted);font-size:.75rem">La réservation expire le {{ reservation.date_expiration|date:"d/m/Y à H:i" }} si le paiement n’est pas finalisé.</p>
-      </form>
-      <aside class="summary-card">
-        <p class="kicker light">Récapitulatif</p>
-        <h2>{{ reservation.appartement }}</h2>
-        <dl>
-          <dt>Réservation</dt><dd>{{ reservation.numero_reservation }}</dd>
-          <dt>Arrivée</dt><dd>{{ reservation.date_debut|date:"d/m/Y" }}</dd>
-          <dt>Départ</dt><dd>{{ reservation.date_fin|date:"d/m/Y" }}</dd>
-          <dt>Durée</dt><dd>{{ reservation.get_duree }} nuits</dd>
-          <dt>Total</dt><dd>{{ reservation.montant_total }} MAD</dd>
-        </dl>
+      <aside class="transfer-summary">
+        <span class="transfer-status">En attente de validation</span><p class="kicker light">Votre escapade</p><h2>{{ reservation.appartement }}</h2><p>Résidence Amwaj · Sidi Rahal</p>
+        <dl><div><dt>Réservation</dt><dd>{{ reservation.numero_reservation }}</dd></div><div><dt>Arrivée</dt><dd>{{ reservation.date_debut|date:"d M Y" }}</dd></div><div><dt>Départ</dt><dd>{{ reservation.date_fin|date:"d M Y" }}</dd></div><div><dt>Durée</dt><dd>{{ reservation.get_duree }} nuit{{ reservation.get_duree|pluralize }}</dd></div></dl>
+        <div class="transfer-total"><span>Montant à verser</span><strong>{{ reservation.montant_total }} <small>MAD</small></strong></div>
+        <p class="transfer-accepted">✓ Conditions acceptées le {{ reservation.politiques_acceptees_le|date:"d/m/Y à H:i" }}</p><a href="{% url 'reservations:politiques_generales' %}">Relire les politiques de réservation →</a>
       </aside>
     </div>
   </div>

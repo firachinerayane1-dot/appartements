@@ -1,23 +1,18 @@
-import logging
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
 from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_http_methods, require_POST
 
 from accounts.mixins import administrateur_required
 from apartments.models import Appartement, Photo
 from services.reservation_services import creer_reservation
-from .forms import FiltreReservationAdminForm, ReservationForm
+from .forms import AcceptationPolitiquesForm, FiltreReservationAdminForm, ReservationForm
 from .models import Reservation
 from .policies import policies_context
 
-
-logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -27,35 +22,15 @@ def reserver(request, appartement_id):
         pk=appartement_id,
         disponible=True,
     )
-    form = ReservationForm(request.POST or None, initial={'date_debut': request.GET.get('date_debut'), 'date_fin': request.GET.get('date_fin')})
+    form = ReservationForm(request.POST if request.method == 'POST' else None, initial={'date_debut': request.GET.get('date_debut'), 'date_fin': request.GET.get('date_fin')})
     if request.method == 'POST' and form.is_valid():
         try:
             reservation = creer_reservation(request.user, appartement, **form.cleaned_data)
         except ValidationError as exc:
             form.add_error(None, exc.messages[0])
         else:
-            lien_politiques = request.build_absolute_uri(
-                reverse('reservations:politiques', args=(reservation.pk,))
-            )
-            try:
-                reservation.envoyer_email_politiques(lien_politiques)
-            except Exception:
-                logger.exception(
-                    "Échec de l'envoi des politiques pour la réservation %s",
-                    reservation.numero_reservation,
-                )
-                messages.warning(
-                    request,
-                    "La réservation est créée, mais l'e-mail n'a pas pu être envoyé. "
-                    "Vous pouvez consulter les politiques depuis cette page.",
-                )
-            else:
-                messages.success(
-                    request,
-                    "Réservation créée. Consultez votre e-mail et acceptez les politiques "
-                    "dans les 24 heures pour accéder au paiement.",
-                )
-            return redirect('reservations:detail', pk=reservation.pk)
+            messages.success(request, "Dates bloquées pendant 24 heures. Effectuez le virement et envoyez votre reçu au support pour validation.")
+            return redirect('payments:payer', reservation_id=reservation.pk)
     debut_valeur = form['date_debut'].value()
     fin_valeur = form['date_fin'].value()
     debut_affiche = debut_valeur if hasattr(debut_valeur, 'strftime') else parse_date(debut_valeur or '')
@@ -130,40 +105,29 @@ def detail(request, pk):
     return render(request, 'reservations/detail.html', {'reservation': reservation, 'recap': reservation.generer_recap()})
 
 
+@require_http_methods(['GET'])
+def politiques_generales(request):
+    return render(request, 'reservations/politiques.html', policies_context())
+
+
 @login_required
 @require_http_methods(['GET', 'POST'])
 def politiques(request, pk):
-    reservation = get_object_or_404(
-        Reservation.objects.select_related('appartement', 'client'),
-        pk=pk,
-        client=request.user,
-    )
-    if reservation.expirer_si_necessaire():
-        messages.error(
-            request,
-            "Le délai de paiement de 24 heures est expiré. L'appartement est de nouveau disponible.",
-        )
-        return redirect('reservations:detail', pk=reservation.pk)
-    if reservation.statut != Reservation.EN_ATTENTE:
-        messages.info(request, "Cette réservation ne peut plus être payée.")
-        return redirect('reservations:detail', pk=reservation.pk)
-    if reservation.politiques_acceptees_le:
-        return redirect('payments:payer', reservation_id=reservation.pk)
-
-    if request.method == 'POST':
+    reservation = get_object_or_404(Reservation, pk=pk, client=request.user)
+    reservation.expirer_si_necessaire()
+    form = AcceptationPolitiquesForm(request.POST if request.method == 'POST' else None)
+    peut_accepter = reservation.statut == Reservation.EN_ATTENTE and not reservation.politiques_acceptees_le
+    if request.method == 'POST' and peut_accepter and form.is_valid():
         try:
             reservation.accepter_politiques()
         except ValidationError as exc:
-            messages.error(request, exc.messages[0])
-            return redirect('reservations:detail', pk=reservation.pk)
-        messages.success(request, "Politiques acceptées. Vous pouvez maintenant payer par carte bancaire.")
-        return redirect('payments:payer', reservation_id=reservation.pk)
-
-    return render(
-        request,
-        'reservations/politiques.html',
-        {'reservation': reservation, **policies_context(reservation)},
-    )
+            form.add_error(None, exc.messages[0])
+        else:
+            return redirect('payments:payer', reservation_id=reservation.pk)
+    return render(request, 'reservations/politiques.html', {
+        'reservation': reservation, 'form': form, 'peut_accepter': peut_accepter,
+        **policies_context(reservation),
+    })
 
 
 @login_required
@@ -201,7 +165,7 @@ def admin_liste(request):
 def admin_annuler(request, pk):
     reservation = get_object_or_404(Reservation, pk=pk)
     try:
-        reservation.annuler()
+        reservation.annuler(motif=request.POST.get('motif', 'CLIENT'), administrateur=request.user)
     except ValidationError as exc:
         messages.error(request, exc.messages[0])
         return redirect('reservations:admin_liste')

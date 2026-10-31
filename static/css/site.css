@@ -994,3 +994,58 @@ button, input, select, textarea { font: inherit; }
   .policy-hours strong { font-size: 1.4rem; }
   .policies-accept-card { padding: 1.35rem; }
 }
+
+/* Virement bancaire et consentement explicite */
+.policy-consent { margin: 1.5rem 0; padding: 1.15rem; background: #f4f5ef; border: 1px solid #d9dfd5; border-radius: 12px; }
+.policy-consent > div { display: flex; align-items: flex-start; gap: .8rem; }
+.policy-consent input[type="checkbox"] { flex: 0 0 20px; width: 20px; height: 20px; margin: .2rem 0 0; accent-color: #244c40; }
+.policy-consent label { font-size: .9rem; line-height: 1.65; cursor: pointer; }
+.policy-consent a { text-decoration: underline; text-underline-offset: 3px; color: #244c40; }
+.transfer-page { background: #f6f4ee; }
+.transfer-back { color: #566b60; font-size: .85rem; }
+.transfer-heading { display: flex; justify-content: space-between; gap: 2rem; align-items: center; margin: 2.5rem 0; }
+.transfer-heading h1 { font: 500 clamp(2.4rem, 5vw, 4.2rem)/1.12 Georgia, serif; color: #203e34; margin: .7rem 0 1rem; letter-spacing: -.04em; }
+.transfer-heading p:last-child { max-width: 590px; color: #68736b; line-height: 1.8; }
+.transfer-step { font: 400 2rem Georgia, serif; color: #305448; text-align: right; }
+.transfer-step small { display: block; font: 500 .75rem/2 sans-serif; color: #68736b; }
+.transfer-deadline { display: flex; align-items: center; gap: 1rem; border: 1px solid #dfd4b9; background: #f4eddc; padding: 1.2rem 1.5rem; border-radius: 14px; margin-bottom: 1.5rem; color: #705a32; }
+.transfer-deadline > span { font-size: 2rem; }
+.transfer-deadline strong { font-size: .95rem; }
+.transfer-deadline p { margin: .4rem 0 0; font-size: .85rem; line-height: 1.6; }
+.transfer-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 1.5rem; align-items: start; }
+.transfer-card { background: #fff; border: 1px solid #e5e6dc; padding: clamp(1.25rem, 3vw, 2.2rem); border-radius: 18px; margin-bottom: 1.5rem; }
+.transfer-card h2 { font: 500 1.7rem/1.25 Georgia, serif; color: #203e34; margin: .3rem 0; }
+.transfer-card-title { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.7rem; }
+.transfer-icon { background: #ecf0e9; color: #305448; width: 48px; height: 48px; display: grid; place-items: center; border-radius: 12px; font-size: 1.5rem; flex-shrink: 0; }
+.transfer-currency { margin-left: auto; font-size: .7rem; background: #f3f4ef; padding: .5rem; border-radius: 6px; }
+.transfer-bank-details { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; }
+.transfer-bank-details dt { font-size: .75rem; color: #6d786f; margin-bottom: .45rem; }
+.transfer-bank-details dd { margin: 0; font-size: 1rem; font-weight: 600; color: #273f35; overflow-wrap: anywhere; }
+.transfer-bank-details .transfer-rib { grid-column: 1 / -1; background: #f3f5ef; border: 1px dashed #bdc8b8; padding: 1.2rem; border-radius: 10px; }
+.transfer-rib dd { font-family: monospace; font-size: 1.2rem; letter-spacing: .08em; }
+.transfer-reference { font-family: monospace; }
+.transfer-note { font-size: .8rem; line-height: 1.8; color: #6a746d; margin: 1.5rem 0 0; }
+.transfer-instructions { padding: 0; margin: 1.8rem 0; list-style: none; }
+.transfer-instructions li { display: flex; align-items: flex-start; gap: 1rem; margin: 1.5rem 0; }
+.transfer-instructions li > span { width: 30px; height: 30px; flex-shrink: 0; display: grid; place-items: center; border: 1px solid #d4ddce; border-radius: 50%; color: #345745; font-size: .8rem; }
+.transfer-instructions h3 { font-size: .95rem; color: #263e33; margin: .25rem 0 .5rem; }
+.transfer-instructions p { font-size: .85rem; line-height: 1.8; color: #69746d; margin: 0; }
+.transfer-whatsapp { display: flex; justify-content: space-between; gap: 1rem; width: 100%; background: #246746; color: #fff; border-radius: 10px; padding: 1rem 1.2rem; }
+.transfer-whatsapp:hover { background: #194e33; color: #fff; }
+.transfer-unavailable { background: #faf5e9; color: #715b32; border-radius: 10px; padding: 1rem; line-height: 1.7; font-size: .9rem; }
+.transfer-unavailable a { text-decoration: underline; overflow-wrap: anywhere; }
+.transfer-summary { background: #213e34; color: #fff; padding: 2rem; border-radius: 18px; position: sticky; top: 110px; }
+.transfer-status { display: inline-block; font-size: .7rem; border: 1px solid #647768; border-radius: 20px; padding: .5rem .8rem; color: #e5dcc1; margin-bottom: 2rem; }
+.transfer-summary h2 { font: 500 2rem/1.25 Georgia, serif; margin: .5rem 0; }
+.transfer-summary > p { font-size: .8rem; color: #c1cec4; }
+.transfer-summary dl { margin: 2rem 0; }
+.transfer-summary dl div { display: flex; justify-content: space-between; gap: 1rem; padding: .8rem 0; border-bottom: 1px solid #40574a; font-size: .85rem; }
+.transfer-summary dt { color: #bfcec2; }
+.transfer-summary dd { margin: 0; text-align: right; }
+.transfer-total span { display: block; color: #d7d8bf; font-size: .8rem; margin-bottom: .6rem; }
+.transfer-total strong { font: 500 2.5rem Georgia, serif; }
+.transfer-total small { font: 500 .9rem sans-serif; }
+.transfer-summary .transfer-accepted { margin-top: 2rem; line-height: 1.7; }
+.transfer-summary > a { color: #ecdfb7; font-size: .8rem; text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 800px) { .transfer-layout { grid-template-columns: 1fr; } .transfer-summary { position: static; } .transfer-step { display: none; } }
+@media (max-width: 480px) { .transfer-bank-details { grid-template-columns: 1fr; } .transfer-card-title { gap: .6rem; } .transfer-card h2 { font-size: 1.4rem; } .transfer-currency { display: none; } .transfer-deadline { align-items: flex-start; padding: 1rem; } }

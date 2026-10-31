@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Valider le virement · Administration{% endblock %}
+{% block content %}
+<main class="page-main"><div class="shell">
+  <div class="page-heading"><div><p class="kicker">Administration · Vérification du paiement</p><h1>Confirmer la réservation</h1><p>La validation enregistre le paiement, confirme le séjour et envoie l’email avec le PDF au client.</p></div></div>
+  <div class="form-layout">
+    <form class="form-card" method="post">{% csrf_token %}{{ form.as_p }}<button type="submit" class="button button-primary">Valider le virement et confirmer</button><p><a href="{% url 'reservations:admin_liste' %}">Retour aux réservations</a></p></form>
+    <aside class="summary-card"><p class="kicker light">Virement à vérifier</p><h2>{{ reservation.numero_reservation }}</h2><dl><dt>Client</dt><dd>{{ reservation.client }}</dd><dt>Email</dt><dd>{{ reservation.client.email }}</dd><dt>Appartement</dt><dd>{{ reservation.appartement }}</dd><dt>Séjour</dt><dd>{{ reservation.date_debut|date:"d/m/Y" }} → {{ reservation.date_fin|date:"d/m/Y" }}</dd><dt>Montant à recevoir</dt><dd>{{ reservation.montant_total }} MAD</dd><dt>Échéance de validation</dt><dd>{{ reservation.date_expiration|date:"d/m/Y à H:i" }}</dd></dl></aside>
+  </div>
+</div></main>
+{% endblock %}

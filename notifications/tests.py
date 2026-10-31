@@ -57,7 +57,7 @@ class NotificationExpirationReservationTests(TestCase):
         self.assertIsNotNone(notification.date_envoi)
         self.assertFalse(notification.lue)
         self.assertIn(self.reservation.numero_reservation, notification.message)
-        self.assertIn("paiement n'a pas été effectué", notification.message)
+        self.assertIn("paiement n’a pas été validé", notification.message)
         self.assertIn('24 heures', notification.message)
 
     def test_expiration_est_idempotente(self):
@@ -80,8 +80,9 @@ class NotificationExpirationReservationTests(TestCase):
         self.assertEqual(self.reservation.statut, Reservation.EN_ATTENTE)
         self.assertFalse(Notification.objects.exists())
 
-    def test_reservation_payee_n_expire_pas(self):
+    def test_reservation_confirmee_n_expire_pas(self):
         self.rendre_reservation_ancienne()
+        Reservation.objects.filter(pk=self.reservation.pk).update(statut=Reservation.CONFIRMEE)
         Paiement.objects.create(
             reservation=self.reservation,
             montant=self.reservation.montant_total,
@@ -93,7 +94,7 @@ class NotificationExpirationReservationTests(TestCase):
         self.assertEqual(Reservation.expirer_en_attente(), 0)
 
         self.reservation.refresh_from_db()
-        self.assertEqual(self.reservation.statut, Reservation.EN_ATTENTE)
+        self.assertEqual(self.reservation.statut, Reservation.CONFIRMEE)
         self.assertFalse(Notification.objects.exists())
 
     def test_commande_expire_et_notifie_les_clients(self):

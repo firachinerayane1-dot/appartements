@@ -10,11 +10,11 @@
       <a class="booking-back-link" href="{% url 'apartments:detail' appartement.pk %}?date_debut={{ date_debut }}&amp;date_fin={{ date_fin }}">← Retour à l’appartement</a>
       <p class="kicker light">Dernière vérification</p>
       <h1>Confirmez votre séjour.</h1>
-      <p>Vos dates sont réservées pendant 24 heures après validation, le temps d’accepter les politiques et de procéder au paiement.</p>
+      <p>Acceptez les conditions pour bloquer vos dates pendant 24 heures, puis effectuez votre virement et faites valider votre réservation.</p>
       <ol class="booking-steps" aria-label="Étapes de réservation">
-        <li class="active"><span>01</span><strong>Confirmation</strong></li>
-        <li><span>02</span><strong>Politiques</strong></li>
-        <li><span>03</span><strong>Paiement</strong></li>
+        <li class="active"><span>01</span><strong>Dates et conditions</strong></li>
+        <li><span>02</span><strong>Virement</strong></li>
+        <li><span>03</span><strong>Validation</strong></li>
       </ol>
     </div>
   </section>
@@ -47,8 +47,12 @@
         </div>
       {% endif %}
 
-      <div class="booking-policy-note"><span aria-hidden="true">i</span><div><strong>Aucun paiement maintenant</strong><p>Après confirmation, vous recevrez les politiques par e-mail. Vous disposerez de 24 heures pour les accepter et payer par carte.</p></div></div>
-      <button class="button booking-submit" type="submit"><span>Confirmer ma demande</span><span aria-hidden="true">→</span></button>
+      <div class="booking-policy-note"><span aria-hidden="true">i</span><div><strong>Vos dates, réservées pendant 24 heures</strong><p>Après votre accord, effectuez le virement et envoyez le reçu avec votre numéro de réservation sur WhatsApp. Le support vous contacte, puis l’administration valide le séjour. Sans validation dans les 24 heures, les dates sont libérées.</p></div></div>
+      <div class="policy-consent">
+        {{ form.accepter_politiques.errors }}
+        <div>{{ form.accepter_politiques }}<label for="{{ form.accepter_politiques.id_for_label }}">J’ai lu et j’accepte les <a href="{% url 'reservations:politiques_generales' %}" target="_blank" rel="noopener">politiques de réservation et les conditions d’annulation</a> (nouvel onglet).</label></div>
+      </div>
+      <button class="button booking-submit" type="submit"><span>Bloquer mes dates et continuer</span><span aria-hidden="true">→</span></button>
     </form>
 
     <aside class="booking-property-card">

@@ -1,19 +1,7 @@
-import re
 from django import forms
 
 
-class PaiementForm(forms.Form):
-    numero_carte = forms.CharField(max_length=19, label='Numéro de carte factice')
-    expiration = forms.CharField(max_length=5, help_text='MM/AA')
-    cvv = forms.CharField(max_length=4)
-
-    def clean(self):
-        data = super().clean()
-        numero = re.sub(r'\s+', '', data.get('numero_carte', ''))
-        if not re.fullmatch(r'\d{16}', numero):
-            self.add_error('numero_carte', "Saisissez 16 chiffres.")
-        if not re.fullmatch(r'(0[1-9]|1[0-2])/\d{2}', data.get('expiration', '')):
-            self.add_error('expiration', "Format attendu : MM/AA.")
-        if not re.fullmatch(r'\d{3,4}', data.get('cvv', '')):
-            self.add_error('cvv', "Saisissez 3 ou 4 chiffres.")
-        return data
+class ValidationVirementForm(forms.Form):
+    reference_virement = forms.CharField(max_length=140, label='Référence bancaire du virement')
+    paiement_verifie = forms.BooleanField(label='J’ai vérifié la réception du montant total sur le compte bancaire.')
+    client_contacte = forms.BooleanField(label='Le support a contacté le client et confirmé les informations du séjour.')

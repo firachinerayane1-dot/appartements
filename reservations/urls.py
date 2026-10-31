@@ -4,6 +4,7 @@ from . import views
 app_name = 'reservations'
 
 urlpatterns = [
+    path('politiques/', views.politiques_generales, name='politiques_generales'),
     path('appartement/<int:appartement_id>/reserver/', views.reserver, name='reserver'),
     path('mes-reservations/', views.mes_reservations, name='mes_reservations'),
     path('<int:pk>/politiques/', views.politiques, name='politiques'),

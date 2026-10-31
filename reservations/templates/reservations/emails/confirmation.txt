@@ -46,7 +46,7 @@ Mode de paiement : Carte bancaire
 Date de paiement : {{ date_paiement|date:"d/m/Y à H:i" }}
 
 CONDITIONS ET POLITIQUES
-Politique d'annulation : NON ANNULABLE - NON REMBOURSABLE
+Politique d'annulation : {{ annulation }}
 
 {% for politique in politiques %}{{ politique.titre }} :
 {{ politique.texte }}
