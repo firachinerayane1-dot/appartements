@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Rapport du projet FOSE Safar — 14 septembre 2026</title>
+  <style>
+    @page { size: A4; margin: 16mm 15mm 18mm; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: #17233c;
+      font-family: "Liberation Sans", Arial, sans-serif;
+      font-size: 9.8pt;
+      line-height: 1.43;
+    }
+    h1, h2, h3, h4 {
+      color: #1f4b3f;
+      font-family: "Liberation Sans", Arial, sans-serif;
+      page-break-after: avoid;
+    }
+    h1 { margin: 0 0 6mm; font-size: 31pt; line-height: 1.08; }
+    h2 {
+      margin: 0 0 5mm;
+      padding-bottom: 2.5mm;
+      border-bottom: 2px solid #c89b55;
+      font-size: 19pt;
+    }
+    h3 { margin: 5mm 0 2.5mm; font-size: 13.2pt; }
+    h4 { margin: 4mm 0 1.5mm; font-size: 10.5pt; }
+    p { margin: 0 0 3mm; }
+    ul, ol { margin: 1.5mm 0 3.5mm 5mm; padding-left: 5mm; }
+    li { margin-bottom: 1.1mm; }
+    a { color: #1f4b3f; text-decoration: none; }
+    code {
+      color: #17233c;
+      background: #eef3f1;
+      font-family: "Liberation Mono", monospace;
+      font-size: 8.5pt;
+      padding: .2mm .7mm;
+    }
+    pre {
+      margin: 2mm 0 4mm;
+      padding: 3.5mm;
+      color: #f8faf9;
+      background: #17233c;
+      border-left: 4px solid #c89b55;
+      font-family: "Liberation Mono", monospace;
+      font-size: 8.1pt;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      page-break-inside: avoid;
+    }
+    table {
+      width: 100%;
+      margin: 2.5mm 0 5mm;
+      border-collapse: collapse;
+      font-size: 8.8pt;
+    }
+    thead { display: table-header-group; }
+    tr { page-break-inside: avoid; }
+    th {
+      padding: 2.3mm;
+      color: #fff;
+      background: #1f4b3f;
+      border: 1px solid #1f4b3f;
+      text-align: left;
+    }
+    td {
+      padding: 2.2mm;
+      vertical-align: top;
+      border: 1px solid #d8dfdc;
+    }
+    tbody tr:nth-child(even) td { background: #f6f8f7; }
+    .cover {
+      min-height: 250mm;
+      padding: 17mm 13mm;
+      color: #fff;
+      background: #1f4b3f;
+      page-break-after: always;
+    }
+    .cover .brand {
+      display: inline-block;
+      margin-bottom: 16mm;
+      padding: 3mm 5mm;
+      color: #1f4b3f;
+      background: #fff;
+      font-size: 16pt;
+      font-weight: bold;
+    }
+    .cover h1 { color: #fff; font-size: 35pt; }
+    .cover .subtitle { color: #e5efea; font-size: 15pt; line-height: 1.45; }
+    .cover .meta {
+      margin-top: 68mm;
+      padding-top: 5mm;
+      color: #e5efea;
+      border-top: 1px solid #84a197;
+      font-size: 9.5pt;
+    }
+    .chapter { page-break-before: always; }
+    .keep { page-break-inside: avoid; }
+    .lead { color: #3d4d48; font-size: 11pt; }
+    .small { font-size: 8.2pt; }
+    .muted { color: #667085; }
+    .callout {
+      margin: 3mm 0 5mm;
+      padding: 3.5mm 4mm;
+      background: #e5efea;
+      border-left: 4px solid #1f4b3f;
+      page-break-inside: avoid;
+    }
+    .warning { background: #fff3df; border-left-color: #c07a22; }
+    .danger { background: #f8e8e4; border-left-color: #923b32; }
+    .info { background: #edf3fa; border-left-color: #486d95; }
+    .cols {
+      display: table;
+      width: 100%;
+      margin: 0 0 4mm;
+      border-spacing: 4mm 0;
+      table-layout: fixed;
+    }
+    .col { display: table-cell; vertical-align: top; }
+    .card {
+      margin-bottom: 4mm;
+      padding: 3.5mm;
+      background: #f6f8f7;
+      border-top: 3px solid #1f4b3f;
+      page-break-inside: avoid;
+    }
+    .card h3, .card h4 { margin-top: 0; }
+    .kpi-table {
+      width: 100%;
+      margin: 3mm 0 6mm;
+      border-collapse: separate;
+      border-spacing: 2mm;
+      table-layout: fixed;
+    }
+    .kpi-table td {
+      padding: 3mm;
+      background: #f6f1e7;
+      border: 0;
+      border-bottom: 3px solid #c89b55;
+      text-align: center;
+    }
+    .kpi-table b { display: block; color: #1f4b3f; font-size: 19pt; }
+    .flow {
+      margin: 3mm 0 5mm;
+      padding: 4mm;
+      background: #f6f8f7;
+      border: 1px solid #d8dfdc;
+      text-align: center;
+      font-weight: bold;
+      page-break-inside: avoid;
+    }
+    .flow span { padding: 0 1.7mm; color: #c07a22; }
+    .diagram {
+      margin: 3mm 0 5mm;
+      padding: 4mm;
+      background: #17233c;
+      color: #fff;
+      font-family: "Liberation Mono", monospace;
+      font-size: 8.4pt;
+      line-height: 1.5;
+      white-space: pre;
+      page-break-inside: avoid;
+    }
+    .priority-critical { color: #923b32; font-weight: bold; }
+    .priority-high { color: #a85d14; font-weight: bold; }
+    .priority-medium { color: #486d95; font-weight: bold; }
+    .badge {
+      display: inline-block;
+      padding: .7mm 1.8mm;
+      color: #fff;
+      background: #1f4b3f;
+      font-size: 7.5pt;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .toc li { margin-bottom: 1.6mm; }
+    .check td:first-child { width: 8mm; text-align: center; font-size: 12pt; }
+    .signature {
+      margin-top: 8mm;
+      padding-top: 4mm;
+      border-top: 1px solid #d8dfdc;
+      color: #667085;
+      font-size: 8.5pt;
+    }
+  </style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="brand">FOSE SAFAR</div>
+  <h1>Rapport complet du projet</h1>
+  <p class="subtitle">Plateforme web de recherche, réservation et gestion d’appartements à la Résidence Amwaj, Sidi Rahal.</p>
+  <div class="meta">
+    <p><strong>Date de l’analyse :</strong> 14 septembre 2026</p>
+    <p><strong>Version analysée :</strong> commit <code>f2ac723</code> du 4 septembre 2026</p>
+    <p><strong>Référentiel :</strong> <code>appartements</code> — application Django <code>webbap</code></p>
+    <p><strong>Public visé :</strong> direction de projet, équipe fonctionnelle, développeurs, administrateurs et futurs exploitants</p>
+  </div>
+</section>
+
+<section>
+  <h2>Identité et portée du document</h2>
+  <p class="lead">Ce rapport décrit l’état réellement observé du projet : objectifs, utilisateurs, fonctions, règles métier, architecture, modèle de données, sécurité, qualité, installation, exploitation, limites et feuille de route.</p>
+
+  <div class="callout info">
+    <strong>Méthode.</strong> Analyse statique de l’ensemble du dépôt, lecture des modèles, vues, formulaires, services, routes, gabarits, migrations et tests ; exécution de <code>manage.py check</code>, <code>check --deploy</code>, contrôle des migrations et exécution de la suite de tests sur une base SQLite neuve. Aucun secret du fichier <code>.env</code> ni aucune donnée personnelle n’est reproduit.
+  </div>
+
+  <h3>Sommaire</h3>
+  <ol class="toc">
+    <li><a href="#synthese">Synthèse exécutive</a></li>
+    <li><a href="#contexte">Contexte, objectifs et périmètre</a></li>
+    <li><a href="#acteurs">Acteurs et droits</a></li>
+    <li><a href="#fonctions">Périmètre fonctionnel</a></li>
+    <li><a href="#parcours">Parcours utilisateur et cycle de réservation</a></li>
+    <li><a href="#regles">Règles métier</a></li>
+    <li><a href="#architecture">Architecture technique</a></li>
+    <li><a href="#donnees">Modèle de données</a></li>
+    <li><a href="#interfaces">Interfaces, e-mails et documents</a></li>
+    <li><a href="#securite">Sécurité, confidentialité et conformité</a></li>
+    <li><a href="#qualite">Qualité, tests et état vérifié</a></li>
+    <li><a href="#installation">Installation et configuration</a></li>
+    <li><a href="#exploitation">Exploitation, maintenance et sauvegardes</a></li>
+    <li><a href="#risques">Risques, limites et recommandations</a></li>
+    <li><a href="#roadmap">Feuille de route proposée</a></li>
+    <li><a href="#annexes">Annexes techniques</a></li>
+  </ol>
+
+  <div class="callout warning">
+    <strong>Important.</strong> Le projet est fonctionnel comme démonstrateur avancé, mais il ne doit pas encaisser de vrais paiements en production dans son état actuel : le formulaire bancaire est simulé et aucune passerelle de paiement n’est connectée.
+  </div>
+</section>
+
+<section id="synthese" class="chapter">
+  <h2>1. Synthèse exécutive</h2>
+  <p>FOSE Safar est une application web en français permettant de consulter des appartements, rechercher leur disponibilité, réserver un séjour et suivre son traitement. Une tarification et des règles spécifiques sont prévues pour les clients FM6. Un espace d’administration permet de gérer les logements, les réservations, les paiements et des indicateurs d’activité.</p>
+
+  <table class="kpi-table"><tbody><tr>
+    <td><b>7</b><br>applications métier</td>
+    <td><b>72</b><br>tests détectés</td>
+    <td><b>70</b><br>tests réussis</td>
+    <td><b>31</b><br>gabarits HTML</td>
+  </tr></tbody></table>
+
+  <h3>Évaluation globale</h3>
+  <table>
+    <thead><tr><th>Axe</th><th>État</th><th>Appréciation</th></tr></thead>
+    <tbody>
+      <tr><td>Couverture fonctionnelle</td><td><span class="badge">Avancée</span></td><td>Le parcours principal, les espaces client/admin, les e-mails, les notifications et l’export sont présents.</td></tr>
+      <tr><td>Règles métier</td><td><span class="badge">Solide</span></td><td>Les contraintes centrales sont regroupées dans les modèles/services, protégées par transactions et largement testées.</td></tr>
+      <tr><td>Qualité automatisée</td><td><span class="badge">Bonne</span></td><td>70 tests réussissent sur SQLite ; les 2 tests de concurrence nécessitent PostgreSQL.</td></tr>
+      <tr><td>Prêt pour production</td><td><span class="badge">À préparer</span></td><td>Paiement réel, sécurité HTTPS, validation FM6, base PostgreSQL, conservation des données et exploitation restent à finaliser.</td></tr>
+      <tr><td>Documentation</td><td><span class="badge">Partielle</span></td><td>Un guide de maintenance et un guide OAuth existent ; README, architecture de déploiement et procédures d’incident restent à formaliser.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="cols">
+    <div class="col card">
+      <h3>Points forts</h3>
+      <ul>
+        <li>séparation claire par domaines Django ;</li>
+        <li>modèle utilisateur par e-mail et rôles ;</li>
+        <li>règles FM6, chevauchements et quotas testés ;</li>
+        <li>transactions et verrous prévus pour PostgreSQL ;</li>
+        <li>expiration idempotente et notifications ;</li>
+        <li>confirmation e-mail avec PDF ;</li>
+        <li>interface responsive et cohérente.</li>
+      </ul>
+    </div>
+    <div class="col card">
+      <h3>Décisions prioritaires</h3>
+      <ul>
+        <li>choisir et intégrer un prestataire de paiement ;</li>
+        <li>définir la preuve officielle d’éligibilité FM6 ;</li>
+        <li>stabiliser PostgreSQL et appliquer les migrations ;</li>
+        <li>relier ou retirer les périodes de vacances ;</li>
+        <li>définir l’hébergement, les sauvegardes et la supervision ;</li>
+        <li>valider juridiquement les politiques publiées.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="contexte" class="chapter">
+  <h2>2. Contexte, objectifs et périmètre</h2>
+
+  <h3>2.1 Contexte métier observé</h3>
+  <p>La marque présentée dans la majorité de l’application est <strong>FOSE Safar</strong>. L’offre concerne des appartements dans la Résidence Amwaj à Sidi Rahal, au Maroc, avec piscine, jardins, terrain multisports et parking. L’application distingue le public régulier et les bénéficiaires FM6.</p>
+
+  <h3>2.2 Problème traité</h3>
+  <p>Le projet centralise un processus auparavant susceptible d’être manuel : présentation des logements, contrôle de disponibilité, application des tarifs, respect des quotas, collecte des politiques, paiement, confirmation, notification et pilotage.</p>
+
+  <h3>2.3 Objectifs fonctionnels</h3>
+  <ul>
+    <li>présenter la résidence et ses appartements ;</li>
+    <li>permettre une recherche fiable par dates ;</li>
+    <li>appliquer automatiquement les tarifs et règles selon le type de client ;</li>
+    <li>empêcher les doubles réservations et conflits d’un même adhérent ;</li>
+    <li>faire accepter les conditions avant le paiement ;</li>
+    <li>confirmer et documenter le séjour après paiement ;</li>
+    <li>donner à l’administrateur une vue opérationnelle et statistique.</li>
+  </ul>
+
+  <h3>2.4 Périmètre inclus</h3>
+  <table>
+    <thead><tr><th>Inclus</th><th>Hors périmètre actuel ou non implémenté</th></tr></thead>
+    <tbody>
+      <tr><td>Site public, catalogue, photos, recherche, comptes, OAuth Google, réservations, politiques, paiement simulé, reçu, e-mails, PDF, notifications, administration, tableau de bord, export Excel.</td><td>Passerelle bancaire réelle, remboursements, facturation fiscale, synchronisation avec plateformes externes, application mobile native, multilingue, channel manager, ménage/check-in opérationnel, signature électronique.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.5 Livrables présents dans le dépôt</h3>
+  <ul>
+    <li>code source Django et migrations ;</li>
+    <li>31 gabarits HTML, feuilles de style et JavaScript ;</li>
+    <li>21 images de présentation ou médias ;</li>
+    <li>tests automatisés ;</li>
+    <li>exemple de configuration <code>.env.example</code> ;</li>
+    <li>guide OAuth Google ;</li>
+    <li>guide de révision et maintenance HTML/PDF.</li>
+  </ul>
+</section>
+
+<section id="acteurs" class="chapter">
+  <h2>3. Acteurs et droits</h2>
+
+  <table>
+    <thead><tr><th>Acteur</th><th>Accès</th><th>Capacités principales</th><th>Restrictions</th></tr></thead>
+    <tbody>
+      <tr><td>Visiteur</td><td>Public</td><td>Accueil, présentation, confidentialité, inscription, connexion, recherche de logements.</td><td>Doit être authentifié pour réserver.</td></tr>
+      <tr><td>Client régulier</td><td>Compte e-mail ou Google</td><td>Recherche, réservation hors août, profil, politiques, paiement, reçu, historique, notifications.</td><td>Tarif régulier ; août bloqué ; aucun chevauchement personnel.</td></tr>
+      <tr><td>Client FM6</td><td>Compte avec rôle FM6 et matricule</td><td>Mêmes fonctions client, tarif préférentiel et accès en août.</td><td>5 nuits maximum par réservation et 10 nuits par année civile.</td></tr>
+      <tr><td>Administrateur</td><td>Rôle administrateur ou superutilisateur</td><td>Logements, photos, périodes, réservations, paiements, tableau de bord, export Excel, administration Django.</td><td>Ne peut pas effectuer de réservation client.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout warning">
+    <strong>Contrôle d’éligibilité FM6 à revoir.</strong> À l’inscription, l’utilisateur peut choisir lui-même « Client FM6 » et fournir n’importe quel matricule non vide et unique. Depuis le profil, l’ajout d’un matricule convertit aussi automatiquement un client régulier en client FM6. Aucun référentiel externe ni validation administrative n’est utilisé.
+  </div>
+
+  <h3>Mécanismes d’autorisation</h3>
+  <ul>
+    <li><code>login_required</code> protège les pages client ;</li>
+    <li><code>administrateur_required</code> renvoie une erreur 403 à un utilisateur authentifié non autorisé ;</li>
+    <li>les requêtes sur réservations, reçus et notifications sont filtrées par le propriétaire ;</li>
+    <li>les formulaires publics d’inscription excluent explicitement le rôle administrateur.</li>
+  </ul>
+</section>
+
+<section id="fonctions" class="chapter">
+  <h2>4. Périmètre fonctionnel</h2>
+
+  <table>
+    <thead><tr><th>Domaine</th><th>Fonctions disponibles</th><th>Application</th></tr></thead>
+    <tbody>
+      <tr><td>Accueil</td><td>Présentation de la résidence, services, galerie, localisation, accès au catalogue.</td><td><code>core</code></td></tr>
+      <tr><td>Comptes</td><td>Inscription, connexion/déconnexion, Google OAuth, profil, modification, mot de passe oublié, consentement confidentialité.</td><td><code>accounts</code> + <code>allauth</code></td></tr>
+      <tr><td>Catalogue</td><td>Recherche par dates, pagination 12 éléments, tarif personnalisé, fiche logement et galerie.</td><td><code>apartments</code></td></tr>
+      <tr><td>Réservation</td><td>Création, numéro unique, récapitulatif, historique, acceptation des politiques, annulation avant paiement, expiration à 24 h.</td><td><code>reservations</code></td></tr>
+      <tr><td>Paiement</td><td>Saisie factice de carte, validation de format, confirmation atomique, reçu.</td><td><code>payments</code></td></tr>
+      <tr><td>Communication</td><td>E-mail des politiques, confirmation HTML/texte, PDF joint, alertes d’expiration et badge de non-lus.</td><td><code>notifications</code> + <code>services</code></td></tr>
+      <tr><td>Administration</td><td>CRUD logements, ajout de photo, périodes de vacances, listes/filtrage, annulation/suppression, back-office Django.</td><td>plusieurs applications</td></tr>
+      <tr><td>Pilotage</td><td>Taux d’occupation, revenu, compteurs, série mensuelle, filtre de période et export XLSX.</td><td><code>dashboard</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Fonctions de confort et d’interface</h3>
+  <ul>
+    <li>design responsive, menu mobile et animations respectant <code>prefers-reduced-motion</code> ;</li>
+    <li>messages temporaires fermables ;</li>
+    <li>dates minimales contrôlées côté navigateur et côté serveur ;</li>
+    <li>réinitialisation de mot de passe par e-mail ;</li>
+    <li>chargement optimisé des photos avec <code>prefetch_related</code> ;</li>
+    <li>interface et messages en français, fuseau <code>Africa/Casablanca</code>.</li>
+  </ul>
+</section>
+
+<section id="parcours" class="chapter">
+  <h2>5. Parcours utilisateur et cycle de réservation</h2>
+
+  <h3>5.1 Parcours client nominal</h3>
+  <div class="flow">Accueil <span>→</span> choix des dates <span>→</span> logements disponibles <span>→</span> fiche logement <span>→</span> connexion <span>→</span> réservation <span>→</span> politiques <span>→</span> paiement <span>→</span> reçu + e-mail/PDF</div>
+  <ol>
+    <li>Le client saisit une date d’arrivée et une date de départ.</li>
+    <li>Le service exclut les logements indisponibles ou déjà occupés par une réservation confirmée ou une attente de moins de 24 h.</li>
+    <li>Le détail recalcule le tarif correspondant au rôle du client.</li>
+    <li>La création verrouille le client et le logement, expire les anciennes attentes puis valide toutes les règles.</li>
+    <li>Une réservation <code>EN_ATTENTE</code> est créée avec un numéro de 9 caractères au format <code>aaAA00000</code>.</li>
+    <li>Les politiques sont envoyées par e-mail ; l’utilisateur doit les accepter.</li>
+    <li>Un paiement simulé par carte fait passer le paiement à <code>PAYE</code> et la réservation à <code>CONFIRMEE</code>.</li>
+    <li>Un e-mail de confirmation est envoyé avec un PDF de deux pages.</li>
+  </ol>
+
+  <h3>5.2 États de réservation</h3>
+  <div class="flow">
+    EN_ATTENTE <span>→ paiement + politiques acceptées →</span> CONFIRMEE<br>
+    EN_ATTENTE <span>→ 24 h sans paiement →</span> EXPIREE <span>→</span> Notification interne<br>
+    EN_ATTENTE <span>→ annulation client ou admin →</span> ANNULEE<br>
+    CONFIRMEE <span>→ transition prévue mais non automatisée →</span> TERMINEE<br>
+    <span>REJETEE :</span> état défini sans flux applicatif actif
+  </div>
+
+  <h3>5.3 Cas d’erreur gérés</h3>
+  <ul>
+    <li>date passée, date de fin antérieure ou égale au début ;</li>
+    <li>appartement indisponible ou conflit de période ;</li>
+    <li>double réservation du même client, même sur deux logements différents ;</li>
+    <li>règles d’août et quotas FM6 ;</li>
+    <li>paiement après expiration, montant incohérent ou politiques non acceptées ;</li>
+    <li>annulation après paiement refusée ;</li>
+    <li>échec d’envoi e-mail signalé sans annuler le paiement déjà confirmé.</li>
+  </ul>
+</section>
+
+<section id="regles" class="chapter">
+  <h2>6. Règles métier</h2>
+
+  <table>
+    <thead><tr><th>#</th><th>Règle</th><th>Valeur / comportement</th><th>Implémentation</th></tr></thead>
+    <tbody>
+      <tr><td>R1</td><td>Tarif régulier</td><td>700,00 MAD par nuit par défaut, configurable par appartement.</td><td><code>Appartement.prix_par_nuit</code></td></tr>
+      <tr><td>R2</td><td>Tarif FM6</td><td>500,00 MAD par nuit par défaut, configurable par appartement.</td><td><code>prix_fm6_par_nuit</code></td></tr>
+      <tr><td>R3</td><td>Calcul du séjour</td><td>Nombre de nuits × tarif ; départ exclu ; durée strictement positive.</td><td><code>calculer_prix()</code></td></tr>
+      <tr><td>R4</td><td>Août</td><td>Toute nuit en août est réservée aux clients FM6.</td><td><code>chevauche_le_mois_aout()</code></td></tr>
+      <tr><td>R5</td><td>Durée FM6</td><td>5 nuits maximum par réservation.</td><td><code>MAX_NUITS_FM6_PAR_RESERVATION</code></td></tr>
+      <tr><td>R6</td><td>Quota FM6</td><td>10 nuits maximum par année civile, ventilées par année si le séjour franchit le 1er janvier.</td><td><code>_valider_quota_annuel_fm6()</code></td></tr>
+      <tr><td>R7</td><td>Conflit client</td><td>Un adhérent ne peut avoir deux réservations actives qui se chevauchent, même sur des logements différents.</td><td><code>reservations_adherent_en_conflit()</code></td></tr>
+      <tr><td>R8</td><td>Conflit logement</td><td>Les réservations confirmées et attentes récentes bloquent le logement ; bornes semi-ouvertes.</td><td><code>is_disponible()</code></td></tr>
+      <tr><td>R9</td><td>Délai de paiement</td><td>24 heures à compter de la création.</td><td><code>DELAI_PAIEMENT</code></td></tr>
+      <tr><td>R10</td><td>Acceptation</td><td>Politiques obligatoires avant paiement ; horodatage conservé.</td><td><code>accepter_politiques()</code></td></tr>
+      <tr><td>R11</td><td>Moyen de paiement</td><td>Carte bancaire uniquement.</td><td><code>Paiement.CARTE</code></td></tr>
+      <tr><td>R12</td><td>Annulation</td><td>Possible avant paiement ; impossible après confirmation/paiement ; tarif non remboursable.</td><td><code>annuler()</code></td></tr>
+      <tr><td>R13</td><td>Garantie</td><td>1 000,00 MAD par défaut, remise à l’arrivée ; paramétrable par environnement.</td><td><code>RAHAL_STAY_GUARANTEE_AMOUNT</code></td></tr>
+      <tr><td>R14</td><td>Horaires</td><td>Check-in 15:00, check-out 12:00 par défaut.</td><td>variables d’environnement</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout warning">
+    <strong>Écart fonctionnel identifié.</strong> Le modèle et les écrans permettent à l’administrateur de créer des <code>PeriodeVacances</code>, et l’interface affirme qu’elles réservent la disponibilité aux clients FM6. Pourtant, le moteur de disponibilité ne consulte jamais ces enregistrements : seule la règle fixe du mois d’août est appliquée. Un test confirme même qu’un client régulier peut réserver pendant une telle période. Il faut décider si ces périodes doivent devenir actives ou être retirées.
+  </div>
+</section>
+
+<section id="architecture" class="chapter">
+  <h2>7. Architecture technique</h2>
+
+  <h3>7.1 Vue d’ensemble</h3>
+  <div class="flow">
+    Navigateur <span>→</span> routes Django <span>→</span> vues + formulaires <span>→</span> services métier <span>→</span> modèles / ORM <span>→</span> PostgreSQL ou SQLite<br><br>
+    Sorties : templates/CSS/JS · messages · SMTP/e-mails · Pillow/PDF · openpyxl/Excel<br>
+    Authentification externe : Google OAuth via django-allauth
+  </div>
+
+  <h3>7.2 Composants applicatifs</h3>
+  <table>
+    <thead><tr><th>Composant</th><th>Responsabilité</th><th>Fichiers centraux</th></tr></thead>
+    <tbody>
+      <tr><td><code>webbap</code></td><td>Configuration, routage racine, WSGI/ASGI.</td><td><code>settings.py</code>, <code>urls.py</code></td></tr>
+      <tr><td><code>core</code></td><td>Accueil public et politique de confidentialité.</td><td><code>views.py</code>, templates</td></tr>
+      <tr><td><code>accounts</code></td><td>Utilisateur personnalisé, rôles, inscription, session, profil, Google.</td><td><code>models.py</code>, <code>forms.py</code>, <code>mixins.py</code></td></tr>
+      <tr><td><code>apartments</code></td><td>Logements, photos, périodes, recherche et administration.</td><td><code>models.py</code>, <code>views.py</code></td></tr>
+      <tr><td><code>reservations</code></td><td>Cycle, statuts, quotas, politiques, expiration et commandes.</td><td><code>models.py</code>, <code>views.py</code>, <code>policies.py</code></td></tr>
+      <tr><td><code>payments</code></td><td>Paiement simulé, validation et reçu.</td><td><code>models.py</code>, <code>forms.py</code>, <code>views.py</code></td></tr>
+      <tr><td><code>notifications</code></td><td>Alertes internes, lecture et compteur global.</td><td><code>models.py</code>, <code>context_processors.py</code></td></tr>
+      <tr><td><code>dashboard</code></td><td>Indicateurs administrateur et export XLSX.</td><td><code>views.py</code>, <code>forms.py</code></td></tr>
+      <tr><td><code>services</code></td><td>Transactions de réservation et génération/envoi de confirmation.</td><td><code>reservation_services.py</code>, <code>confirmation_reservation.py</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.3 Technologies et versions verrouillées</h3>
+  <table>
+    <thead><tr><th>Technologie</th><th>Version</th><th>Usage</th></tr></thead>
+    <tbody>
+      <tr><td>Python</td><td>Environnement observé : 3.14.7</td><td>Langage serveur</td></tr>
+      <tr><td>Django</td><td>6.0.7</td><td>Framework web, ORM, formulaires, sessions, admin</td></tr>
+      <tr><td>django-allauth</td><td>65.18.0</td><td>OAuth Google et comptes sociaux</td></tr>
+      <tr><td>psycopg</td><td>3.3.4</td><td>Connexion PostgreSQL</td></tr>
+      <tr><td>Pillow</td><td>11.3.0</td><td>Images et génération des confirmations PDF</td></tr>
+      <tr><td>openpyxl</td><td>3.1.5</td><td>Export Excel des réservations</td></tr>
+      <tr><td>python-dotenv</td><td>1.2.2</td><td>Chargement du fichier <code>.env</code></td></tr>
+      <tr><td>HTML/CSS/JavaScript</td><td>natif</td><td>Interface sans framework frontal</td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.4 Base de données</h3>
+  <p>Si <code>DB_NAME</code> existe, l’application utilise PostgreSQL ; sinon elle utilise <code>db.sqlite3</code>. PostgreSQL est le choix attendu pour la production et les garanties de concurrence, car SQLite ne prend pas en charge <code>SELECT FOR UPDATE</code>.</p>
+</section>
+
+<section id="donnees" class="chapter">
+  <h2>8. Modèle de données</h2>
+
+  <h3>8.1 Relations principales</h3>
+  <div class="flow">
+    Utilisateur <strong>1—N</strong> Réservation <strong>N—1</strong> Appartement<br>
+    Réservation <strong>1—1</strong> Paiement · Réservation <strong>1—N</strong> Notification<br>
+    Appartement <strong>1—N</strong> Photo · Appartement <strong>1—N</strong> PeriodeVacances<br><br>
+    Utilisateur et Appartement : suppression protégée si une réservation existe.<br>
+    Paiement et Notification : suppression en cascade avec la réservation.
+  </div>
+
+  <h3>8.2 Dictionnaire synthétique</h3>
+  <table>
+    <thead><tr><th>Entité</th><th>Champs essentiels</th><th>Contraintes / comportement</th></tr></thead>
+    <tbody>
+      <tr><td><code>Utilisateur</code></td><td>e-mail, nom, prénom, téléphone, rôle, matricule, consentement, permissions, dates.</td><td>E-mail unique ; matricule unique et obligatoire pour FM6 ; mot de passe haché ; identifiant de connexion = e-mail.</td></tr>
+      <tr><td><code>Appartement</code></td><td>titre, description, tarifs régulier/FM6, capacité, disponibilité.</td><td>Capacité ≥ 1 ; ordre alphabétique ; calcul tarifaire centralisé.</td></tr>
+      <tr><td><code>Photo</code></td><td>fichier image, légende, indicateur principal.</td><td>Plusieurs photos par logement ; aucune unicité imposée à la photo principale.</td></tr>
+      <tr><td><code>PeriodeVacances</code></td><td>logement, début, fin, libellé.</td><td>Fin strictement après début ; actuellement non utilisée par la recherche.</td></tr>
+      <tr><td><code>Reservation</code></td><td>client, logement, dates, création, politiques, numéro, statut, montant.</td><td>Numéro unique ; dates valides ; nombreuses validations métier ; suppression protégée côté client/logement.</td></tr>
+      <tr><td><code>Paiement</code></td><td>réservation, montant, méthode, statut, date.</td><td>Relation un-à-un ; montant vérifié ; paiement atomique ; carte seulement.</td></tr>
+      <tr><td><code>Notification</code></td><td>client, réservation optionnelle, catégorie, message, envoi, lecture.</td><td>Une seule notification d’expiration par réservation ; ordre antéchronologique.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>8.3 Intégrité et concurrence</h3>
+  <ul>
+    <li>contraintes SQL sur les dates de réservation et de vacances ;</li>
+    <li>unicité SQL des e-mails, matricules et numéros de réservation ;</li>
+    <li>transactions atomiques pour créer/modifier une réservation et effectuer un paiement ;</li>
+    <li>verrouillage du client puis des appartements dans un ordre déterministe ;</li>
+    <li>expiration conditionnelle et notification idempotente ;</li>
+    <li>les contrôles de disponibilité complexes restent applicatifs et doivent donc être exécutés par les services prévus.</li>
+  </ul>
+</section>
+
+<section id="interfaces" class="chapter">
+  <h2>9. Interfaces, e-mails et documents</h2>
+
+  <h3>9.1 Pages principales</h3>
+  <table>
+    <thead><tr><th>Espace</th><th>Pages</th><th>Caractéristiques</th></tr></thead>
+    <tbody>
+      <tr><td>Public</td><td>Accueil, catalogue, détail, confidentialité, inscription, connexion.</td><td>Galeries de la résidence, carte/localisation, formulaire de dates, design responsive.</td></tr>
+      <tr><td>Client</td><td>Profil, réservation, politiques, paiement, reçu, mes réservations, notifications.</td><td>Récapitulatif, statuts, actions guidées et messages.</td></tr>
+      <tr><td>Administrateur</td><td>Tableau de bord, logements, périodes, réservations, paiements, admin Django.</td><td>Filtres, tableaux, création/modification/suppression et export.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>9.2 Communication automatique</h3>
+  <ul>
+    <li><strong>Après création :</strong> e-mail HTML + texte contenant les politiques et un lien d’acceptation.</li>
+    <li><strong>Après paiement :</strong> e-mail HTML + texte avec confirmation et PDF joint.</li>
+    <li><strong>Après expiration :</strong> notification interne unique ; pas d’e-mail d’expiration actuellement.</li>
+    <li><strong>Mot de passe oublié :</strong> e-mail standard Django personnalisé par gabarits.</li>
+  </ul>
+
+  <h3>9.3 Confirmation PDF client</h3>
+  <p>Le service Pillow génère un PDF de deux pages au format image : confirmation, séjour, client et tarif sur la première ; politiques, garantie, horaires et coordonnées sur la seconde. Le document est attaché à l’e-mail, mais aucune route de téléchargement autonome n’est proposée dans l’espace client.</p>
+
+  <h3>9.4 Tableau de bord</h3>
+  <ul>
+    <li>période par défaut : 30 derniers jours jusqu’au lendemain de la date courante ;</li>
+    <li>taux d’occupation calculé sur les logements marqués disponibles ;</li>
+    <li>revenu fondé sur la date de paiement, alors que les réservations sont filtrées par chevauchement de séjour ;</li>
+    <li>compteurs total, confirmées et annulées ;</li>
+    <li>série du nombre de réservations par mois d’arrivée ;</li>
+    <li>export Excel des réservations de la période.</li>
+  </ul>
+</section>
+
+<section id="securite" class="chapter">
+  <h2>10. Sécurité, confidentialité et conformité</h2>
+
+  <h3>10.1 Protections présentes</h3>
+  <ul>
+    <li>hachage des mots de passe via Django et quatre validateurs de robustesse ;</li>
+    <li>jetons CSRF sur les formulaires et mutations limitées en POST ;</li>
+    <li>sessions et authentification Django ;</li>
+    <li>contrôles de rôle et de propriété des objets ;</li>
+    <li>protection anti-framing via <code>XFrameOptionsMiddleware</code> ;</li>
+    <li>clés, identifiants OAuth et SMTP chargés depuis l’environnement ;</li>
+    <li><code>.env</code>, base SQLite, médias générés et environnement virtuel ignorés par Git ;</li>
+    <li>les numéros de carte saisis ne sont pas stockés dans les modèles.</li>
+  </ul>
+
+  <h3>10.2 Politique de confidentialité</h3>
+  <p>Une page publique décrit les données collectées, une conservation maximale annoncée de cinq ans après la dernière activité et les droits d’accès, rectification, opposition et suppression selon la loi marocaine n° 09-08. L’inscription exige un consentement horodaté.</p>
+
+  <div class="callout danger">
+    <strong>Éléments juridiques non finalisés.</strong> La page utilise à plusieurs endroits la marque « FOSEH Safar » au lieu de « FOSE Safar », mentionne le domaine <code>www.fosehsafar.com</code> et laisse le numéro CNDP « à compléter ». La règle de conservation annoncée n’est pas automatisée dans le code. Une validation juridique et métier est nécessaire avant publication officielle.
+  </div>
+
+  <h3>10.3 Résultat du contrôle de déploiement</h3>
+  <p><code>manage.py check --deploy</code> a signalé six avertissements avec les valeurs de développement : HSTS absent, redirection HTTPS absente, clé secrète de développement, cookies de session non sécurisés, cookie CSRF non sécurisé et <code>DEBUG=True</code>.</p>
+  <table>
+    <thead><tr><th>Réglage recommandé en production</th><th>Objectif</th></tr></thead>
+    <tbody>
+      <tr><td><code>DEBUG=False</code> et <code>ALLOWED_HOSTS</code> explicite</td><td>Ne pas exposer les détails internes.</td></tr>
+      <tr><td>Clé <code>SECRET_KEY</code> longue, aléatoire et hors dépôt</td><td>Protéger signatures, sessions et jetons.</td></tr>
+      <tr><td><code>SECURE_SSL_REDIRECT=True</code></td><td>Forcer HTTPS.</td></tr>
+      <tr><td><code>SESSION_COOKIE_SECURE=True</code>, <code>CSRF_COOKIE_SECURE=True</code></td><td>Empêcher l’envoi des cookies en HTTP.</td></tr>
+      <tr><td><code>SECURE_HSTS_SECONDS</code> après validation HTTPS</td><td>Imposer HTTPS au navigateur.</td></tr>
+      <tr><td>Proxy de confiance et <code>SECURE_PROXY_SSL_HEADER</code> si nécessaire</td><td>Reconnaître correctement HTTPS derrière un reverse proxy.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="qualite" class="chapter">
+  <h2>11. Qualité, tests et état vérifié</h2>
+
+  <h3>11.1 Mesures du dépôt</h3>
+  <table class="kpi-table"><tbody><tr>
+    <td><b>87</b><br>fichiers Python</td>
+    <td><b>4 579</b><br>lignes Python</td>
+    <td><b>1 311</b><br>lignes de tests</td>
+    <td><b>13</b><br>migrations métier</td>
+  </tr></tbody></table>
+  <p class="small muted">Mesures incluant modèles, vues, formulaires, migrations, tests et fichiers d’initialisation ; dépendances du dossier <code>venv</code> exclues.</p>
+
+  <h3>11.2 Résultats exécutés le 14 septembre 2026</h3>
+  <table>
+    <thead><tr><th>Contrôle</th><th>Résultat</th><th>Interprétation</th></tr></thead>
+    <tbody>
+      <tr><td><code>manage.py check</code></td><td>Réussi, 0 problème</td><td>Configuration applicative cohérente.</td></tr>
+      <tr><td><code>makemigrations --check --dry-run</code></td><td>« No changes detected »</td><td>Les modèles et fichiers de migration sont synchronisés.</td></tr>
+      <tr><td>Suite de tests sur SQLite neuve</td><td>72 trouvés ; 70 réussis ; 2 ignorés ; 0 échec</td><td>Le comportement fonctionnel couvert est stable sur une base fraîche.</td></tr>
+      <tr><td>Tests ignorés</td><td>2 tests de concurrence</td><td>SQLite ne prend pas en charge <code>SELECT FOR UPDATE</code> ; ils doivent être exécutés sur PostgreSQL.</td></tr>
+      <tr><td><code>check --deploy</code></td><td>6 avertissements</td><td>Réglages de sécurité de production à ajouter.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>11.3 Couverture fonctionnelle des tests</h3>
+  <p>Les tests couvrent notamment : inscription/consentement/matricule, OAuth Google, recherche et requêtes optimisées, règles tarifaires, août, quotas FM6, chevauchements, modification via service, politiques, paiement, annulation, expiration, notifications, pages principales et concurrence PostgreSQL.</p>
+
+  <h3>11.4 État des bases locales</h3>
+  <div class="callout warning">
+    Le fichier <code>.env</code> sélectionne PostgreSQL, mais le serveur local sur <code>localhost:5432</code> n’était pas joignable pendant l’analyse. La base SQLite de repli est vide et possède huit migrations métier non appliquées. Elle ne doit pas être considérée comme une base opérationnelle à jour. Les tests ont réussi sur une base SQLite temporaire entièrement migrée.
+  </div>
+</section>
+
+<section id="installation" class="chapter">
+  <h2>12. Installation et configuration</h2>
+
+  <h3>12.1 Prérequis</h3>
+  <ul>
+    <li>Python compatible avec Django 6.0 ; environnement observé : Python 3.14.7 ;</li>
+    <li>pip et environnement virtuel ;</li>
+    <li>PostgreSQL recommandé en exploitation ; SQLite possible pour une démonstration locale ;</li>
+    <li>compte SMTP pour les vrais e-mails ;</li>
+    <li>projet Google Cloud si la connexion Google est activée.</li>
+  </ul>
+
+  <h3>12.2 Installation locale</h3>
+  <pre>cd /home/iliane/Bureau/appartements
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+# compléter .env sans publier ses secrets
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver</pre>
+
+  <p>Sans variables <code>DB_NAME</code>, l’application utilise automatiquement <code>db.sqlite3</code>. Après démarrage, l’accueil se trouve normalement sur <code>http://127.0.0.1:8000/</code> et l’administration Django sur <code>/admin/</code>.</p>
+
+  <h3>12.3 Variables d’environnement</h3>
+  <table>
+    <thead><tr><th>Groupe</th><th>Variables</th><th>Rôle</th></tr></thead>
+    <tbody>
+      <tr><td>Django</td><td><code>SECRET_KEY</code>, <code>DEBUG</code>, <code>ALLOWED_HOSTS</code></td><td>Sécurité et hôtes.</td></tr>
+      <tr><td>Base</td><td><code>DB_NAME</code>, <code>DB_USER</code>, <code>DB_PASSWORD</code>, <code>DB_HOST</code>, <code>DB_PORT</code></td><td>Active PostgreSQL.</td></tr>
+      <tr><td>Google</td><td><code>GOOGLE_OAUTH_CLIENT_ID</code>, <code>GOOGLE_OAUTH_CLIENT_SECRET</code></td><td>Connexion sociale ; bouton désactivé si absent.</td></tr>
+      <tr><td>E-mail</td><td><code>EMAIL_BACKEND</code>, <code>EMAIL_HOST</code>, <code>EMAIL_PORT</code>, <code>EMAIL_HOST_USER</code>, <code>EMAIL_HOST_PASSWORD</code>, <code>EMAIL_USE_TLS</code>, <code>DEFAULT_FROM_EMAIL</code></td><td>SMTP et expéditeur.</td></tr>
+      <tr><td>Établissement</td><td><code>RAHAL_STAY_NAME</code>, <code>ADDRESS</code>, <code>COORDINATES</code>, <code>CONTACT_EMAIL</code>, <code>CONTACT_PHONE</code></td><td>Marque et coordonnées des messages/PDF.</td></tr>
+      <tr><td>Séjour</td><td><code>RAHAL_STAY_CHECK_IN</code>, <code>CHECK_OUT</code>, <code>GUARANTEE_AMOUNT</code></td><td>Politiques et confirmation.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>12.4 OAuth Google</h3>
+  <p>Le callback local attendu est <code>/accounts/google/login/callback/</code>. Les origines et URI de redirection doivent être créées dans Google Cloud en HTTP local et HTTPS pour le domaine de production.</p>
+</section>
+
+<section id="exploitation" class="chapter">
+  <h2>13. Exploitation, maintenance et sauvegardes</h2>
+
+  <h3>13.1 Tâches récurrentes</h3>
+  <table class="check">
+    <thead><tr><th></th><th>Tâche</th><th>Fréquence proposée</th></tr></thead>
+    <tbody>
+      <tr><td>□</td><td>Exécuter <code>python manage.py expirer_reservations</code>.</td><td>Toutes les 5 à 15 minutes via cron/planificateur.</td></tr>
+      <tr><td>□</td><td>Sauvegarder PostgreSQL et vérifier une restauration.</td><td>Quotidien ; test mensuel.</td></tr>
+      <tr><td>□</td><td>Sauvegarder le dossier <code>media/</code>.</td><td>Quotidien ou stockage objet versionné.</td></tr>
+      <tr><td>□</td><td>Surveiller erreurs applicatives, SMTP et latence.</td><td>Continu.</td></tr>
+      <tr><td>□</td><td>Contrôler les certificats HTTPS et secrets.</td><td>Automatique + revue trimestrielle.</td></tr>
+      <tr><td>□</td><td>Mettre à jour les dépendances après tests.</td><td>Mensuel ou selon alertes sécurité.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>13.2 Procédure de livraison recommandée</h3>
+  <ol>
+    <li>sauvegarder base et médias ;</li>
+    <li>déployer le code dans une version immuable ;</li>
+    <li>installer les dépendances verrouillées ;</li>
+    <li>exécuter les tests sur PostgreSQL ;</li>
+    <li>appliquer <code>python manage.py migrate</code> ;</li>
+    <li>exécuter <code>python manage.py collectstatic --noinput</code> ;</li>
+    <li>redémarrer les processus WSGI/ASGI ;</li>
+    <li>vérifier accueil, authentification, recherche, réservation de test, e-mail et administration ;</li>
+    <li>surveiller les journaux et indicateurs après livraison.</li>
+  </ol>
+
+  <h3>13.3 Architecture de production minimale</h3>
+  <div class="flow">HTTPS / reverse proxy <span>→</span> serveur WSGI/ASGI <span>→</span> Django <span>→</span> PostgreSQL<br>+ stockage persistant des médias + SMTP + planificateur d’expiration + sauvegardes + supervision</div>
+
+  <h3>13.4 Observabilité à ajouter</h3>
+  <ul>
+    <li>journalisation structurée avec identifiant de requête et niveau d’erreur ;</li>
+    <li>outil de suivi des exceptions ;</li>
+    <li>métriques : réservations créées/confirmées/expirées, taux d’échec SMTP et paiement, latence ;</li>
+    <li>endpoint de santé vérifiant application et base ;</li>
+    <li>alertes sur sauvegarde manquée, base indisponible et accumulation d’attentes expirées.</li>
+  </ul>
+</section>
+
+<section id="risques" class="chapter">
+  <h2>14. Risques, limites et recommandations</h2>
+
+  <table>
+    <thead><tr><th>Priorité</th><th>Constat</th><th>Impact</th><th>Recommandation</th></tr></thead>
+    <tbody>
+      <tr><td class="priority-critical">Critique</td><td>Paiement simulé : le format de carte suffit à marquer la réservation payée.</td><td>Impossible d’encaisser ou de prouver un paiement réel.</td><td>Intégrer une passerelle conforme, utiliser webhooks signés, idempotence, références prestataire et aucun stockage de carte.</td></tr>
+      <tr><td class="priority-critical">Critique</td><td>Réglages de production HTTPS et secrets non définis dans le code.</td><td>Sessions, CSRF et informations internes pourraient être exposés.</td><td>Ajouter une configuration de production séparée et satisfaire <code>check --deploy</code>.</td></tr>
+      <tr><td class="priority-high">Élevée</td><td>Éligibilité FM6 auto-déclarée.</td><td>Accès indu au tarif 500 MAD et aux dates d’août.</td><td>Valider le matricule contre une source autorisée ou introduire un statut « en attente de validation » approuvé par un administrateur.</td></tr>
+      <tr><td class="priority-high">Élevée</td><td>PostgreSQL local indisponible et SQLite de repli non migrée.</td><td>Démarrage/tests avec l’environnement courant impossibles ; risque de divergence de schéma.</td><td>Rétablir PostgreSQL, vérifier les sauvegardes, lancer toutes les migrations et la suite complète.</td></tr>
+      <tr><td class="priority-high">Élevée</td><td><code>PeriodeVacances</code> n’influence pas la disponibilité.</td><td>Écran administrateur trompeur et règles attendues non appliquées.</td><td>Connecter le modèle au moteur de recherche/création ou supprimer la fonctionnalité.</td></tr>
+      <tr><td class="priority-high">Élevée</td><td>Politique juridique incomplète et conservation non automatisée.</td><td>Risque de non-conformité et d’information incorrecte.</td><td>Faire valider le texte, compléter CNDP/domaine/contact et créer une politique technique de purge/anonymisation.</td></tr>
+      <tr><td class="priority-high">Élevée</td><td>Suppression admin d’une réservation efface en cascade paiement et notifications.</td><td>Perte de traçabilité comptable et opérationnelle.</td><td>Remplacer par archivage logique, journal d’audit et permissions renforcées.</td></tr>
+      <tr><td class="priority-medium">Moyenne</td><td>États <code>TERMINEE</code> et <code>REJETEE</code> sans transition applicative.</td><td>Historique et indicateurs incomplets.</td><td>Ajouter un job de clôture et formaliser le cas de rejet, ou retirer les états inutiles.</td></tr>
+      <tr><td class="priority-medium">Moyenne</td><td>Plusieurs photos peuvent être marquées principales.</td><td>Choix visuel ambigu.</td><td>Ajouter une contrainte conditionnelle ou une normalisation lors de l’enregistrement.</td></tr>
+      <tr><td class="priority-medium">Moyenne</td><td>Une photo invalide peut être ignorée après sauvegarde du logement.</td><td>L’utilisateur croit avoir ajouté une image.</td><td>Valider logement et photo avant sauvegarde/redirect et afficher les erreurs.</td></tr>
+      <tr><td class="priority-medium">Moyenne</td><td>Pas de pipeline CI, conteneur, manifeste de service ni procédure de retour arrière observés.</td><td>Livraisons manuelles et reproductibilité limitée.</td><td>Ajouter CI sur PostgreSQL, analyse sécurité, artefact, migration contrôlée et rollback documenté.</td></tr>
+      <tr><td class="priority-medium">Moyenne</td><td>Revenu filtré par date de paiement, occupation par dates de séjour.</td><td>Une même période du tableau de bord mélange deux conventions.</td><td>Afficher explicitement les définitions ou proposer deux filtres distincts.</td></tr>
+      <tr><td class="priority-medium">Moyenne</td><td>Marque FOSE/FOSEH incohérente.</td><td>Confusion contractuelle et visuelle.</td><td>Définir le nom légal et centraliser toutes les occurrences.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="roadmap" class="chapter">
+  <h2>15. Feuille de route proposée</h2>
+
+  <h3>Phase 1 — Sécuriser et stabiliser avant production</h3>
+  <ol>
+    <li>rétablir PostgreSQL, appliquer les migrations et exécuter les 72 tests dont les tests de concurrence ;</li>
+    <li>ajouter la configuration HTTPS/production, secrets robustes et hébergement cible ;</li>
+    <li>remplacer le paiement simulé par une passerelle et tester les webhooks ;</li>
+    <li>mettre en place une validation officielle FM6 ;</li>
+    <li>corriger la politique de confidentialité et la cohérence de marque ;</li>
+    <li>déployer sauvegardes, expiration planifiée et supervision.</li>
+  </ol>
+
+  <h3>Phase 2 — Fiabiliser l’exploitation</h3>
+  <ol>
+    <li>archivage logique et audit des actions administrateur ;</li>
+    <li>pipeline CI/CD avec PostgreSQL et contrôle de sécurité ;</li>
+    <li>gestion cohérente des périodes de vacances ;</li>
+    <li>automatisation de fin de séjour et de conservation des données ;</li>
+    <li>téléchargement du PDF depuis l’espace client et renvoi d’e-mail contrôlé.</li>
+  </ol>
+
+  <h3>Phase 3 — Enrichir le produit</h3>
+  <ol>
+    <li>calendrier visuel et recherche par capacité/équipements ;</li>
+    <li>validation FM6 intégrée et espace agent ;</li>
+    <li>factures, avoirs et éventuelle politique de remboursement ;</li>
+    <li>tableau de bord clarifié, export financier et suivi de conversion ;</li>
+    <li>accessibilité auditée, multilingue et performance images.</li>
+  </ol>
+
+  <div class="callout">
+    <strong>Critère de passage en production proposé.</strong> 72/72 tests réussis sur PostgreSQL, aucun avertissement critique de <code>check --deploy</code>, paiement de bout en bout validé en environnement de test, restauration de sauvegarde testée, texte juridique approuvé et procédure d’incident disponible.
+  </div>
+</section>
+
+<section id="annexes" class="chapter">
+  <h2>16. Annexes techniques</h2>
+
+  <h3>16.1 Arborescence utile</h3>
+  <pre>appartements/
+├── webbap/                 # configuration et routes racine
+├── core/                   # accueil et confidentialité
+├── accounts/               # utilisateurs, rôles, authentification
+├── apartments/             # logements, photos, recherche
+├── reservations/           # réservation, règles, politiques, expiration
+├── payments/               # paiement simulé et reçu
+├── notifications/          # alertes internes
+├── dashboard/              # statistiques et export Excel
+├── services/               # services transactionnels, e-mail et PDF
+├── templates/base.html     # structure commune
+├── static/                 # CSS, JavaScript, images publiques
+├── media/                  # images téléversées
+├── docs/                   # documentation
+├── requirements.txt        # dépendances verrouillées
+├── .env.example            # variables attendues
+└── manage.py</pre>
+
+  <h3>16.2 Carte des routes métier</h3>
+  <table>
+    <thead><tr><th>Préfixe</th><th>Routes principales</th><th>Accès</th></tr></thead>
+    <tbody>
+      <tr><td><code>/</code></td><td>accueil, politique de confidentialité</td><td>Public</td></tr>
+      <tr><td><code>/accounts/</code></td><td>inscription, connexion, déconnexion, profil, modification, réinitialisation, routes allauth/Google</td><td>Public/client selon page</td></tr>
+      <tr><td><code>/appartements/</code></td><td>liste, détail, gestion, créer/modifier/supprimer, périodes de vacances</td><td>Public/client ; gestion admin</td></tr>
+      <tr><td><code>/reservations/</code></td><td>réserver, mes réservations, politiques, détail, annuler, gestion</td><td>Client ; gestion admin</td></tr>
+      <tr><td><code>/paiements/</code></td><td>paiement d’une réservation, reçu, gestion</td><td>Client propriétaire ; gestion admin</td></tr>
+      <tr><td><code>/notifications/</code></td><td>liste, marquer lue</td><td>Utilisateur authentifié propriétaire</td></tr>
+      <tr><td><code>/tableau-de-bord/</code></td><td>indicateurs, export XLSX</td><td>Administrateur</td></tr>
+      <tr><td><code>/admin/</code></td><td>administration Django</td><td>Staff/superutilisateur</td></tr>
+    </tbody>
+  </table>
+
+  <h3>16.3 Commandes de contrôle</h3>
+  <pre># Contrôles courants
+python manage.py check
+python manage.py check --deploy
+python manage.py makemigrations --check --dry-run
+python manage.py showmigrations
+python manage.py test
+
+# Exploitation
+python manage.py migrate
+python manage.py collectstatic --noinput
+python manage.py expirer_reservations
+python manage.py createsuperuser</pre>
+
+  <h3>16.4 Checklist de recette manuelle</h3>
+  <table class="check">
+    <tbody>
+      <tr><td>□</td><td>Créer un client régulier puis un client FM6 validé.</td></tr>
+      <tr><td>□</td><td>Vérifier 700/500 MAD et le calcul multi-nuits.</td></tr>
+      <tr><td>□</td><td>Contrôler août, maximum 5 nuits et quota annuel de 10 nuits.</td></tr>
+      <tr><td>□</td><td>Tenter un chevauchement de logement et un chevauchement du même client.</td></tr>
+      <tr><td>□</td><td>Créer une réservation, recevoir les politiques et les accepter.</td></tr>
+      <tr><td>□</td><td>Effectuer un paiement de test et vérifier reçu, statut et PDF.</td></tr>
+      <tr><td>□</td><td>Vérifier qu’une réservation payée ne peut plus être annulée.</td></tr>
+      <tr><td>□</td><td>Faire expirer une attente et contrôler disponibilité + notification unique.</td></tr>
+      <tr><td>□</td><td>Tester la séparation client/admin et l’accès aux objets d’un autre client.</td></tr>
+      <tr><td>□</td><td>Comparer les indicateurs et l’export Excel aux données sources.</td></tr>
+      <tr><td>□</td><td>Tester sur mobile, clavier, lecteur d’écran et mouvement réduit.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>16.5 Glossaire</h3>
+  <table>
+    <tbody>
+      <tr><td><strong>FM6</strong></td><td>Catégorie de client bénéficiant de règles et tarifs spécifiques dans l’application.</td></tr>
+      <tr><td><strong>Bornes semi-ouvertes</strong></td><td>L’arrivée est incluse et le départ exclu ; un départ et une nouvelle arrivée le même jour ne se chevauchent pas.</td></tr>
+      <tr><td><strong>ORM</strong></td><td>Couche Django qui manipule la base avec des objets Python.</td></tr>
+      <tr><td><strong>Migration</strong></td><td>Fichier versionné décrivant une évolution du schéma de base.</td></tr>
+      <tr><td><strong>Idempotent</strong></td><td>Une opération répétée ne crée pas d’effet supplémentaire indésirable.</td></tr>
+      <tr><td><strong>OAuth</strong></td><td>Protocole utilisé pour se connecter avec Google sans fournir son mot de passe Google au site.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Conclusion</h3>
+  <p>FOSE Safar dispose d’une base fonctionnelle et technique sérieuse, notamment sur la réservation, les quotas et la cohérence transactionnelle. La priorité n’est plus d’ajouter beaucoup de fonctionnalités, mais de fermer les écarts entre démonstrateur et service exploitable : paiement réel, sécurité de production, preuve FM6, PostgreSQL, conformité et opérations. Une fois ces points traités, le projet pourra évoluer sur une base structurée et bien testée.</p>
+
+  <div class="signature">
+    Rapport produit automatiquement à partir du dépôt local, sans inclusion de secrets ni de données personnelles. Les constats décrivent la version observée au 14 septembre 2026 et doivent être réévalués après toute modification significative du code ou de l’environnement.
+  </div>
+</section>
+
+</body>
+</html>

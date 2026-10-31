@@ -276,6 +276,7 @@ class Reservation(models.Model):
         self.save(update_fields=('statut',))
         return self
 
+    @transaction.atomic
     def annuler(self):
         from payments.models import Paiement
         paiement_effectue = (
@@ -293,6 +294,8 @@ class Reservation(models.Model):
         from notifications.models import Notification
         Notification.objects.create(
             client=self.client,
+            reservation=self,
+            categorie=Notification.INFORMATION,
             message=f"Votre réservation de {self.appartement} du {self.date_debut:%d/%m/%Y} au {self.date_fin:%d/%m/%Y} a été annulée.",
         ).envoyer()
         return self

@@ -2,16 +2,18 @@ from datetime import date, timedelta
 from decimal import Decimal
 from concurrent.futures import ThreadPoolExecutor
 from threading import Barrier
+from unittest.mock import patch
 
 from django.core import mail
 from django.core.exceptions import ValidationError
-from django.db import close_old_connections
+from django.db import IntegrityError, close_old_connections
 from django.test import TestCase, TransactionTestCase, override_settings, skipUnlessDBFeature
 from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import Utilisateur
 from apartments.models import Appartement, PeriodeVacances
+from notifications.models import Notification
 from payments.models import Paiement
 from services.reservation_services import (
     MESSAGE_AOUT_RESERVE_FM6,
@@ -372,6 +374,34 @@ class ReglesReservationTests(TestCase):
         )
 
         self.assertEqual(nouvelle.statut, Reservation.EN_ATTENTE)
+
+    def test_annulation_cree_une_notification_complete(self):
+        reservation = creer_reservation(
+            self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 15)
+        )
+
+        reservation.annuler()
+
+        notification = Notification.objects.get(reservation=reservation)
+        self.assertEqual(notification.client, self.enseignant)
+        self.assertEqual(notification.categorie, Notification.INFORMATION)
+        self.assertIsNotNone(notification.date_envoi)
+        self.assertIn('a été annulée', notification.message)
+
+    def test_echec_notification_annulation_ne_change_pas_le_statut(self):
+        reservation = creer_reservation(
+            self.enseignant, self.appartement, date(2027, 7, 10), date(2027, 7, 15)
+        )
+
+        with patch(
+            'notifications.models.Notification.objects.create',
+            side_effect=IntegrityError('notification impossible'),
+        ):
+            with self.assertRaises(IntegrityError):
+                reservation.annuler()
+
+        reservation.refresh_from_db()
+        self.assertEqual(reservation.statut, Reservation.EN_ATTENTE)
 
     def test_modification_sans_conflit_est_acceptee(self):
         reservation = creer_reservation(
