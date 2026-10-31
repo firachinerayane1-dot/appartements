@@ -1,11 +1,14 @@
-{% extends "base.html" %}
+{% extends "dashboard/base.html" %}
 {% block title %}Valider le virement · Administration{% endblock %}
-{% block content %}
-<main class="page-main"><div class="shell">
-  <div class="page-heading"><div><p class="kicker">Administration · Vérification du paiement</p><h1>Confirmer la réservation</h1><p>La validation enregistre le paiement, confirme le séjour et envoie l’email avec le PDF au client.</p></div></div>
-  <div class="form-layout">
-    <form class="form-card" method="post">{% csrf_token %}{{ form.as_p }}<button type="submit" class="button button-primary">Valider le virement et confirmer</button><p><a href="{% url 'reservations:admin_liste' %}">Retour aux réservations</a></p></form>
-    <aside class="summary-card"><p class="kicker light">Virement à vérifier</p><h2>{{ reservation.numero_reservation }}</h2><dl><dt>Client</dt><dd>{{ reservation.client }}</dd><dt>Email</dt><dd>{{ reservation.client.email }}</dd><dt>Appartement</dt><dd>{{ reservation.appartement }}</dd><dt>Séjour</dt><dd>{{ reservation.date_debut|date:"d/m/Y" }} → {{ reservation.date_fin|date:"d/m/Y" }}</dd><dt>Montant à recevoir</dt><dd>{{ reservation.montant_total }} MAD</dd><dt>Échéance de validation</dt><dd>{{ reservation.date_expiration|date:"d/m/Y à H:i" }}</dd></dl></aside>
-  </div>
-</div></main>
+{% block admin_content %}
+<header class="admin-page-heading"><div><p class="kicker">Réservations / Vérification</p><h1>Valider le virement</h1><p>Vérifiez le paiement et les informations du client avant de confirmer son séjour.</p></div><a class="button button-ghost" href="{% url 'reservations:admin_liste' %}">← Réservations</a></header>
+<div class="form-layout">
+  <form class="form-card" method="post">{% csrf_token %}{{ form.non_field_errors }}<h2>Vérification du paiement</h2><p class="admin-period-note">La validation confirme le séjour et envoie l’email de confirmation avec son PDF.</p>
+    <div class="admin-field">{{ form.reference_virement.label_tag }}{{ form.reference_virement }}{{ form.reference_virement.errors }}</div>
+    <div class="admin-check">{{ form.paiement_verifie }}<div>{{ form.paiement_verifie.label_tag }}{{ form.paiement_verifie.errors }}</div></div>
+    <div class="admin-check">{{ form.client_contacte }}<div>{{ form.client_contacte.label_tag }}{{ form.client_contacte.errors }}</div></div>
+    <button type="submit" class="button button-primary">Valider et confirmer le séjour</button>
+  </form>
+  <aside class="summary-card"><p class="kicker light">Réservation</p><h2>{{ reservation.numero_reservation }}</h2><dl><dt>Client</dt><dd>{{ reservation.client }}</dd><dt>Email</dt><dd>{{ reservation.client.email }}</dd><dt>Appartement</dt><dd>{{ reservation.appartement }}</dd><dt>Séjour</dt><dd>{{ reservation.date_debut|date:"d/m/Y" }} → {{ reservation.date_fin|date:"d/m/Y" }}</dd><dt>Montant à recevoir</dt><dd>{{ reservation.montant_total }} MAD</dd><dt>À valider avant le</dt><dd>{{ reservation.date_expiration|date:"d/m/Y à H:i" }}</dd></dl></aside>
+</div>
 {% endblock %}

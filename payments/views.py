@@ -3,6 +3,7 @@ import re
 from urllib.parse import urlencode
 
 from django.conf import settings
+from django.core.paginator import Paginator
 from django.views.decorators.http import require_http_methods
 
 from django.contrib import messages
@@ -13,7 +14,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from accounts.mixins import administrateur_required
 from reservations.models import Reservation
 from services.confirmation_reservation import envoyer_email_confirmation
-from .forms import ValidationVirementForm
+from .forms import FiltrePaiementForm, ValidationVirementForm
 from .models import Paiement
 
 
@@ -92,10 +93,13 @@ def recu(request, pk):
 @administrateur_required
 def admin_liste(request):
     paiements = Paiement.objects.select_related('reservation__client', 'reservation__appartement')
-    if request.GET.get('statut'):
-        paiements = paiements.filter(statut=request.GET['statut'])
-    if request.GET.get('methode'):
-        paiements = paiements.filter(methode=request.GET['methode'])
-    if request.GET.get('date'):
-        paiements = paiements.filter(date_paiement__date=request.GET['date'])
-    return render(request, 'payments/admin_liste.html', {'paiements': paiements, 'statuts': Paiement.STATUTS, 'methodes': Paiement.METHODES})
+    form = FiltrePaiementForm(request.GET or None)
+    if form.is_valid():
+        if form.cleaned_data['statut']:
+            paiements = paiements.filter(statut=form.cleaned_data['statut'])
+        if form.cleaned_data['methode']:
+            paiements = paiements.filter(methode=form.cleaned_data['methode'])
+        if form.cleaned_data['date']:
+            paiements = paiements.filter(date_paiement__date=form.cleaned_data['date'])
+    page = Paginator(paiements, 20).get_page(request.GET.get('page'))
+    return render(request, 'payments/admin_liste.html', {'paiements': page, 'page_obj': page, 'form': form})

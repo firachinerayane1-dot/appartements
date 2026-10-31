@@ -24,7 +24,7 @@ if (arrival && departure) {
 
 const catalogArrival = document.getElementById('id_date_debut');
 const catalogDeparture = document.getElementById('id_date_fin');
-if (catalogArrival && catalogDeparture) {
+if (catalogArrival && catalogDeparture && !document.body.classList.contains('admin-workspace')) {
   const today = new Date().toISOString().split('T')[0];
   catalogArrival.min = today;
   catalogDeparture.min = catalogArrival.value || today;

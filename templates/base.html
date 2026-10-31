@@ -11,6 +11,7 @@
   {% block extra_head %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
+  {% block header %}
   <header class="site-header">
     <div class="shell nav-shell">
       <a class="brand" href="{% url 'core:accueil' %}" aria-label="FOSEH Safar, accueil"><span class="brand-mark">F</span><span>FOSEH <span>Safar</span></span></a>
@@ -41,11 +42,13 @@
       </nav>
     </div>
   </header>
+  {% endblock %}
 
   {% if messages %}<div class="toast-wrap" role="status">{% for message in messages %}<div class="toast {{ message.tags|default:'info' }}"><span>{{ message }}</span><button type="button" aria-label="Fermer">×</button></div>{% endfor %}</div>{% endif %}
 
   {% block content %}{% endblock %}
 
+  {% block footer %}
   <footer class="site-footer">
     <div class="shell footer-grid">
       <div><a class="brand brand-light" href="{% url 'core:accueil' %}"><span class="brand-mark">F</span><span>FOSEH <span>Safar</span></span></a><p>Des appartements lumineux dans une résidence privée avec piscine et jardins, à Sidi Rahal.</p></div>
@@ -55,7 +58,8 @@
     </div>
     <div class="shell footer-bottom"><span>© {% now 'Y' %} FOSEH Safar</span><span>Votre parenthèse à Sidi Rahal</span></div>
   </footer>
-  <script src="{% static 'js/site.js' %}?v=13" defer></script>
+  {% endblock %}
+  <script src="{% static 'js/site.js' %}?v=14" defer></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>

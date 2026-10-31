@@ -1,7 +1,8 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_http_methods, require_POST
@@ -102,7 +103,8 @@ def detail(request, pk):
         queryset = queryset.filter(client=request.user)
     reservation = get_object_or_404(queryset, pk=pk)
     reservation.expirer_si_necessaire()
-    return render(request, 'reservations/detail.html', {'reservation': reservation, 'recap': reservation.generer_recap()})
+    template = 'reservations/admin_detail.html' if request.user.est_administrateur() else 'reservations/detail.html'
+    return render(request, template, {'reservation': reservation, 'recap': reservation.generer_recap()})
 
 
 @require_http_methods(['GET'])
@@ -149,6 +151,9 @@ def admin_liste(request):
     form = FiltreReservationAdminForm(request.GET or None)
     reservations = Reservation.objects.select_related('client', 'appartement')
     if form.is_valid():
+        recherche = form.cleaned_data.get('recherche')
+        if recherche:
+            reservations = reservations.filter(Q(numero_reservation__icontains=recherche) | Q(client__nom__icontains=recherche) | Q(client__prenom__icontains=recherche) | Q(client__email__icontains=recherche))
         if form.cleaned_data.get('statut'):
             reservations = reservations.filter(statut=form.cleaned_data['statut'])
         if form.cleaned_data.get('appartement'):
@@ -157,7 +162,8 @@ def admin_liste(request):
             reservations = reservations.filter(date_fin__gt=form.cleaned_data['date_debut'])
         if form.cleaned_data.get('date_fin'):
             reservations = reservations.filter(date_debut__lt=form.cleaned_data['date_fin'])
-    return render(request, 'reservations/admin_liste.html', {'form': form, 'reservations': reservations})
+    page = Paginator(reservations, 20).get_page(request.GET.get('page'))
+    return render(request, 'reservations/admin_liste.html', {'form': form, 'reservations': page, 'page_obj': page})
 
 
 @administrateur_required

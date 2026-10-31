@@ -53,6 +53,8 @@ def index(request):
     contexte = {
         'form': form, 'date_debut': debut, 'date_fin': fin, 'taux_occupation': taux_occupation,
         'revenu_total': revenu, 'compteurs': compteurs, 'reservations_par_mois': par_mois,
+        'maximum_mensuel': max((ligne['total'] for ligne in par_mois), default=1),
+        'attentes': Reservation.objects.filter(statut=Reservation.EN_ATTENTE).select_related('client', 'appartement').order_by('date_reservation')[:5],
     }
     return render(request, 'dashboard/index.html', contexte)
 
