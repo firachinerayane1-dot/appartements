@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.validators import RegexValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -169,19 +169,76 @@ class Reservation(models.Model):
         )
 
     def expirer_si_necessaire(self):
-        if self.est_expiree():
-            self.statut = self.EXPIREE
-            self.save(update_fields=('statut',))
+        if self.statut == self.EXPIREE:
             return True
+        if not self.est_expiree():
+            return False
+
+        nombre_expire = type(self)._expirer_queryset(
+            type(self).objects.filter(pk=self.pk),
+        )
+        if nombre_expire:
+            self.statut = self.EXPIREE
+            return True
+
+        # Une autre requête a pu modifier la réservation entre sa lecture et
+        # l'expiration. On restitue alors l'état réellement enregistré.
+        self.statut = type(self).objects.values_list('statut', flat=True).get(pk=self.pk)
         return self.statut == self.EXPIREE
 
     @classmethod
-    def expirer_en_attente(cls):
+    def expirer_en_attente(cls, queryset=None):
+        return cls._expirer_queryset(queryset if queryset is not None else cls.objects.all())
+
+    @classmethod
+    def _expirer_queryset(cls, queryset):
+        """Expire les attentes impayées et alerte chaque client une seule fois."""
+        from notifications.models import Notification
+
         limite = timezone.now() - cls.DELAI_PAIEMENT
-        return cls.objects.filter(
+        avec_echeance_depassee = queryset.filter(
             statut=cls.EN_ATTENTE,
             date_reservation__lte=limite,
-        ).update(statut=cls.EXPIREE)
+        ).exclude(paiement__statut='PAYE')
+
+        nombre_expire = 0
+        with transaction.atomic():
+            reservations = list(
+                avec_echeance_depassee.select_for_update().select_related(
+                    'client', 'appartement'
+                )
+            )
+            for reservation in reservations:
+                # Le filtre conditionnel protège aussi les bases où
+                # select_for_update n'est pas disponible, comme SQLite.
+                modifiee = cls.objects.filter(
+                    pk=reservation.pk,
+                    statut=cls.EN_ATTENTE,
+                    date_reservation__lte=limite,
+                ).exclude(paiement__statut='PAYE').update(statut=cls.EXPIREE)
+                if not modifiee:
+                    continue
+
+                reservation.statut = cls.EXPIREE
+                notification, _ = Notification.objects.get_or_create(
+                    reservation=reservation,
+                    categorie=Notification.EXPIRATION_RESERVATION,
+                    defaults={
+                        'client': reservation.client,
+                        'message': (
+                            f"Votre réservation {reservation.numero_reservation} pour "
+                            f"{reservation.appartement} du "
+                            f"{reservation.date_debut:%d/%m/%Y} au "
+                            f"{reservation.date_fin:%d/%m/%Y} a expiré, car le paiement "
+                            "n'a pas été effectué dans le délai de 24 heures. Le logement "
+                            "est de nouveau disponible."
+                        ),
+                    },
+                )
+                notification.envoyer()
+                nombre_expire += 1
+
+        return nombre_expire
 
     def accepter_politiques(self):
         if self.expirer_si_necessaire():
