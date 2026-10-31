@@ -30,6 +30,7 @@ class ReservationForm(AcceptationPolitiquesForm):
 
 
 class FiltreReservationAdminForm(forms.Form):
+    recherche = forms.CharField(required=False, label="Rechercher", widget=forms.TextInput(attrs={"placeholder": "Référence, nom, email…"}))
     statut = forms.ChoiceField(required=False, choices=[('', 'Tous les statuts')])
     appartement = forms.ModelChoiceField(required=False, queryset=None)
     date_debut = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))

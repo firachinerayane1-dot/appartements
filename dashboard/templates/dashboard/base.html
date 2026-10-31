@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+{% block body_class %}admin-workspace{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/admin.css' %}?v=1">{% endblock %}
+{% block header %}
+<header class="admin-topbar">
+  <a class="brand" href="{% url 'dashboard:index' %}"><span class="brand-mark">F</span><span>FOSEH <span>Safar</span></span></a>
+  <span class="admin-environment">Espace de gestion</span>
+  <div class="admin-account"><a href="{% url 'accounts:profil' %}">{{ user.prenom|default:'Administrateur' }}</a><form method="post" action="{% url 'accounts:deconnexion' %}">{% csrf_token %}<button type="submit" class="link-button">Déconnexion</button></form></div>
+</header>
+{% endblock %}
+{% block content %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <p class="admin-nav-label">Résidence Amwaj</p>
+    <nav aria-label="Administration">
+      <a href="{% url 'dashboard:index' %}" {% if request.resolver_match.namespace == 'dashboard' %}aria-current="page"{% endif %}><span aria-hidden="true">◫</span> Vue d’ensemble</a>
+      <a href="{% url 'reservations:admin_liste' %}" {% if request.resolver_match.namespace == 'reservations' or request.resolver_match.url_name == 'admin_valider' %}aria-current="page"{% endif %}><span aria-hidden="true">▤</span> Réservations</a>
+      <a href="{% url 'payments:admin_liste' %}" {% if request.resolver_match.namespace == 'payments' and request.resolver_match.url_name != 'admin_valider' %}aria-current="page"{% endif %}><span aria-hidden="true">↗</span> Paiements</a>
+      <a href="{% url 'apartments:admin_liste' %}" {% if request.resolver_match.namespace == 'apartments' and 'vacances' not in request.resolver_match.url_name %}aria-current="page"{% endif %}><span aria-hidden="true">⌂</span> Appartements</a>
+      <a href="{% url 'apartments:vacances_liste' %}" {% if 'vacances' in request.resolver_match.url_name %}aria-current="page"{% endif %}><span aria-hidden="true">▦</span> Périodes de vacances</a>
+    </nav>
+    <div class="admin-sidebar-bottom"><a href="{% url 'notifications:liste' %}">Notifications {% if notifications_non_lues %}({{ notifications_non_lues }}){% endif %}</a><a href="{% url 'core:accueil' %}">Voir le site ↗</a><small>FOSEH Safar · Administration</small></div>
+  </aside>
+  <main class="admin-content" id="admin-content">{% block admin_content %}{% endblock %}</main>
+</div>
+{% endblock %}
+{% block footer %}{% endblock %}
+{% block extra_js %}<script src="{% static 'js/admin.js' %}?v=1" defer></script>{% endblock %}
