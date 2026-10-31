@@ -7,11 +7,11 @@
   <section class="policies-hero">
     <div class="policies-hero-backdrop" aria-hidden="true"></div>
     <div class="shell policies-hero-content">
-      <a class="policies-back-link" href="{% url 'reservations:detail' reservation.pk %}">← Retour à la réservation</a>
-      <p class="kicker light">Étape 2 sur 3</p>
+      {% if reservation %}<a class="policies-back-link" href="{% url 'reservations:detail' reservation.pk %}">← Retour à la réservation</a>{% else %}<a class="policies-back-link" href="{% url 'apartments:liste' %}">← Découvrir les appartements</a>{% endif %}
+      <p class="kicker light">Réserver en toute clarté</p>
       <h1>Vos conditions<br><em>de séjour.</em></h1>
       <p>Prenez connaissance des règles qui encadrent votre réservation avant de poursuivre vers le paiement.</p>
-      <div class="policies-reservation-meta"><span>N° {{ reservation.numero_reservation }}</span><span>{{ reservation.appartement }}</span><span>{{ reservation.date_debut|date:"d M" }} → {{ reservation.date_fin|date:"d M Y" }}</span></div>
+      {% if reservation %}<div class="policies-reservation-meta"><span>N° {{ reservation.numero_reservation }}</span><span>{{ reservation.appartement }}</span><span>{{ reservation.date_debut|date:"d M" }} → {{ reservation.date_fin|date:"d M Y" }}</span></div>{% endif %}
     </div>
   </section>
 
@@ -19,7 +19,7 @@
     <div class="policies-document">
       <div class="policies-document-heading">
         <div><p class="kicker">À lire attentivement</p><h2>Politiques de réservation et de séjour</h2></div>
-        <span>7 règles essentielles</span>
+        <span>Version du 31 octobre 2026</span>
       </div>
 
       <section class="policy-group" aria-labelledby="booking-policies-title">
@@ -49,16 +49,23 @@
 
     <aside class="policies-accept-card">
       <span class="policies-lock" aria-hidden="true">✓</span>
-      <p class="kicker">Votre accord</p>
-      <h2>Prêt à continuer ?</h2>
-      <p>En validant, vous confirmez avoir lu et accepté l’ensemble des politiques affichées sur cette page.</p>
+      <p class="kicker">L’essentiel</p>
+      <h2>Un séjour bien préparé.</h2>
+      <p>Blocage de 24 heures, paiement par virement et confirmation par l’administration.</p>
       <dl>
-        <div><dt>Échéance</dt><dd>{{ reservation.date_expiration|date:"d/m/Y à H:i" }}</dd></div>
+        {% if reservation %}<div><dt>Échéance</dt><dd>{{ reservation.date_expiration|date:"d/m/Y à H:i" }}</dd></div>{% endif %}
         <div><dt>Garantie à l’arrivée</dt><dd>{{ guarantee }} MAD</dd></div>
-        <div><dt>Paiement</dt><dd>Carte bancaire</dd></div>
+        <div><dt>Paiement</dt><dd>Virement bancaire</dd></div>
       </dl>
-      <form method="post">{% csrf_token %}<button class="button policies-accept-button" type="submit"><span>J’ai lu et j’accepte</span><span aria-hidden="true">→</span></button></form>
-      <small>Vous serez ensuite redirigé vers le paiement.</small>
+      {% if peut_accepter %}
+      <form method="post">
+        {% csrf_token %}{{ form.non_field_errors }}
+        <div class="policy-consent">{{ form.accepter_politiques.errors }}<div>{{ form.accepter_politiques }}<label for="{{ form.accepter_politiques.id_for_label }}">J’ai lu et j’accepte les politiques de réservation et les conditions d’annulation.</label></div></div>
+        <button class="button policies-accept-button" type="submit">Accepter et accéder au virement →</button>
+      </form>
+      {% elif reservation.politiques_acceptees_le %}
+      <p>Conditions acceptées le {{ reservation.politiques_acceptees_le|date:"d/m/Y à H:i" }}.</p>
+      {% else %}<p>Vous pourrez donner votre accord dans le formulaire de réservation. Cette page reste accessible à tout moment.</p>{% endif %}
     </aside>
   </section>
 </main>

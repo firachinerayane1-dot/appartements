@@ -72,8 +72,8 @@
       {% elif reservation.statut == 'EN_ATTENTE' %}
         {% if reservation.politiques_acceptees_le %}
           <h2>Finalisez le paiement</h2>
-          <p>Vos politiques sont acceptées. Réglez maintenant par carte avant l’expiration du délai.</p>
-          <a class="button reservation-primary-action" href="{% url 'payments:payer' reservation.pk %}">Payer par carte <span>→</span></a>
+          <p>Vos politiques sont acceptées. Effectuez le virement et envoyez votre reçu au support WhatsApp avant l’échéance. L’administration doit valider le séjour dans les 24 heures.</p>
+          <a class="button reservation-primary-action" href="{% url 'payments:payer' reservation.pk %}">Voir les instructions de virement <span>→</span></a>
         {% else %}
           <h2>Lisez les politiques</h2>
           <p>Consultez et acceptez les conditions de séjour avant d’accéder au paiement sécurisé.</p>
@@ -82,14 +82,15 @@
         <form method="post" action="{% url 'reservations:annuler' reservation.pk %}">{% csrf_token %}<button class="reservation-cancel-action" type="submit">Annuler cette demande</button></form>
       {% elif reservation.statut == 'CONFIRMEE' %}
         <h2>Votre séjour est confirmé</h2>
-        <p>Le paiement est validé. Votre réservation est définitive et son tarif n’est pas remboursable.</p>
+        <p>Votre virement a été vérifié par l’administration. Les conditions d’annulation et de remboursement restent applicables.</p>
         <a class="button reservation-primary-action" href="{% url 'notifications:liste' %}">Voir mes notifications <span>→</span></a>
+        <form method="post" action="{% url 'reservations:annuler' reservation.pk %}" onsubmit="return confirm('Confirmer l’annulation de ce séjour ? Le remboursement sera traité selon les conditions acceptées.');">{% csrf_token %}<button class="reservation-cancel-action" type="submit">Annuler selon les conditions</button></form>
       {% elif reservation.statut == 'EXPIREE' %}
         <h2>Le délai est expiré</h2>
-        <p>Le paiement n’a pas été effectué dans les 24 heures. L’appartement est de nouveau disponible.</p>
+        <p>La réservation n’a pas été validée par l’administration dans les 24 heures. L’appartement est de nouveau disponible.</p>
         <a class="button reservation-primary-action" href="{% url 'apartments:liste' %}">Rechercher un séjour <span>→</span></a>
       {% elif reservation.statut == 'ANNULEE' %}
-        <h2>Demande annulée</h2>
+        <h2>Demande annulée</h2><p>Remboursement prévu : <strong>{{ reservation.montant_remboursement }} MAD</strong>. Le support organise le remboursement après vérification ; aucun transfert automatique n’est effectué.</p>
         <p>Cette réservation ne bloque plus les dates. Vous pouvez effectuer une nouvelle recherche à tout moment.</p>
         <a class="button reservation-primary-action" href="{% url 'apartments:liste' %}">Nouvelle réservation <span>→</span></a>
       {% elif reservation.statut == 'TERMINEE' %}
@@ -101,6 +102,7 @@
         <p>Consultez vos notifications pour suivre les dernières informations concernant cette demande.</p>
         <a class="button reservation-primary-action" href="{% url 'notifications:liste' %}">Voir mes notifications <span>→</span></a>
       {% endif %}
+      <p><a href="{% url 'reservations:politiques_generales' %}">Consulter les politiques de réservation</a></p>
       <div class="reservation-help"><span>?</span><p><strong>Besoin d’aide ?</strong>Votre numéro de référence est {{ reservation.numero_reservation }}.</p></div>
     </aside>
   </section>

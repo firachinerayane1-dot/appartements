@@ -7,3 +7,8 @@ class PaiementAdmin(admin.ModelAdmin):
     list_display = ('id', 'reservation', 'montant', 'methode', 'statut', 'date_paiement')
     list_filter = ('statut', 'methode', 'date_paiement')
     search_fields = ('reservation__client__email',)
+
+    readonly_fields = tuple(field.name for field in Paiement._meta.fields)
+
+    def has_add_permission(self, request):
+        return False

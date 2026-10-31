@@ -219,3 +219,11 @@ RAHAL_STAY_CONTACT_PHONE = os.getenv('RAHAL_STAY_CONTACT_PHONE', '')
 RAHAL_STAY_CHECK_IN = os.getenv('RAHAL_STAY_CHECK_IN', '15:00')
 RAHAL_STAY_CHECK_OUT = os.getenv('RAHAL_STAY_CHECK_OUT', '12:00')
 RAHAL_STAY_GUARANTEE_AMOUNT = os.getenv('RAHAL_STAY_GUARANTEE_AMOUNT', '1000.00')
+
+# Coordonnées publiées sur la page de virement. Aucun compte fictif par défaut.
+PAYMENT_BANK_NAME = os.getenv('PAYMENT_BANK_NAME', '')
+PAYMENT_ACCOUNT_HOLDER = os.getenv('PAYMENT_ACCOUNT_HOLDER', '')
+PAYMENT_RIB = os.getenv('PAYMENT_RIB', '')
+PAYMENT_IBAN = os.getenv('PAYMENT_IBAN', '')
+PAYMENT_BIC = os.getenv('PAYMENT_BIC', '')
+SUPPORT_WHATSAPP_NUMBER = os.getenv('SUPPORT_WHATSAPP_NUMBER', '')

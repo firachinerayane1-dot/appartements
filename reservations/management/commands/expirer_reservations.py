@@ -5,7 +5,7 @@ from reservations.models import Reservation
 
 class Command(BaseCommand):
     help = (
-        "Expire les réservations non payées depuis 24 heures et envoie une "
+        "Expire les réservations non validées depuis 24 heures et envoie une "
         "notification interne aux clients concernés."
     )
 

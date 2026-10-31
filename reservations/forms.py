@@ -2,7 +2,14 @@ from django import forms
 from django.utils import timezone
 
 
-class ReservationForm(forms.Form):
+class AcceptationPolitiquesForm(forms.Form):
+    accepter_politiques = forms.BooleanField(
+        label="J’ai lu et j’accepte les politiques de réservation et les conditions d’annulation.",
+        error_messages={'required': "Veuillez lire et accepter les politiques de réservation."},
+    )
+
+
+class ReservationForm(AcceptationPolitiquesForm):
     date_debut = forms.DateField(
         label="Date d'arrivée",
         widget=forms.DateInput(attrs={'type': 'date'}),

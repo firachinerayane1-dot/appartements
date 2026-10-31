@@ -8,7 +8,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from PIL import Image, ImageDraw, ImageFont
 
-from reservations.policies import STAY_POLICIES, format_amount
+from reservations.policies import CANCELLATION_SUMMARY, STAY_POLICIES, format_amount
 
 
 LARGEUR_PAGE = 1240
@@ -48,6 +48,7 @@ def _contexte_confirmation(paiement):
         'solde': _format_montant(Decimal('0')),
         'garantie': garantie,
         'politiques': politiques,
+        'annulation': CANCELLATION_SUMMARY,
         'marque': settings.RAHAL_STAY_NAME,
         'adresse': settings.RAHAL_STAY_ADDRESS,
         'coordonnees': settings.RAHAL_STAY_COORDINATES,
@@ -302,19 +303,18 @@ def _page_politiques(contexte):
 
     dessin.text((MARGE, 210), 'CONDITIONS ET POLITIQUES', font=police_titre, fill=VERT)
     dessin.rounded_rectangle(
-        (MARGE, 280, LARGEUR_PAGE - MARGE, 405),
+        (MARGE, 280, LARGEUR_PAGE - MARGE, 495),
         radius=18,
         fill=ROUGE_CLAIR,
     )
     dessin.text((MARGE + 28, 305), "POLITIQUE D'ANNULATION", font=_charger_police(17, gras=True), fill=ROUGE)
-    dessin.text(
-        (MARGE + 28, 347),
-        'NON ANNULABLE · NON REMBOURSABLE',
-        font=_charger_police(27, gras=True),
-        fill=ROUGE,
+    _texte(
+        dessin, (MARGE + 28, 345), contexte['annulation'],
+        _charger_police(20), couleur=ROUGE,
+        largeur=LARGEUR_PAGE - 2 * MARGE - 56, interligne=7,
     )
 
-    y = 450
+    y = 530
     for politique in contexte['politiques']:
         dessin.text((MARGE, y), politique['titre'], font=police_section, fill=VERT)
         y = _texte(

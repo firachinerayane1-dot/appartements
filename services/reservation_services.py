@@ -39,7 +39,7 @@ def _verrouiller_appartements(*appartement_ids):
 
 
 @transaction.atomic
-def creer_reservation(client, appartement, date_debut, date_fin):
+def creer_reservation(client, appartement, date_debut, date_fin, accepter_politiques=False):
     """Point d'entrée unique appliquant les règles de disponibilité."""
     if not client.is_authenticated or client.est_administrateur():
         raise PermissionDenied("Seul un client peut réserver.")
@@ -62,6 +62,8 @@ def creer_reservation(client, appartement, date_debut, date_fin):
         date_fin=date_fin,
         statut=Reservation.EN_ATTENTE,
         montant_total=appartement.calculer_prix(date_debut, date_fin, client),
+        politiques_acceptees_le=timezone.now() if accepter_politiques else None,
+        version_politiques="2026-10-31" if accepter_politiques else "",
     )
     reservation.full_clean()
 

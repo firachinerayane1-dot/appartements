@@ -1,14 +1,14 @@
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
+from zoneinfo import ZoneInfo
+from decimal import Decimal
 import secrets
 import string
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.mail import send_mail
 from django.core.validators import RegexValidator
 from django.db import models, transaction
 from django.db.models import Q
-from django.template.loader import render_to_string
 from django.utils import timezone
 
 
@@ -53,6 +53,10 @@ class Reservation(models.Model):
     date_fin = models.DateField()
     date_reservation = models.DateTimeField(auto_now_add=True)
     politiques_acceptees_le = models.DateTimeField(null=True, blank=True, editable=False)
+    version_politiques = models.CharField(max_length=20, blank=True, editable=False)
+    annulee_le = models.DateTimeField(null=True, blank=True, editable=False)
+    motif_annulation = models.CharField(max_length=20, blank=True, editable=False)
+    montant_remboursement = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
     numero_reservation = models.CharField(
         max_length=9,
         unique=True,
@@ -156,6 +160,11 @@ class Reservation(models.Model):
         return (self.date_fin - self.date_debut).days
 
     @property
+    def arrivee_prevue(self):
+        heure = time.fromisoformat(settings.RAHAL_STAY_CHECK_IN)
+        return datetime.combine(self.date_debut, heure, tzinfo=ZoneInfo('Africa/Casablanca'))
+
+    @property
     def date_expiration(self):
         if not self.date_reservation:
             return None
@@ -199,7 +208,7 @@ class Reservation(models.Model):
         avec_echeance_depassee = queryset.filter(
             statut=cls.EN_ATTENTE,
             date_reservation__lte=limite,
-        ).exclude(paiement__statut='PAYE')
+        )
 
         nombre_expire = 0
         with transaction.atomic():
@@ -215,7 +224,7 @@ class Reservation(models.Model):
                     pk=reservation.pk,
                     statut=cls.EN_ATTENTE,
                     date_reservation__lte=limite,
-                ).exclude(paiement__statut='PAYE').update(statut=cls.EXPIREE)
+                ).update(statut=cls.EXPIREE)
                 if not modifiee:
                     continue
 
@@ -230,7 +239,7 @@ class Reservation(models.Model):
                             f"{reservation.appartement} du "
                             f"{reservation.date_debut:%d/%m/%Y} au "
                             f"{reservation.date_fin:%d/%m/%Y} a expiré, car le paiement "
-                            "n'a pas été effectué dans le délai de 24 heures. Le logement "
+                            "n’a pas été validé par l’administration dans le délai de 24 heures. Le logement "
                             "est de nouveau disponible."
                         ),
                     },
@@ -240,67 +249,59 @@ class Reservation(models.Model):
 
         return nombre_expire
 
+    @transaction.atomic
     def accepter_politiques(self):
-        if self.expirer_si_necessaire():
-            raise ValidationError("Le délai de paiement de 24 heures est expiré.")
-        if self.statut != self.EN_ATTENTE:
-            raise ValidationError("Cette réservation ne peut plus être payée.")
-        if not self.politiques_acceptees_le:
-            self.politiques_acceptees_le = timezone.now()
-            self.save(update_fields=('politiques_acceptees_le',))
-        return self
-
-    def envoyer_email_politiques(self, lien_politiques):
-        from .policies import policies_context
-
-        contexte = {
-            'reservation': self,
-            'lien_politiques': lien_politiques,
-            'marque': settings.RAHAL_STAY_NAME,
-            **policies_context(self),
-        }
-        send_mail(
-            subject=f'Politiques de votre réservation {self.numero_reservation}',
-            message=render_to_string('reservations/emails/politiques.txt', contexte),
-            from_email=None,
-            recipient_list=[self.client.email],
-            html_message=render_to_string('reservations/emails/politiques.html', contexte),
-        )
-
-    def confirmer(self):
-        if self.expirer_si_necessaire():
-            raise ValidationError("Le délai de paiement de 24 heures est expiré.")
-        if self.statut != self.EN_ATTENTE:
-            raise ValidationError("Seule une réservation en attente peut être confirmée.")
-        self.statut = self.CONFIRMEE
-        self.save(update_fields=('statut',))
+        reservation = type(self).objects.select_for_update().get(pk=self.pk)
+        if reservation.est_expiree() or reservation.statut != self.EN_ATTENTE:
+            raise ValidationError("Cette réservation ne peut plus être payée : le délai de 24 heures est expiré ou son statut a changé.")
+        if not reservation.politiques_acceptees_le:
+            reservation.politiques_acceptees_le = timezone.now()
+            reservation.version_politiques = '2026-10-31'
+            reservation.save(update_fields=('politiques_acceptees_le', 'version_politiques'))
+        self.refresh_from_db()
         return self
 
     @transaction.atomic
-    def annuler(self):
+    def annuler(self, motif='CLIENT', administrateur=None):
         from payments.models import Paiement
-        paiement_effectue = (
-            self.pk
-            and Paiement.objects.filter(reservation=self, statut=Paiement.PAYE).exists()
-        )
-        if self.statut == self.CONFIRMEE or paiement_effectue:
-            raise ValidationError(
-                "Une réservation payée ne peut pas être annulée et son tarif n'est pas remboursable."
-            )
-        if self.statut in (self.ANNULEE, self.TERMINEE, self.REJETEE, self.EXPIREE):
-            return self
-        self.statut = self.ANNULEE
-        self.save(update_fields=('statut',))
         from notifications.models import Notification
+        if motif not in ('CLIENT', 'ERREUR_ETABLISSEMENT', 'NO_SHOW'):
+            raise ValidationError("Motif d’annulation invalide.")
+        if motif != 'CLIENT' and not (administrateur and administrateur.est_administrateur()):
+            raise ValidationError("Ce motif est réservé à l’administration.")
+        reservation = type(self).objects.select_for_update().get(pk=self.pk)
+        if reservation.statut in (self.ANNULEE, self.TERMINEE, self.REJETEE, self.EXPIREE):
+            self.refresh_from_db()
+            return self
+        maintenant = timezone.now()
+        if motif == 'NO_SHOW' and timezone.localdate() <= reservation.date_debut:
+            raise ValidationError("Une non-présentation ne peut être enregistrée qu’après le jour d’arrivée.")
+        if motif == 'CLIENT' and maintenant >= reservation.arrivee_prevue:
+            raise ValidationError("À partir de l’heure d’arrivée prévue, contactez le support pour traiter votre demande.")
+        paiement = Paiement.objects.filter(reservation=reservation, statut=Paiement.PAYE).first()
+        taux = Decimal('0')
+        if paiement:
+            if motif == 'ERREUR_ETABLISSEMENT':
+                taux = Decimal('1')
+            elif motif == 'CLIENT':
+                taux = Decimal('0.5') if reservation.arrivee_prevue - maintenant > timedelta(hours=72) else Decimal('0')
+        reservation.montant_remboursement = ((paiement.montant if paiement else Decimal('0')) * taux).quantize(Decimal('0.01'))
+        reservation.statut = self.ANNULEE
+        reservation.annulee_le = maintenant
+        reservation.motif_annulation = motif
+        reservation.save(update_fields=('statut', 'annulee_le', 'motif_annulation', 'montant_remboursement'))
         Notification.objects.create(
-            client=self.client,
-            reservation=self,
-            categorie=Notification.INFORMATION,
-            message=f"Votre réservation de {self.appartement} du {self.date_debut:%d/%m/%Y} au {self.date_fin:%d/%m/%Y} a été annulée.",
+            client=reservation.client, reservation=reservation, categorie=Notification.INFORMATION,
+            message=f"Votre réservation {reservation.numero_reservation} pour {reservation.appartement} du {reservation.date_debut:%d/%m/%Y} au {reservation.date_fin:%d/%m/%Y} a été annulée. Remboursement prévu : {reservation.montant_remboursement} MAD, à traiter par le support. Aucun remboursement bancaire automatique n’est effectué.",
         ).envoyer()
+        self.refresh_from_db()
         return self
 
+    @transaction.atomic
     def generer_paiement(self, methode):
+        # Relecture verrouillée : une requête ancienne ne doit pas écraser un paiement validé.
+        type(self).objects.select_for_update().get(pk=self.pk)
+        self.refresh_from_db()
         if self.expirer_si_necessaire():
             raise ValidationError("Le délai de paiement de 24 heures est expiré.")
         if self.statut != self.EN_ATTENTE:
@@ -308,8 +309,8 @@ class Reservation(models.Model):
         from payments.models import Paiement
         if not self.politiques_acceptees_le:
             raise ValidationError("Vous devez lire et accepter les politiques avant le paiement.")
-        if methode != Paiement.CARTE:
-            raise ValidationError("Le paiement est disponible uniquement par carte bancaire.")
+        if methode != Paiement.VIREMENT:
+            raise ValidationError("Le paiement est disponible uniquement par virement bancaire.")
         paiement, _ = Paiement.objects.get_or_create(
             reservation=self,
             defaults={'montant': self.montant_total, 'methode': methode},
@@ -318,7 +319,7 @@ class Reservation(models.Model):
             raise ValidationError("Cette réservation est déjà payée.")
         paiement.methode = methode
         paiement.montant = self.montant_total
-        paiement.save()
+        paiement.save(update_fields=('methode', 'montant'))
         return paiement
 
     def generer_recap(self):
