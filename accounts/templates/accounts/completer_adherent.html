@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Votre statut d’adhérent · FOSEH Safar{% endblock %}
+{% block content %}
+<main class="page-main"><div class="shell" style="max-width:780px">
+  <div class="page-heading"><div><p class="kicker">Bienvenue</p><h1>Êtes-vous adhérent FM6 ?</h1>
+    <p>Renseignez votre matricule pour bénéficier du tarif Client FM6. Si vous n’êtes pas adhérent, laissez le champ vide pour continuer comme client régulier.</p>
+    <p>Vous pourrez également ajouter votre matricule depuis votre profil.</p>
+  </div></div>
+  <div class="form-card"><form method="post">
+    {% csrf_token %}<input type="hidden" name="next" value="{{ next }}">
+    {{ form.as_p }}
+    <button class="button button-primary" type="submit">Continuer</button>
+  </form></div>
+</div></main>
+{% endblock %}

@@ -5,6 +5,7 @@ from . import views
 app_name = 'accounts'
 
 urlpatterns = [
+    path('completer-adherent/', views.completer_adherent, name='completer_adherent'),
     path('inscription/', views.inscription, name='inscription'),
     path('connexion/', views.connexion, name='connexion'),
     path('deconnexion/', views.deconnexion, name='deconnexion'),

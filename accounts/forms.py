@@ -106,3 +106,11 @@ class ProfilForm(forms.ModelForm):
             utilisateur.save()
             self.save_m2m()
         return utilisateur
+
+
+class AdherentForm(ProfilForm):
+    class Meta:
+        model = Utilisateur
+        fields = ('matricule',)
+        labels = {'matricule': "Matricule d’adhérent FM6 (facultatif)"}
+        widgets = {'matricule': forms.TextInput(attrs={'class': 'auth-input'})}
