@@ -30,14 +30,14 @@
           {% else %}
             <a class="{% if request.resolver_match.namespace == 'reservations' %}active{% endif %}" href="{% url 'reservations:mes_reservations' %}">Mes réservations</a>
           {% endif %}
-          <a class="nav-icon-link" href="{% url 'notifications:liste' %}" aria-label="Notifications">Notifications {% if notifications_non_lues %}<span class="nav-badge">{{ notifications_non_lues }}</span>{% endif %}</a>
+          <a class="nav-icon-link nav-notifications" href="{% url 'notifications:liste' %}" aria-label="Notifications"><span aria-hidden="true">◌</span> Notifications {% if notifications_non_lues %}<span class="nav-badge">{{ notifications_non_lues }}</span>{% endif %}</a>
           <div class="user-menu">
             <a class="user-chip" href="{% url 'accounts:profil' %}"><span>{{ user.prenom|first|default:'U' }}{{ user.nom|first }}</span><span class="user-copy"><strong>{{ user.prenom }}</strong><small>{{ user.get_role_display }}</small></span></a>
-            <form method="post" action="{% url 'accounts:deconnexion' %}">{% csrf_token %}<button class="link-button" type="submit">Déconnexion</button></form>
+            <form method="post" action="{% url 'accounts:deconnexion' %}">{% csrf_token %}<button class="link-button" type="submit"><span aria-hidden="true">↗</span> Déconnexion</button></form>
           </div>
         {% else %}
           <a href="{% url 'accounts:connexion' %}">Connexion</a>
-          <a class="nav-cta" href="{% url 'accounts:inscription' %}">Créer un compte</a>
+          <a class="nav-cta" href="{% url 'accounts:inscription' %}">Créer un compte <span aria-hidden="true">↗</span></a>
         {% endif %}
       </nav>
     </div>
