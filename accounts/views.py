@@ -5,7 +5,8 @@ from django.db import IntegrityError, transaction
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
-from .forms import ConnexionForm, InscriptionForm, ProfilForm
+from .forms import ConnexionForm, InscriptionForm, ProfilForm, AdherentForm
+from .redirects import destination_apres_connexion
 
 
 MATRICULE_DEJA_UTILISE = "Ce numéro d'adhérent est déjà utilisé."
@@ -19,8 +20,9 @@ def _est_violation_unicite_matricule(exc):
 
 
 def inscription(request):
+    destination = destination_apres_connexion(request)
     if request.user.is_authenticated:
-        return redirect('core:accueil')
+        return redirect(destination)
     form = InscriptionForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         try:
@@ -33,23 +35,42 @@ def inscription(request):
         else:
             login(request, utilisateur, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, "Votre compte a été créé.")
-            return redirect('core:accueil')
-    return render(request, 'accounts/inscription.html', {'form': form})
+            return redirect(destination)
+    return render(request, 'accounts/inscription.html', {'form': form, 'next': destination})
 
 
 def connexion(request):
+    destination = destination_apres_connexion(request)
     if request.user.is_authenticated:
-        return redirect('core:accueil')
+        return redirect(destination)
     form = ConnexionForm(request, data=request.POST or None)
     if request.method == 'POST' and form.is_valid():
         login(request, form.get_user())
-        return redirect('core:accueil')
-    return render(request, 'accounts/connexion.html', {'form': form})
+        return redirect(destination)
+    return render(request, 'accounts/connexion.html', {'form': form, 'next': destination})
 
 
 @login_required
 def post_login(request):
-    return redirect('core:accueil')
+    return redirect(destination_apres_connexion(request))
+
+
+@login_required
+def completer_adherent(request):
+    destination = destination_apres_connexion(request)
+    form = AdherentForm(request.POST if request.method == 'POST' else None, instance=request.user)
+    if request.method == 'POST' and form.is_valid():
+        try:
+            with transaction.atomic():
+                form.save()
+        except IntegrityError as exc:
+            if not _est_violation_unicite_matricule(exc):
+                raise
+            form.add_error('matricule', MATRICULE_DEJA_UTILISE)
+        else:
+            messages.success(request, 'Votre type de client a été enregistré.')
+            return redirect(destination)
+    return render(request, 'accounts/completer_adherent.html', {'form': form, 'next': destination})
 
 
 @require_POST

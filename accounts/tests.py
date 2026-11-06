@@ -44,14 +44,15 @@ class InscriptionTests(TestCase):
             '/accounts/google/login/callback/',
         )
 
-    def test_connexion_google_ignore_la_destination_et_revient_a_l_accueil(self):
+    def test_connexion_google_conserve_la_destination(self):
         destination = reverse('reservations:mes_reservations')
         response = self.client.get(
             reverse('accounts:connexion'),
             {'next': destination},
         )
 
-        self.assertNotContains(response, 'name="next"')
+        self.assertContains(response, 'name="next"')
+        self.assertContains(response, f'value="{destination}"')
 
     def test_adaptateur_google_remplit_un_nouveau_client(self):
         sociallogin = SocialLogin(
@@ -110,7 +111,7 @@ class InscriptionTests(TestCase):
         self.assertContains(response, 'J’ai lu et compris la')
         self.assertContains(response, reverse('core:politique_confidentialite'))
 
-    def test_connexion_redirige_vers_accueil_meme_avec_next(self):
+    def test_connexion_redirige_vers_next(self):
         utilisateur = Utilisateur.objects.create_user(
             email='client@example.com',
             password='mot-de-passe-solide',
@@ -123,7 +124,7 @@ class InscriptionTests(TestCase):
             {'username': utilisateur.email, 'password': 'mot-de-passe-solide'},
         )
 
-        self.assertRedirects(response, reverse('core:accueil'))
+        self.assertRedirects(response, reverse('reservations:mes_reservations'))
 
     def test_ajouter_un_matricule_transforme_le_client_en_client_fm6(self):
         utilisateur = Utilisateur.objects.create_user(
@@ -210,3 +211,107 @@ class InscriptionTests(TestCase):
                 email='second@example.com', password='mot-de-passe', nom='Second', prenom='FM6',
                 role=Utilisateur.CLIENT_FM6, matricule='FM6-DB-1',
             )
+
+
+class RepriseReservationTests(TestCase):
+    def setUp(self):
+        from apartments.models import Appartement
+        self.user = Utilisateur.objects.create_user(
+            email='reprise@example.com', password='mot-de-passe-solide', nom='Test', prenom='Client',
+        )
+        self.appartement = Appartement.objects.create(
+            titre='Studio', description='Test', prix_par_nuit=700, prix_fm6_par_nuit=500, capacite=2,
+        )
+        self.destination = reverse('reservations:reserver', args=[self.appartement.pk]) + '?date_debut=2027-06-10&date_fin=2027-06-12'
+
+    def test_connexion_retrouve_appartement_et_dates(self):
+        response = self.client.get(self.destination)
+        login_url = response['Location']
+        page = self.client.get(login_url)
+        self.assertEqual(page.context['next'], self.destination)
+        response = self.client.post(login_url, {
+            'username': self.user.email, 'password': 'mot-de-passe-solide',
+            'next': self.destination,
+        }, follow=True)
+        self.assertEqual(response.context['appartement'], self.appartement)
+        self.assertEqual(response.context['date_debut'], '2027-06-10')
+        self.assertEqual(response.context['date_fin'], '2027-06-12')
+
+    def test_inscription_conserve_destination(self):
+        response = self.client.post(reverse('accounts:inscription'), {
+            'role': Utilisateur.CLIENT_REGULIER, 'email': 'nouveau-reprise@example.com',
+            'nom': 'Nouveau', 'prenom': 'Client', 'password1': 'Mot-de-passe-tres-solide-2027',
+            'password2': 'Mot-de-passe-tres-solide-2027', 'consentement_donnees': 'on',
+            'next': self.destination,
+        })
+        self.assertRedirects(response, self.destination)
+
+    def test_destination_externe_refusee(self):
+        for destination in ['https://evil.example/', '//evil.example/', 'javascript:alert(1)']:
+            with self.subTest(destination=destination):
+                self.client.logout()
+                response = self.client.post(reverse('accounts:connexion'), {
+                    'username': self.user.email, 'password': 'mot-de-passe-solide', 'next': destination,
+                })
+                self.assertRedirects(response, reverse('core:accueil'))
+
+    def test_nouveau_compte_google_propose_matricule_avant_reservation(self):
+        from unittest.mock import patch
+        from django.test import RequestFactory
+        from urllib.parse import parse_qs, urlsplit
+        sociallogin = SocialLogin(user=self.user, account=SocialAccount(provider='google', uid='new'))
+        sociallogin.state = {'next': self.destination}
+        request = RequestFactory().get('/')
+        with patch('allauth.socialaccount.adapter.DefaultSocialAccountAdapter.save_user', return_value=self.user):
+            GoogleAccountAdapter().save_user(request, sociallogin)
+        url = sociallogin.get_redirect_url(request)
+        self.assertEqual(urlsplit(url).path, reverse('accounts:completer_adherent'))
+        self.assertEqual(parse_qs(urlsplit(url).query)['next'], [self.destination])
+        self.client.force_login(self.user)
+        response = self.client.get(url)
+        self.assertContains(response, 'Matricule')
+        response = self.client.post(url, {'matricule': ' FM6-REPRISE ', 'next': self.destination}, follow=True)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.role, Utilisateur.CLIENT_FM6)
+        self.assertEqual(self.user.matricule, 'FM6-REPRISE')
+        self.assertEqual(response.context['date_debut'], '2027-06-10')
+        self.assertEqual(response.context['tarif_nuit'], 500)
+
+    def test_google_peut_continuer_comme_client_regulier(self):
+        self.client.force_login(self.user)
+        response = self.client.post(reverse('accounts:completer_adherent'), {'matricule': '', 'next': self.destination})
+        self.assertRedirects(response, self.destination)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.role, Utilisateur.CLIENT_REGULIER)
+        self.assertIsNone(self.user.matricule)
+
+    def test_matricule_deja_utilise_conserve_destination(self):
+        Utilisateur.objects.create_user(email='autre@example.com', nom='Autre', prenom='Client', matricule='EXISTANT', role=Utilisateur.CLIENT_FM6)
+        self.client.force_login(self.user)
+        response = self.client.post(reverse('accounts:completer_adherent'), {'matricule': 'EXISTANT', 'next': self.destination})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('matricule', response.context['form'].errors)
+        self.assertEqual(response.context['next'], self.destination)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.role, Utilisateur.CLIENT_REGULIER)
+
+    @override_settings(SOCIALACCOUNT_PROVIDERS=GOOGLE_PROVIDER_SETTINGS)
+    def test_inscription_allauth_reelle_passe_par_le_matricule(self):
+        from allauth.account.models import EmailAddress
+        from allauth.core.context import request_context
+        from allauth.socialaccount.internal.flows.signup import process_signup
+        from urllib.parse import parse_qs, urlsplit
+        request = self.client.get(reverse('accounts:connexion')).wsgi_request
+        sociallogin = SocialLogin(
+            user=Utilisateur(email='nouveau-google@example.com', nom='Google', prenom='Client'),
+            account=SocialAccount(provider='google', uid='google-integration'),
+            email_addresses=[EmailAddress(email='nouveau-google@example.com', verified=True, primary=True)],
+        )
+        sociallogin.state = {'next': self.destination}
+        with request_context(request):
+            response = process_signup(request, sociallogin)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(urlsplit(response['Location']).path, reverse('accounts:completer_adherent'))
+        self.assertEqual(parse_qs(urlsplit(response['Location']).query)['next'], [self.destination])
+        self.assertTrue(SocialAccount.objects.filter(uid='google-integration').exists())
+        self.assertIn('_auth_user_id', request.session)
