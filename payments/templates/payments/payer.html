@@ -35,7 +35,7 @@
             <li><span>2</span><div><h3>Envoyez votre reçu sur WhatsApp</h3><p>Transmettez votre <strong>numéro de réservation et le reçu du paiement</strong>. Le message est prérempli ; ajoutez vous-même le reçu en pièce jointe dans WhatsApp.</p></div></li>
             <li><span>3</span><div><h3>Échangez avec notre support</h3><p>Le support vous contacte pour vérifier votre séjour. Après vérification du virement, l’administrateur valide votre réservation. Vous recevez alors la confirmation par email.</p></div></li>
           </ol>
-          {% if whatsapp_url %}<a class="button transfer-whatsapp" href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer">Envoyer mon reçu sur WhatsApp <span aria-hidden="true">↗</span></a>{% else %}<p class="transfer-unavailable">Le contact WhatsApp sera disponible prochainement. Contactez le support à <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.</p>{% endif %}
+          {% if whatsapp_url %}<a class="button transfer-whatsapp" href="{{ whatsapp_url }}">Envoyer mon reçu sur WhatsApp <span aria-hidden="true">↗</span></a>{% else %}<p class="transfer-unavailable">Le contact WhatsApp sera disponible prochainement. Contactez le support à <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.</p>{% endif %}
           <p class="transfer-note">Un reçu envoyé ne constitue pas une confirmation et ne prolonge pas le délai. Si votre virement est déjà parti mais que le délai expire, contactez le support avant tout nouveau paiement.</p>
         </section>
       </div>

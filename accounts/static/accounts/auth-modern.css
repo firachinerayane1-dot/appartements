@@ -1,0 +1,76 @@
+/* Connexion et inscription : identité visuelle de la résidence. */
+.auth-modern { background: #f7f4ee; }
+.auth-modern .auth-page { grid-template-columns: minmax(0, 46%) minmax(0, 1fr); padding: 16px; gap: 16px; }
+.auth-modern .auth-showcase { position: sticky; top: 16px; height: calc(100vh - 32px); min-height: 620px; padding: clamp(2rem,4vw,4.5rem); border-radius: 20px; background: linear-gradient(180deg,rgba(10,32,28,.4),rgba(10,32,28,.62) 45%,rgba(10,32,28,.92)),url('../img/residence/piscine-nuit.jpeg') 58% center/cover no-repeat; }
+.auth-modern .auth-showcase::after { content: none; }
+.auth-modern .auth-brand { display: flex; align-items: center; gap: .4rem; font-size: 1.05rem; }
+.auth-modern .auth-brand > span { width: 38px; height: 38px; margin-right: .25rem; background: #f7f4ee; color: var(--forest); font-family: Georgia,serif; }
+.auth-modern .auth-brand em { color: #f0cdae; font: italic 500 1.2rem Georgia,serif; }
+.auth-modern .auth-showcase h1 { font: 500 clamp(2.8rem,4.3vw,4.9rem)/1.03 Georgia,serif; letter-spacing: -.045em; margin-block: 1rem 1.5rem; }
+.auth-modern .auth-showcase h1 em { color: #f0cdae; font-weight: 400; }
+.auth-modern .auth-showcase p { max-width: 390px; font-size: .94rem; }
+.auth-modern .auth-showcase .eyebrow { font-size: .62rem !important; letter-spacing: .18em; }
+.auth-modern .auth-place { border-top: 1px solid rgba(255,255,255,.28); padding-top: 1.3rem; }
+.auth-place > span { display: block; color: #e4d4bf; font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; }
+.auth-place strong { display: block; margin-top: .4rem; font: 500 1.45rem Georgia,serif; }
+.auth-modern .auth-place p { margin: .4rem 0 0; font-size: .72rem; }
+.auth-modern .auth-panel { position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; min-width: 0; padding: 5.5rem clamp(1.5rem,5vw,5rem) 3rem; }
+.auth-back { position: absolute; top: 1.6rem; left: clamp(1.5rem,5vw,5rem); display: inline-flex; align-items: center; gap: .7rem; color: var(--muted); text-decoration: none; font-size: .74rem; }
+.auth-back:hover { color: var(--forest); }
+.auth-modern .auth-card { max-width: 460px; }
+.auth-modern .auth-card-wide { max-width: 560px; }
+.auth-modern .auth-heading { margin-bottom: 2rem; }
+.auth-modern .auth-heading .eyebrow { color: var(--terracotta-dark); font-size: .62rem !important; }
+.auth-modern .auth-heading h2 { margin-block: .6rem .8rem; color: var(--forest); font: 500 clamp(2.4rem,3.5vw,3.6rem)/1.05 Georgia,serif; letter-spacing: -.045em; }
+.auth-modern .auth-heading p { font-size: .83rem; }
+.auth-modern .auth-heading a, .auth-modern .label-row a { color: var(--terracotta-dark); text-underline-offset: 4px; }
+.auth-modern .auth-heading a:hover, .auth-modern .label-row a:hover { text-decoration: underline; }
+.auth-modern .google-button { min-height: 54px; border-radius: 10px; background: #fffcf8; color: var(--forest); font-size: .85rem; box-shadow: none; cursor: pointer; transition: background .2s,border-color .2s; }
+.auth-modern .google-button:hover:not(:disabled) { background: #eeeee5; border-color: #9aaa9d; }
+.auth-modern .google-button:disabled { cursor: not-allowed; }
+.auth-modern .auth-divider { margin-block: 1.5rem; color: var(--muted); font-size: .7rem; }
+.auth-modern .auth-form { gap: .65rem; }
+.auth-modern .auth-form label { color: var(--forest); font-size: .75rem; font-weight: 650; }
+.auth-modern .auth-input { min-height: 52px; border-radius: 9px; background: #fffcf8; font-size: .88rem; }
+.auth-modern .auth-input::placeholder { color: #8a8881; font-size: .8rem; }
+.auth-modern .auth-input:hover { border-color: #a8b3a6; }
+.auth-modern .label-row { gap: .8rem; }
+.auth-modern .label-row a { font-size: .71rem; }
+.auth-modern .password-toggle { border: 0; color: var(--terracotta-dark); cursor: pointer; }
+.auth-modern .auth-submit { display: flex; align-items: center; justify-content: space-between; padding-inline: 1.2rem; min-height: 54px; margin-top: .8rem; border-radius: 9px; font-size: .84rem; font-weight: 650; cursor: pointer; box-shadow: 0 8px 20px rgba(31,75,63,.1); transition: background .2s; }
+.auth-modern .auth-submit:hover { background: var(--forest-dark); }
+.auth-modern .auth-submit span { font-size: 1.2rem; }
+.auth-modern .form-grid { gap: 1rem; }
+.auth-modern .form-grid > div { gap: .55rem; min-width: 0; }
+.auth-modern .consent-checkbox { margin-top: .75rem; font-size: .72rem; font-weight: 400 !important; }
+.auth-modern .consent-checkbox a { color: var(--terracotta-dark); }
+.auth-footnote { margin: 1.5rem auto 0; max-width: 310px; text-align: center; font-size: .72rem; color: var(--muted); }
+.auth-modern :is(a,button):focus-visible { outline: 3px solid var(--terracotta); outline-offset: 4px; }
+.auth-modern #matricule-container:not([hidden]) { display: grid; gap: .55rem; }
+@media (min-width: 861px) {
+  .auth-modern .auth-signup .auth-panel { padding-top: 4.5rem; padding-bottom: 2rem; }
+  .auth-modern .auth-signup .auth-heading { margin-bottom: 1.3rem; }
+  .auth-modern .auth-signup .auth-divider { margin-block: 1.1rem; }
+}
+@media (max-width: 1100px) and (min-width: 861px) {
+  .auth-modern .auth-page { grid-template-columns: minmax(0,40%) minmax(0,1fr); }
+  .auth-modern .auth-panel { padding-inline: 2rem; }
+  .auth-modern .auth-back { left: 2rem; }
+  .auth-modern .auth-showcase { padding: 2rem; }
+}
+@media (max-width: 860px) {
+  .auth-modern .auth-page { grid-template-columns: minmax(0,1fr); padding: 12px; gap: 0; }
+  .auth-modern .auth-showcase { position: relative; top: auto; height: auto; min-height: 320px; padding: 1.8rem; gap: 2.5rem; background-position: center 58%; border-radius: 16px; }
+  .auth-modern .auth-showcase h1 { max-width: 580px; margin-block: .7rem 0; font-size: clamp(2.3rem,6vw,3.3rem); }
+  .auth-modern .auth-showcase > div > p:not(.eyebrow), .auth-modern .auth-place { display: none; }
+  .auth-modern .auth-panel { padding: 4.5rem 1.5rem 2rem; }
+  .auth-modern .auth-back { top: 1.5rem; left: 1.5rem; }
+}
+@media (max-width: 520px) {
+  .auth-modern .auth-page { padding: 8px; }
+  .auth-modern .auth-showcase { min-height: 290px; padding: 1.5rem; }
+  .auth-modern .auth-panel { padding-inline: 1rem; }
+  .auth-modern .auth-back { left: 1rem; }
+  .auth-modern .auth-heading h2 { font-size: 2.65rem; }
+  .auth-modern .form-grid { grid-template-columns: minmax(0,1fr); gap: .7rem; }
+}

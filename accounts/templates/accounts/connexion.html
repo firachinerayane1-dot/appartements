@@ -1,21 +1,22 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}Connexion · FOSEH Safar{% endblock %}
-{% block body_class %}auth-body{% endblock %}
-{% block extra_head %}<link rel="stylesheet" href="{% static 'accounts/auth.css' %}?v=4">{% endblock %}
+{% block body_class %}auth-body auth-modern{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'accounts/auth.css' %}?v=5"><link rel="stylesheet" href="{% static 'accounts/auth-modern.css' %}?v=1">{% endblock %}
 {% block content %}
 <main class="auth-page">
   <section class="auth-showcase" aria-label="Présentation">
-    <a class="auth-brand" href="{% url 'core:accueil' %}"><span>F</span> FOSEH Safar</a>
+    <a class="auth-brand" href="{% url 'core:accueil' %}"><span>F</span> FOSEH <em>Safar</em></a>
     <div>
       <p class="eyebrow">Résidence Amwaj · Sidi Rahal</p>
-      <h1>Heureux de vous revoir.</h1>
+      <h1>Le plaisir de revenir.<br><em>Votre séjour vous attend.</em></h1>
       <p>Connectez-vous pour retrouver vos réservations, vos paiements et vos notifications.</p>
     </div>
-    <p class="auth-trust">Piscine · Jardins · Résidence privée · Terrain multisports</p>
+    <div class="auth-place"><span>Votre parenthèse à Sidi Rahal</span><strong>Résidence Amwaj</strong><p>Piscine · Jardins · Côte atlantique</p></div>
   </section>
 
   <section class="auth-panel">
+    <a class="auth-back" href="{% url 'core:accueil' %}"><span aria-hidden="true">←</span> Retour à l’accueil</a>
     <div class="auth-card">
       <div class="auth-heading">
         <p class="eyebrow">Espace client</p>
@@ -32,7 +33,7 @@
           </button>
         </form>
       {% else %}
-        <button class="google-button" type="button" disabled title="Configurez Google OAuth dans le fichier .env">Continuer avec Google</button>
+        <button class="google-button" type="button" disabled title="La connexion Google est momentanément indisponible">Continuer avec Google</button>
       {% endif %}
 
       <div class="auth-divider"><span>ou avec votre email</span></div>
@@ -43,8 +44,9 @@
         <label for="{{ form.username.id_for_label }}">Adresse email</label>{{ form.username }}{{ form.username.errors }}
         <div class="label-row"><label for="{{ form.password.id_for_label }}">Mot de passe</label><a href="{% url 'accounts:password_reset' %}">Mot de passe oublié ?</a></div>
         <div class="password-field">{{ form.password }}<button type="button" class="password-toggle" data-target="{{ form.password.id_for_label }}" aria-label="Afficher le mot de passe">Afficher</button></div>{{ form.password.errors }}
-        <button class="auth-submit" type="submit">Se connecter</button>
+        <button class="auth-submit" type="submit">Se connecter <span aria-hidden="true">↗</span></button>
       </form>
+      <p class="auth-footnote">Vos séjours, vos réservations et vos informations, réunis dans votre espace.</p>
     </div>
   </section>
 </main>
