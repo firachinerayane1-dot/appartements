@@ -2,6 +2,7 @@
 {% load static %}
 {% block title %}FOSEH Safar · Votre séjour à Sidi Rahal{% endblock %}
 {% block body_class %}home-page{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/home.css' %}?v=2">{% endblock %}
 {% block content %}
 <main>
   <section class="hero">
@@ -10,24 +11,31 @@
       <p class="kicker light">Résidence privée · Sidi Rahal</p>
       <h1>Le calme d’un séjour <em>entre jardin et océan.</em></h1>
       <p class="hero-lead">Des appartements lumineux au sein de la résidence Amwaj, avec piscine, jardins paysagers et espaces de loisirs.</p>
-      <form class="hero-search" method="get" action="{% url 'apartments:liste' %}">
-        <div><label for="home-arrivee">Arrivée</label><input id="home-arrivee" type="date" name="date_debut" required></div>
-        <div><label for="home-depart">Départ</label><input id="home-depart" type="date" name="date_fin" required></div>
-        <button class="button button-primary" type="submit"><span>Rechercher</span><span aria-hidden="true">→</span></button>
-      </form>
+      <div class="home-hero-actions"><a class="button button-light" href="#recherche">Préparer mon séjour <span aria-hidden="true">↗</span></a><a class="home-discover" href="#residence">Explorer la résidence <span aria-hidden="true">↓</span></a></div>
       <div class="hero-meta"><span><strong>Réservation en ligne</strong> simple et rapide</span><span><strong>Résidence privée</strong> calme et sécurisée</span><span><strong>Sidi Rahal</strong> côte atlantique</span></div>
     </div>
   </section>
 
-  <section class="section section-soft" id="services"><div class="shell"><div class="section-heading centered"><div><p class="kicker">La résidence</p><h2>Des vacances simples, dans un cadre préservé</h2></div></div><div class="feature-grid">
-    <article><span class="feature-icon">01</span><h3>Piscine au cœur des jardins</h3><p>Un espace de baignade entouré de pelouses, de palmiers et d’allées paysagées.</p></article>
-    <article><span class="feature-icon">02</span><h3>Résidence privée</h3><p>Un environnement calme, soigné et pensé pour profiter sereinement de votre séjour.</p></article>
-    <article><span class="feature-icon">03</span><h3>Terrain multisports</h3><p>Un espace dédié aux activités et aux moments partagés, à quelques pas du logement.</p></article>
-    <article><span class="feature-icon">04</span><h3>Parking sur place</h3><p>Un accès pratique à la résidence et des espaces de stationnement à proximité.</p></article>
+  <section class="home-search-section shell" id="recherche" aria-label="Rechercher un séjour">
+    <form class="home-search" method="get" action="{% url 'apartments:liste' %}">
+      <div class="home-search-intro"><span class="home-search-icon" aria-hidden="true">↗</span><div><strong>Une pause, à vos dates.</strong><small>Trouvez votre appartement disponible.</small></div></div>
+      <div class="date-field"><label for="home-arrivee">Arrivée</label><input id="home-arrivee" type="date" name="date_debut" required></div>
+      <span class="home-date-arrow" aria-hidden="true">→</span>
+      <div class="date-field"><label for="home-depart">Départ</label><input id="home-depart" type="date" name="date_fin" required></div>
+      <button class="button button-primary" type="submit">Voir les disponibilités <span aria-hidden="true">↗</span></button>
+    </form>
+    <p class="home-search-note">Choisissez vos dates, découvrez les appartements, puis réservez votre séjour.</p>
+  </section>
+
+  <section class="section home-services" id="services"><div class="shell"><div class="section-heading home-section-heading"><div><p class="kicker">La résidence</p><h2>Tout pour ralentir.<br><em>Et profiter, simplement.</em></h2></div><p>Des jardins à la piscine, retrouvez le plaisir de prendre votre temps à la résidence Amwaj.</p></div><div class="feature-grid">
+    <article><span class="feature-icon" aria-hidden="true">≈</span><span class="home-feature-number">01 / Détente</span><h3>Piscine au cœur des jardins</h3><p>Un espace de baignade entouré de pelouses, de palmiers et d’allées paysagées.</p></article>
+    <article><span class="feature-icon" aria-hidden="true">⌂</span><span class="home-feature-number">02 / Sérénité</span><h3>Résidence privée</h3><p>Un environnement calme, soigné et pensé pour profiter sereinement de votre séjour.</p></article>
+    <article><span class="feature-icon" aria-hidden="true">◎</span><span class="home-feature-number">03 / Loisirs</span><h3>Terrain multisports</h3><p>Un espace dédié aux activités et aux moments partagés, à quelques pas du logement.</p></article>
+    <article><span class="feature-icon" aria-hidden="true">P</span><span class="home-feature-number">04 / Pratique</span><h3>Parking sur place</h3><p>Un accès pratique à la résidence et des espaces de stationnement à proximité.</p></article>
   </div></div></section>
 
   <section class="section shell residence-section" id="residence">
-    <div class="residence-intro"><div><p class="kicker">L’appartement en images</p><h2>Des espaces lumineux, pensés pour se retrouver</h2></div><p>Du salon ouvert sur les jardins aux chambres paisibles, chaque espace accompagne les moments simples d’un séjour à Sidi Rahal.</p></div>
+    <div class="residence-intro"><div><p class="kicker">L’appartement en images</p><h2>Posez vos valises.<br><em>Vous êtes chez vous.</em></h2></div><p>Du salon ouvert sur les jardins aux chambres paisibles, chaque espace accompagne les moments simples d’un séjour à Sidi Rahal.</p></div>
     <div class="residence-gallery">
       <figure class="gallery-main"><img src="{% static 'img/residence/salon-appartement.jpeg' %}" alt="Salon lumineux avec espace repas" loading="lazy"><figcaption><span>01</span> Salon &amp; salle à manger</figcaption></figure>
       <figure class="gallery-balcony"><img src="{% static 'img/residence/balcon-appartement.jpeg' %}" alt="Balcon donnant sur les jardins et la piscine" loading="lazy"><figcaption><span>02</span> Balcon sur les jardins</figcaption></figure>
@@ -37,6 +45,17 @@
       <figure><img src="{% static 'img/residence/piscine-nuit.jpeg' %}" alt="Piscine illuminée de la résidence Amwaj la nuit" loading="lazy"><figcaption><span>06</span> La résidence à la nuit tombée</figcaption></figure>
     </div>
     <div class="residence-summary"><p>Un appartement prêt à vivre, dans un environnement calme et verdoyant.</p><div><span>Intérieurs lumineux</span><span>Vue sur jardin</span><span>Piscine commune</span><span>Résidence sécurisée</span></div></div>
+  </section>
+
+  <section class="home-steps-section">
+    <div class="shell">
+      <div class="section-heading home-section-heading"><div><p class="kicker light">Votre séjour, en toute simplicité</p><h2>De l’envie de partir<br><em>au plaisir d’arriver.</em></h2></div><a class="home-discover" href="#recherche">Choisir mes dates <span aria-hidden="true">↗</span></a></div>
+      <ol class="home-steps">
+        <li><span>01</span><h3>Choisissez vos dates</h3><p>Découvrez les appartements disponibles pour votre prochaine escapade.</p></li>
+        <li><span>02</span><h3>Trouvez votre appartement</h3><p>Explorez les photos, les équipements et le tarif de votre séjour.</p></li>
+        <li><span>03</span><h3>Préparez votre arrivée</h3><p>Réservez et suivez les étapes de confirmation depuis votre espace client.</p></li>
+      </ol>
+    </div>
   </section>
 
   <section class="section shell location-section" id="localisation">
