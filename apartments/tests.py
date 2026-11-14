@@ -137,6 +137,15 @@ class RechercheDisponibiliteTests(TestCase):
             f'{url}?date_debut=2027-09-10&amp;date_fin=2027-09-15',
         )
 
+    def test_catalogue_affiche_le_total_et_le_nombre_de_nuits(self):
+        response = self.client.get(
+            reverse('apartments:liste'),
+            {'date_debut': '2027-09-10', 'date_fin': '2027-09-15'},
+        )
+
+        self.assertContains(response, 'Total · 5 nuits')
+        self.assertContains(response, '3500,00')
+
     def test_photo_et_titre_transmettent_les_dates_au_detail(self):
         response = self.client.get(
             reverse('apartments:liste'),
@@ -166,6 +175,8 @@ class RechercheDisponibiliteTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Du 10/09/2027 au 15/09/2027')
+        self.assertContains(response, '3500,00 MAD')
+        self.assertContains(response, '5 nuits')
         self.assertContains(response, '700,00 MAD')
         self.assertContains(response, 'Réserver maintenant')
         self.assertContains(

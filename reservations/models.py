@@ -139,22 +139,47 @@ class Reservation(models.Model):
             nuits_nouvelles = (
                 min(self.date_fin, fin_annee) - max(self.date_debut, debut_annee)
             ).days
-            reservations = type(self).objects.filter(
-                Q(statut__in=(self.CONFIRMEE, self.TERMINEE))
-                | Q(statut=self.EN_ATTENTE, date_reservation__gt=limite_paiement),
-                client_id=self.client_id,
-                date_debut__lt=fin_annee,
-                date_fin__gt=debut_annee,
-            )
-            if self.pk:
-                reservations = reservations.exclude(pk=self.pk)
-
-            nuits_existantes = sum(
-                (min(reservation.date_fin, fin_annee) - max(reservation.date_debut, debut_annee)).days
-                for reservation in reservations.only('date_debut', 'date_fin')
+            nuits_existantes = type(self).nuits_fm6_utilisees(
+                self.client,
+                annee,
+                exclude_pk=self.pk,
+                limite_paiement=limite_paiement,
             )
             if nuits_existantes + nuits_nouvelles > self.MAX_NUITS_FM6_PAR_AN:
                 raise ValidationError(self.MESSAGE_QUOTA_ANNUEL_FM6.format(annee=annee))
+
+    @classmethod
+    def nuits_fm6_utilisees(cls, client, annee, exclude_pk=None, limite_paiement=None):
+        """Retourne les nuits actives imputées au quota FM6 d'une année."""
+        if not client or not client.est_client_fm6():
+            return 0
+
+        debut_annee = date(annee, 1, 1)
+        fin_annee = date(annee + 1, 1, 1)
+        limite_paiement = limite_paiement or timezone.now() - cls.DELAI_PAIEMENT
+        reservations = cls.objects.filter(
+            Q(statut__in=(cls.CONFIRMEE, cls.TERMINEE))
+            | Q(statut=cls.EN_ATTENTE, date_reservation__gt=limite_paiement),
+            client=client,
+            date_debut__lt=fin_annee,
+            date_fin__gt=debut_annee,
+        )
+        if exclude_pk:
+            reservations = reservations.exclude(pk=exclude_pk)
+        return sum(
+            (min(reservation.date_fin, fin_annee) - max(reservation.date_debut, debut_annee)).days
+            for reservation in reservations.only('date_debut', 'date_fin')
+        )
+
+    @classmethod
+    def quota_fm6(cls, client, annee):
+        utilisees = cls.nuits_fm6_utilisees(client, annee)
+        return {
+            'annee': annee,
+            'utilisees': utilisees,
+            'total': cls.MAX_NUITS_FM6_PAR_AN,
+            'restantes': max(0, cls.MAX_NUITS_FM6_PAR_AN - utilisees),
+        }
 
     def get_duree(self):
         return (self.date_fin - self.date_debut).days

@@ -7,17 +7,31 @@ if (toggle && nav) {
     nav.classList.toggle('is-open', !open);
   });
 }
-document.querySelectorAll('.toast button').forEach(button => {
-  button.addEventListener('click', () => button.closest('.toast').remove());
+const dismissToast = toast => {
+  if (!toast || toast.classList.contains('is-closing')) return;
+  toast.classList.add('is-closing');
+  window.setTimeout(() => toast.remove(), 250);
+};
+document.querySelectorAll('.toast').forEach(toast => {
+  const button = toast.querySelector('button');
+  if (button) button.addEventListener('click', () => dismissToast(toast));
+  window.setTimeout(() => dismissToast(toast), 2000);
 });
+
+const dayAfter = value => {
+  if (!value) return '';
+  const date = new Date(`${value}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + 1);
+  return date.toISOString().split('T')[0];
+};
 const arrival = document.getElementById('home-arrivee');
 const departure = document.getElementById('home-depart');
 if (arrival && departure) {
   const today = new Date().toISOString().split('T')[0];
   arrival.min = today;
-  departure.min = today;
+  departure.min = arrival.value ? dayAfter(arrival.value) : dayAfter(today);
   arrival.addEventListener('change', () => {
-    departure.min = arrival.value;
+    departure.min = dayAfter(arrival.value || today);
     if (departure.value && departure.value <= arrival.value) departure.value = '';
   });
 }
@@ -27,13 +41,45 @@ const catalogDeparture = document.getElementById('id_date_fin');
 if (catalogArrival && catalogDeparture && !document.body.classList.contains('admin-workspace')) {
   const today = new Date().toISOString().split('T')[0];
   catalogArrival.min = today;
-  catalogDeparture.min = catalogArrival.value || today;
+  catalogDeparture.min = dayAfter(catalogArrival.value || today);
   catalogArrival.addEventListener('change', () => {
-    catalogDeparture.min = catalogArrival.value || today;
+    catalogDeparture.min = dayAfter(catalogArrival.value || today);
     if (catalogDeparture.value && catalogDeparture.value <= catalogArrival.value) {
       catalogDeparture.value = '';
     }
   });
+
+  const priceSummary = document.getElementById('booking-price-summary');
+  const liveSummary = document.getElementById('booking-live-summary');
+  const liveNights = document.getElementById('booking-live-nights');
+  const liveTotal = document.getElementById('booking-live-total');
+  const totalRow = document.getElementById('booking-total-row');
+  const totalValue = document.getElementById('booking-total-value');
+  const updateBookingTotal = () => {
+    if (!priceSummary || !catalogArrival.value || !catalogDeparture.value) return;
+    const start = new Date(`${catalogArrival.value}T00:00:00Z`);
+    const end = new Date(`${catalogDeparture.value}T00:00:00Z`);
+    const nights = Math.round((end - start) / 86400000);
+    if (nights <= 0) return;
+    const rate = Number(priceSummary.dataset.nightlyRate.replace(',', '.'));
+    const total = new Intl.NumberFormat('fr-FR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(rate * nights);
+    if (liveSummary && liveNights && liveTotal) {
+      liveNights.textContent = `${nights} nuit${nights > 1 ? 's' : ''}`;
+      liveTotal.textContent = `Total du séjour : ${total} MAD`;
+      liveSummary.hidden = false;
+    }
+    if (totalRow && totalValue) {
+      totalRow.querySelector('dt').textContent = `Total du séjour · ${nights} nuit${nights > 1 ? 's' : ''}`;
+      totalValue.textContent = `${total} MAD`;
+      totalRow.hidden = false;
+    }
+  };
+  catalogArrival.addEventListener('change', updateBookingTotal);
+  catalogDeparture.addEventListener('change', updateBookingTotal);
+  updateBookingTotal();
 }
 
 /* Animations déclenchées au défilement. La classe motion-ready évite de
