@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}Confirmer {{ appartement.titre }} · FOSEH Safar{% endblock %}
-{% block body_class %}booking-page{% endblock %}
+{% block body_class %}booking-page mobile-booking-page{% endblock %}
 {% block content %}
 <main>
   <section class="booking-hero">
@@ -20,7 +20,7 @@
   </section>
 
   <section class="booking-checkout shell">
-    <form class="booking-confirm-card" method="post">
+    <form id="booking-form" class="booking-confirm-card" method="post">
       {% csrf_token %}
       <div class="booking-card-heading">
         <div><p class="kicker">Votre demande</p><h2>{% if dates_preselectionnees %}Vérifiez les détails{% else %}Indiquez vos dates{% endif %}</h2></div>
@@ -58,7 +58,7 @@
       <button class="button booking-submit" type="submit"><span>Bloquer mes dates et continuer</span><span aria-hidden="true">→</span></button>
     </form>
 
-    <aside class="booking-property-card">
+    <aside class="booking-property-card" id="booking-summary" tabindex="-1">
       <div class="booking-property-image">
         {% with photo=appartement.photos.all.0 %}
         {% if photo %}<img src="{{ photo.image_url }}" srcset="{{ photo.image_srcset }}" sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 640px" width="{{ photo.image_width }}" height="{{ photo.image_height }}" decoding="async" alt="{{ photo.legende|default:appartement.titre }}" loading="lazy">{% else %}<img src="{% static 'img/residence/salon-appartement-640.webp' %}" srcset="{% static 'img/residence/salon-appartement-320.webp' %} 320w, {% static 'img/residence/salon-appartement-640.webp' %} 640w, {% static 'img/residence/salon-appartement-960.webp' %} 960w, {% static 'img/residence/salon-appartement-1540.webp' %} 1540w" sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 640px" width="1540" height="1021" decoding="async" alt="Salon lumineux d’un appartement FOSEH Safar" loading="lazy">{% endif %}
@@ -79,4 +79,8 @@
     </aside>
   </section>
 </main>
+<div class="mobile-booking-bar" aria-label="Confirmer votre séjour">
+  <a class="mobile-booking-summary" href="#booking-summary"><strong id="mobile-booking-total">{% if montant_estime %}{{ montant_estime }} MAD{% else %}{{ tarif_nuit }} MAD / nuit{% endif %}</strong><span>Voir le résumé ↑</span></a>
+  <button class="button" type="submit" form="booking-form">Bloquer mes dates</button>
+</div>
 {% endblock %}
