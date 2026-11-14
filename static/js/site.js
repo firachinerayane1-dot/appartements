@@ -56,16 +56,22 @@ if (catalogArrival && catalogDeparture && !document.body.classList.contains('adm
   const totalRow = document.getElementById('booking-total-row');
   const totalValue = document.getElementById('booking-total-value');
   const updateBookingTotal = () => {
-    if (!priceSummary || !catalogArrival.value || !catalogDeparture.value) return;
+    if (!priceSummary) return;
+    const mobileTotal = document.getElementById('mobile-booking-total');
+    if (liveSummary) liveSummary.hidden = true;
+    if (totalRow) totalRow.hidden = true;
+    if (mobileTotal) mobileTotal.textContent = `${priceSummary.dataset.nightlyRate} MAD / nuit`;
+    if (!catalogArrival.value || !catalogDeparture.value) return;
     const start = new Date(`${catalogArrival.value}T00:00:00Z`);
     const end = new Date(`${catalogDeparture.value}T00:00:00Z`);
     const nights = Math.round((end - start) / 86400000);
-    if (nights <= 0) return;
+    if (!Number.isFinite(nights) || nights <= 0) return;
     const rate = Number(priceSummary.dataset.nightlyRate.replace(',', '.'));
     const total = new Intl.NumberFormat('fr-FR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(rate * nights);
+    if (mobileTotal) mobileTotal.textContent = `${total} MAD`;
     if (liveSummary && liveNights && liveTotal) {
       liveNights.textContent = `${nights} nuit${nights > 1 ? 's' : ''}`;
       liveTotal.textContent = `Total du séjour : ${total} MAD`;
@@ -128,13 +134,13 @@ if (!reducedMotion && 'IntersectionObserver' in window) {
     const group = item.parentElement;
     const siblings = group ? [...group.children].filter(child => child.matches('.property-card, .feature-grid article, .stat-card, .notification-card, .reservation-card, .reservation-overview article')) : [];
     const position = siblings.indexOf(item);
-    if (position >= 0) item.style.setProperty('--reveal-delay', `${Math.min(position, 4) * 90}ms`);
+    if (position >= 0) item.style.setProperty('--reveal-delay', `${Math.min(position, 4) * 30}ms`);
   });
 
   const imageItems = document.querySelectorAll('.residence-gallery figure, .map-card, .gallery, .stay-gallery-item, .reservation-card-media, .reservations-empty-image, .booking-property-image, .reservation-stay-image');
   imageItems.forEach((item, index) => {
     item.classList.add('image-reveal');
-    item.style.setProperty('--reveal-delay', `${Math.min(index, 4) * 80}ms`);
+    item.style.setProperty('--reveal-delay', `${Math.min(index, 4) * 25}ms`);
   });
 
   const observer = new IntersectionObserver((entries, activeObserver) => {
@@ -173,4 +179,55 @@ if (stayGallery && galleryPrevious && galleryNext) {
   stayGallery.addEventListener('scroll', updateGallery, { passive: true });
   window.addEventListener('resize', updateGallery, { passive: true });
   updateGallery();
+}
+
+// Garder les valeurs des boutons nommés dans la requête native du formulaire.
+const pendingForms = new Map();
+const submissionStatus = document.createElement('p');
+submissionStatus.className = 'sr-only';
+submissionStatus.setAttribute('role', 'status');
+document.body.append(submissionStatus);
+document.addEventListener('submit', event => {
+  const form = event.target;
+  if (!(form instanceof HTMLFormElement) || event.defaultPrevented || form.method === 'dialog') return;
+  if (pendingForms.has(form)) {
+    event.preventDefault();
+    return;
+  }
+  const buttons = [...form.elements].filter(element =>
+    (element instanceof HTMLButtonElement || element instanceof HTMLInputElement) &&
+    element.type === 'submit' && !element.disabled
+  );
+  const originals = buttons.map(button => ({
+    button, html: button.innerHTML, ariaDisabled: button.getAttribute('aria-disabled'),
+  }));
+  pendingForms.set(form, { originals, busy: form.getAttribute('aria-busy') });
+  form.setAttribute('aria-busy', 'true');
+  buttons.forEach(button => {
+    button.setAttribute('aria-disabled', 'true');
+    if (button instanceof HTMLButtonElement) {
+      button.innerHTML = '<span class="submission-spinner" aria-hidden="true"></span><span>Envoi en cours…</span>';
+    }
+  });
+  submissionStatus.textContent = 'Envoi en cours, veuillez patienter…';
+});
+window.addEventListener('pageshow', () => {
+  pendingForms.forEach(({ originals, busy }, form) => {
+    if (busy === null) form.removeAttribute('aria-busy');
+    else form.setAttribute('aria-busy', busy);
+    originals.forEach(({ button, html, ariaDisabled }) => {
+      button.innerHTML = html;
+      if (ariaDisabled === null) button.removeAttribute('aria-disabled');
+      else button.setAttribute('aria-disabled', ariaDisabled);
+    });
+  });
+  pendingForms.clear();
+  submissionStatus.textContent = '';
+});
+
+const mobileBookingBar = document.querySelector('.mobile-booking-bar');
+if (mobileBookingBar && 'ResizeObserver' in window) {
+  new ResizeObserver(() => {
+    document.documentElement.style.setProperty('--booking-bar-height', `${mobileBookingBar.getBoundingClientRect().height}px`);
+  }).observe(mobileBookingBar);
 }

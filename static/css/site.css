@@ -68,7 +68,7 @@ button, input, select, textarea { font: inherit; }
 
 /* Accueil */
 .hero { position: relative; min-height: 760px; display: flex; align-items: flex-end; overflow: hidden; background: var(--forest-dark); color: #fff; }
-.hero-backdrop { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(8, 27, 37, .91) 0%, rgba(12, 40, 42, .70) 48%, rgba(8, 22, 34, .16) 100%), linear-gradient(0deg, rgba(7, 28, 25, .48), transparent 45%), url("../img/residence/piscine-nuit.webp") center 58%/cover no-repeat; transform: scale(1.015); animation: hero-settle 1.4s cubic-bezier(.22, 1, .36, 1) both; }
+.hero-backdrop { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(8, 27, 37, .91) 0%, rgba(12, 40, 42, .70) 48%, rgba(8, 22, 34, .16) 100%), linear-gradient(0deg, rgba(7, 28, 25, .48), transparent 45%), url("../img/residence/piscine-nuit.webp") center 58%/cover no-repeat; transform: scale(1.015); animation: hero-settle .45s cubic-bezier(.22, 1, .36, 1) both; }
 .hero::before { content: ""; position: absolute; z-index: 1; inset: auto 0 0; height: 130px; background: linear-gradient(transparent, rgba(8, 25, 28, .38)); pointer-events: none; }
 .hero::after { content: ""; position: absolute; right: 4vw; top: 3rem; width: 250px; height: 250px; border: 1px solid rgba(255, 255, 255, .18); border-radius: 50%; box-shadow: 0 0 0 55px rgba(255,255,255,.025); }
 @keyframes hero-settle { from { opacity: .68; transform: scale(1.07); } to { opacity: 1; transform: scale(1.015); } }
@@ -280,7 +280,7 @@ button, input, select, textarea { font: inherit; }
 .reservations-page .site-footer { margin-top: 0; }
 .reservations-hero { position: relative; min-height: 610px; display: flex; align-items: center; overflow: hidden; background: var(--forest-dark); color: #fff; isolation: isolate; }
 .reservations-hero::after { content: ""; position: absolute; z-index: -1; inset: auto 0 0; height: 180px; background: linear-gradient(transparent, rgba(7,28,23,.58)); }
-.reservations-hero-backdrop { position: absolute; z-index: -3; inset: 0; background: linear-gradient(90deg, rgba(8,30,25,.97) 0%, rgba(11,39,33,.88) 48%, rgba(8,31,27,.38) 100%), url("../img/residence/piscine-nuit.webp") 58% 55%/cover no-repeat; animation: reservations-hero-settle 1.5s cubic-bezier(.22,1,.36,1) both; }
+.reservations-hero-backdrop { position: absolute; z-index: -3; inset: 0; background: linear-gradient(90deg, rgba(8,30,25,.97) 0%, rgba(11,39,33,.88) 48%, rgba(8,31,27,.38) 100%), url("../img/residence/piscine-nuit.webp") 58% 55%/cover no-repeat; animation: reservations-hero-settle .45s cubic-bezier(.22,1,.36,1) both; }
 @keyframes reservations-hero-settle { from { transform: scale(1.07); filter: saturate(.7); } to { transform: scale(1.015); filter: saturate(1); } }
 .reservations-hero-orbit { position: absolute; z-index: -2; top: -270px; right: -100px; width: 660px; height: 660px; border: 1px solid rgba(255,255,255,.13); border-radius: 50%; box-shadow: 0 0 0 90px rgba(255,255,255,.018), 0 0 0 180px rgba(255,255,255,.01); }
 .reservations-hero-layout { display: grid; grid-template-columns: minmax(0,1fr) 370px; align-items: center; gap: clamp(3rem,8vw,8rem); padding-block: 5.8rem 8.5rem; }
@@ -318,7 +318,7 @@ button, input, select, textarea { font: inherit; }
 .reservation-card:hover { border-color: #D2C8BA; box-shadow: 0 25px 65px rgba(24,50,42,.13); transform: translateY(-5px); }
 .reservation-card-media { position: relative; min-height: 335px; display: block; overflow: hidden; background: var(--sand); }
 .reservation-card-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(6,27,22,.12), transparent 45%, rgba(6,27,22,.55)); pointer-events: none; }
-.reservation-card-media img { width: 100%; height: 100%; object-fit: cover; transition: transform .85s cubic-bezier(.22,1,.36,1), filter .4s ease; }
+.reservation-card-media img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s cubic-bezier(.22,1,.36,1), filter .4s ease; }
 .reservation-card:hover .reservation-card-media img { transform: scale(1.04); }
 .reservation-reference { position: absolute; z-index: 2; left: 1rem; bottom: 1rem; color: rgba(255,255,255,.9); font-size: .62rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
 .status.reservation-card-status { position: absolute; z-index: 2; top: 1rem; left: 1rem; align-items: center; gap: .4rem; padding: .4rem .68rem; border-radius: 99px; box-shadow: 0 5px 20px rgba(9,29,24,.13); }
@@ -376,7 +376,7 @@ button, input, select, textarea { font: inherit; }
 .booking-page { background: #F7F4EE; }
 .booking-page .site-footer { margin-top: 0; }
 .booking-hero { position: relative; min-height: 510px; display: flex; align-items: center; overflow: hidden; background: var(--forest-dark); color: #fff; isolation: isolate; }
-.booking-hero-backdrop { position: absolute; z-index: -2; inset: 0; background: linear-gradient(90deg,rgba(7,29,24,.97) 0%,rgba(11,39,33,.86) 52%,rgba(8,29,25,.32) 100%),url("../img/residence/balcon-appartement.webp") 65% 48%/cover no-repeat; animation: booking-hero-settle 1.5s cubic-bezier(.22,1,.36,1) both; }
+.booking-hero-backdrop { position: absolute; z-index: -2; inset: 0; background: linear-gradient(90deg,rgba(7,29,24,.97) 0%,rgba(11,39,33,.86) 52%,rgba(8,29,25,.32) 100%),url("../img/residence/balcon-appartement.webp") 65% 48%/cover no-repeat; animation: booking-hero-settle .45s cubic-bezier(.22,1,.36,1) both; }
 @keyframes booking-hero-settle { from { transform: scale(1.07); filter: saturate(.72); } to { transform: scale(1.015); filter: saturate(1); } }
 .booking-hero::after { content: ""; position: absolute; z-index: -1; right: -160px; top: -300px; width: 620px; height: 620px; border: 1px solid rgba(255,255,255,.12); border-radius: 50%; box-shadow: 0 0 0 80px rgba(255,255,255,.018); }
 .booking-hero-content { position: relative; padding-block: 5rem 7.5rem; }
@@ -446,7 +446,7 @@ button, input, select, textarea { font: inherit; }
 .reservation-detail-page { background: #F7F4EE; }
 .reservation-detail-page .site-footer { margin-top: 0; }
 .reservation-detail-hero { position: relative; min-height: 530px; display: flex; align-items: center; overflow: hidden; background: var(--forest-dark); color: #fff; isolation: isolate; }
-.reservation-detail-backdrop { position: absolute; z-index: -2; inset: 0; background: linear-gradient(90deg,rgba(7,29,24,.97) 0%,rgba(10,38,32,.86) 55%,rgba(7,28,24,.32) 100%),url("../img/residence/piscine-nuit.webp") 60% 56%/cover no-repeat; animation: reservation-detail-settle 1.5s cubic-bezier(.22,1,.36,1) both; }
+.reservation-detail-backdrop { position: absolute; z-index: -2; inset: 0; background: linear-gradient(90deg,rgba(7,29,24,.97) 0%,rgba(10,38,32,.86) 55%,rgba(7,28,24,.32) 100%),url("../img/residence/piscine-nuit.webp") 60% 56%/cover no-repeat; animation: reservation-detail-settle .45s cubic-bezier(.22,1,.36,1) both; }
 @keyframes reservation-detail-settle { from { transform: scale(1.07); filter: saturate(.68); } to { transform: scale(1.015); filter: saturate(1); } }
 .reservation-detail-hero::after { content: ""; position: absolute; z-index: -1; top: -380px; right: -140px; width: 730px; height: 730px; border: 1px solid rgba(255,255,255,.12); border-radius: 50%; box-shadow: 0 0 0 100px rgba(255,255,255,.015); }
 .reservation-detail-hero-content { position: relative; padding-block: 5rem 7.2rem; }
@@ -531,7 +531,7 @@ button, input, select, textarea { font: inherit; }
 .policies-page { background: #F7F4EE; }
 .policies-page .site-footer { margin-top: 0; }
 .policies-hero { position: relative; min-height: 520px; display: flex; align-items: center; overflow: hidden; background: var(--forest-dark); color: #fff; isolation: isolate; }
-.policies-hero-backdrop { position: absolute; z-index: -2; inset: 0; background: linear-gradient(90deg,rgba(7,29,24,.97) 0%,rgba(10,38,32,.86) 57%,rgba(7,28,24,.35) 100%),url("../img/residence/cuisine-appartement.webp") 62% 54%/cover no-repeat; animation: policies-hero-settle 1.5s cubic-bezier(.22,1,.36,1) both; }
+.policies-hero-backdrop { position: absolute; z-index: -2; inset: 0; background: linear-gradient(90deg,rgba(7,29,24,.97) 0%,rgba(10,38,32,.86) 57%,rgba(7,28,24,.35) 100%),url("../img/residence/cuisine-appartement.webp") 62% 54%/cover no-repeat; animation: policies-hero-settle .45s cubic-bezier(.22,1,.36,1) both; }
 @keyframes policies-hero-settle { from { transform: scale(1.07); filter: saturate(.65); } to { transform: scale(1.015); filter: saturate(1); } }
 .policies-hero::after { content: ""; position: absolute; z-index: -1; top: -360px; right: -100px; width: 700px; height: 700px; border: 1px solid rgba(255,255,255,.12); border-radius: 50%; box-shadow: 0 0 0 90px rgba(255,255,255,.015); }
 .policies-hero-content { position: relative; padding-block: 5.5rem 8rem; }
@@ -603,6 +603,7 @@ button, input, select, textarea { font: inherit; }
 .toast { transition: opacity .25s ease, transform .25s ease; }
 .toast.is-closing { opacity: 0; transform: translateY(-8px); }
 
+.booking-property-content dl > [hidden], .booking-live-summary[hidden] { display: none; }
 .booking-live-summary { margin-top: 1rem; padding: .9rem 1rem; background: #f3f7f4; color: var(--forest); }
 .booking-live-summary span { float: right; font-weight: 800; }
 
@@ -734,9 +735,9 @@ button, input, select, textarea { font: inherit; }
   transform: translateY(30px);
   filter: blur(3px);
   transition:
-    opacity .72s cubic-bezier(.22, 1, .36, 1) var(--reveal-delay, 0ms),
-    transform .72s cubic-bezier(.22, 1, .36, 1) var(--reveal-delay, 0ms),
-    filter .72s ease var(--reveal-delay, 0ms);
+    opacity .24s cubic-bezier(.22, 1, .36, 1) var(--reveal-delay, 0ms),
+    transform .24s cubic-bezier(.22, 1, .36, 1) var(--reveal-delay, 0ms),
+    filter .24s ease var(--reveal-delay, 0ms);
 }
 .motion-ready .scroll-reveal.is-visible {
   opacity: 1;
@@ -748,8 +749,8 @@ button, input, select, textarea { font: inherit; }
   transform: translateY(14px) scale(.985);
   filter: saturate(.78) brightness(.94);
   transition:
-    transform .85s cubic-bezier(.22, 1, .36, 1) var(--reveal-delay, 0ms),
-    filter .85s ease var(--reveal-delay, 0ms);
+    transform .3s cubic-bezier(.22, 1, .36, 1) var(--reveal-delay, 0ms),
+    filter .3s ease var(--reveal-delay, 0ms);
 }
 .motion-ready .image-reveal.is-visible {
   opacity: 1;
@@ -1072,4 +1073,27 @@ button, input, select, textarea { font: inherit; }
 .reservation-detail-backdrop { background: linear-gradient(90deg,rgba(7,29,24,.97) 0%,rgba(10,38,32,.86) 55%,rgba(7,28,24,.32) 100%),url("../img/residence/piscine-nuit-640.webp") 60% 56%/cover no-repeat; }
 .policies-hero-backdrop { background: linear-gradient(90deg,rgba(7,29,24,.97) 0%,rgba(10,38,32,.86) 57%,rgba(7,28,24,.35) 100%),url("../img/residence/cuisine-appartement-640.webp") 62% 54%/cover no-repeat; }
 .gallery-empty { background: url("../img/residence/salon-640.webp") center/cover; }
+}
+
+/* Actions de réservation accessibles sans remonter la page. */
+.mobile-booking-bar { display: none; }
+#booking-summary { scroll-margin-top: 110px; }
+[aria-disabled="true"] { cursor: wait; opacity: .7; }
+.submission-spinner { display: inline-block; flex-shrink: 0; width: 1em; height: 1em; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: submission-spin .6s linear infinite; }
+@keyframes submission-spin { to { transform: rotate(360deg); } }
+@media (max-width: 1000px) {
+  .mobile-booking-page { padding-bottom: calc(var(--booking-bar-height, 110px) + 16px); }
+  html { scroll-padding-bottom: calc(var(--booking-bar-height, 110px) + 16px); }
+  .mobile-booking-bar { position: fixed; z-index: 40; bottom: 0; inset-inline: 0; display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .85rem max(1rem, env(safe-area-inset-right)) calc(.85rem + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left)); border-top: 1px solid var(--line); background: #fff; box-shadow: 0 -4px 20px rgba(18,45,37,.1); }
+  .mobile-booking-summary { min-width: 0; color: var(--forest); text-decoration: none; }
+  .mobile-booking-summary strong, .mobile-booking-summary span { display: block; }
+  .mobile-booking-summary strong { font-size: .9rem; overflow-wrap: anywhere; }
+  .mobile-booking-summary span { font-size: .75rem; text-decoration: underline; }
+  .mobile-booking-bar .button { flex-shrink: 0; max-width: 55%; text-align: center; }
+  .motion-ready .scroll-reveal, .motion-ready .image-reveal { transition-duration: .18s; transition-delay: 0ms; }
+  .booking-hero { min-height: 0; }
+  .booking-hero-content { padding-block: 4.5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
