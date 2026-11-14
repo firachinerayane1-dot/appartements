@@ -212,3 +212,35 @@ chez les navigateurs, le parcours complet et le nettoyage, CSRF et redirections.
 
 Références : [sessions, poids et tâches Locust 2.47](https://docs.locust.io/en/2.47.0/writing-a-locustfile.html),
 [durée et arrêt gracieux](https://docs.locust.io/en/2.47.0/running-without-web-ui.html).
+
+## Préparer 500 comptes
+
+Le fichier local `loadtest-users.csv` a été étendu de `charge001@example.test` à
+`charge500@example.test`. Les 100 premières lignes sont conservées ; les 400
+nouvelles ont des mots de passe aléatoires individuels. La sauvegarde privée
+`loadtest-users-100-backup.csv` contient les 100 comptes initiaux. Ces CSV sont
+ignorés par Git : un `git pull` ne les transfère pas.
+
+Copier le CSV complet sur la VM et déployer la commande Django, puis exécuter
+**sur la VM**, dans le dossier du projet et avec son environnement de base :
+
+```bash
+venv/bin/python manage.py import_loadtest_users --csv loadtest-users.csv
+```
+
+L'import crée les comptes manquants et vérifie rôle, activation et mot de passe
+des comptes déjà présents. Il ne change aucun compte existant et refuse les
+adresses autres que `chargeNNN@example.test`. Si les 100 comptes initiaux sont
+présents et correspondent au CSV, le résultat attendu est :
+
+```text
+400 comptes créés ; 100 comptes existants vérifiés ; 500 comptes prêts.
+```
+
+La création des mots de passe peut prendre quelques minutes. Utiliser le même
+CSV sur le PC où Locust s'exécute. L'ajout de lignes au CSV seul ne crée aucun
+compte sur la VM. L'import peut être relancé sans dupliquer les comptes.
+
+Lancer ensuite l'interface habituelle et choisir 500 utilisateurs : 350
+navigateurs et 150 réservants. Monter progressivement depuis les paliers déjà
+validés ; 500 utilisateurs n'est pas une capacité garantie sur 2 vCPU.

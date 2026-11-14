@@ -147,7 +147,7 @@ class LoadScenarioTests(unittest.TestCase):
         self.assertTrue(ProjectUser.abstract)
         self.assertFalse(BrowsingUser.abstract)
         self.assertFalse(BookingUser.abstract)
-        for total, browsers, bookers in [(50, 35, 15), (75, 52, 23), (100, 70, 30)]:
+        for total, browsers, bookers in [(50, 35, 15), (75, 52, 23), (100, 70, 30), (500, 350, 150)]:
             with self.subTest(users=total):
                 dispatcher = UsersDispatcher([WorkerNode('local')], [BrowsingUser, BookingUser])
                 dispatcher.new_dispatch(target_user_count=total, spawn_rate=total)
