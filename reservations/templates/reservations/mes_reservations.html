@@ -79,6 +79,7 @@
       <div><span class="empty-compass" aria-hidden="true">◇</span><p class="kicker">Le carnet est encore vide</p><h3>Votre prochain séjour commence ici.</h3><p>Découvrez nos appartements disponibles dans la résidence Amwaj et choisissez les dates qui vous ressemblent.</p><a class="button button-primary" href="{% url 'apartments:liste' %}">Explorer les appartements <span>→</span></a></div>
     </div>
     {% endif %}
+    {% include "includes/admin_pagination.html" %}
   </section>
 
   <section class="reservations-assurance">

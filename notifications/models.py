@@ -27,6 +27,10 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ('-date_envoi', '-pk')
+        indexes = [
+            models.Index(fields=['client', '-date_envoi', '-id'], name='notif_client_date_idx'),
+            models.Index(fields=['client', 'lue'], name='notif_client_lue_idx'),
+        ]
         constraints = [
             models.UniqueConstraint(
                 fields=('reservation', 'categorie'),

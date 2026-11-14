@@ -3,6 +3,9 @@ from decimal import Decimal
 from unittest.mock import patch
 
 from django.core import mail
+from django.core.management import call_command
+from django.db import transaction
+from io import StringIO
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -12,7 +15,8 @@ from accounts.models import Utilisateur
 from apartments.models import Appartement
 from reservations.models import Reservation
 from services.reservation_services import creer_reservation, chercher_appartements_disponibles
-from .models import Paiement
+from .models import Paiement, ConfirmationEmail
+from services.confirmation_queue import traiter_confirmations
 
 
 @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
@@ -67,6 +71,9 @@ class VirementTests(TestCase):
         self.assertEqual(paiement.statut, Paiement.PAYE)
         self.assertEqual(paiement.valide_par, self.admin)
         self.assertEqual(paiement.reference_virement, self.data['reference_virement'])
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(ConfirmationEmail.objects.count(), 1)
+        call_command('envoyer_confirmations', stdout=StringIO())
         self.assertEqual(len(mail.outbox), 1)
         email = mail.outbox[0]
         self.assertIn('50 %', email.body)
@@ -75,6 +82,7 @@ class VirementTests(TestCase):
         self.assertEqual(len(email.attachments), 1)
         self.assertTrue(email.attachments[0].content.startswith(b'%PDF'))
         self.client.post(self.url, self.data)
+        call_command('envoyer_confirmations', stdout=StringIO())
         self.assertEqual(len(mail.outbox), 1)
 
     def test_modele_refuse_validation_par_client(self):
@@ -174,3 +182,55 @@ class VirementTests(TestCase):
         with patch('django.utils.timezone.now', return_value=self.reservation.arrivee_prevue + timedelta(days=1)):
             self.reservation.annuler('NO_SHOW', administrateur=self.admin)
         self.assertEqual(self.reservation.montant_remboursement, 0)
+
+
+    def test_rollback_paiement_annule_la_tache(self):
+        with self.assertRaises(RuntimeError):
+            with transaction.atomic():
+                self.valider()
+                raise RuntimeError('rollback')
+        self.assertFalse(ConfirmationEmail.objects.exists())
+        self.reservation.refresh_from_db()
+        self.assertEqual(self.reservation.statut, Reservation.EN_ATTENTE)
+
+    @patch('services.confirmation_queue.envoyer_email_confirmation')
+    def test_echec_repris_plus_tard_et_sans_doublon(self, envoyer):
+        self.valider()
+        envoyer.side_effect = OSError('SMTP indisponible')
+        with self.assertLogs('services.confirmation_queue', level='ERROR'):
+            self.assertEqual(traiter_confirmations(), (0, 1))
+        tache = ConfirmationEmail.objects.get()
+        self.assertIsNone(tache.envoye_le)
+        self.assertEqual(tache.tentatives, 1)
+        self.assertEqual(traiter_confirmations(), (0, 0))
+        envoyer.side_effect = None
+        envoyer.return_value = 1
+        with patch('services.confirmation_queue.timezone.now', return_value=tache.disponible_le):
+            self.assertEqual(traiter_confirmations(), (1, 0))
+            self.assertEqual(traiter_confirmations(), (0, 0))
+        self.assertEqual(envoyer.call_count, 2)
+
+    @patch('services.confirmation_queue.envoyer_email_confirmation', return_value=1)
+    def test_reprise_apres_interruption_worker(self, envoyer):
+        from uuid import uuid4
+        self.valider()
+        maintenant = timezone.now()
+        ConfirmationEmail.objects.update(verrou=uuid4(), disponible_le=maintenant + timedelta(minutes=15))
+        self.assertEqual(traiter_confirmations(), (0, 0))
+        with patch('services.confirmation_queue.timezone.now', return_value=maintenant + timedelta(minutes=16)):
+            self.assertEqual(traiter_confirmations(), (1, 0))
+        envoyer.assert_called_once()
+
+    def test_pages_ne_declenchent_pas_expiration_globale(self):
+        Reservation.objects.filter(pk=self.reservation.pk).update(date_reservation=timezone.now() - timedelta(hours=25))
+        with patch.object(Reservation, 'expirer_en_attente', side_effect=AssertionError('Expiration globale HTTP')):
+            self.client.force_login(self.voyageur)
+            self.assertEqual(self.client.get(reverse('reservations:mes_reservations')).status_code, 200)
+            self.client.force_login(self.admin)
+            for url in ('reservations:admin_liste', 'dashboard:index', 'dashboard:export_excel'):
+                self.assertEqual(self.client.get(reverse(url)).status_code, 200)
+        self.reservation.refresh_from_db()
+        self.assertEqual(self.reservation.statut, Reservation.EN_ATTENTE)
+        call_command('expirer_reservations', stdout=StringIO())
+        self.reservation.refresh_from_db()
+        self.assertEqual(self.reservation.statut, Reservation.EXPIREE)

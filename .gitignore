@@ -6,3 +6,6 @@ db.sqlite3
 staticfiles/
 loadtest-users*.csv
 loadtest-results/
+
+.expiration.lock
+.confirmations.lock

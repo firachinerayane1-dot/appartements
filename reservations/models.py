@@ -74,7 +74,13 @@ class Reservation(models.Model):
     montant_total = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
-        ordering = ('-date_reservation',)
+        ordering = ('-date_reservation', '-pk')
+        indexes = [
+            models.Index(fields=['-date_reservation', '-id'], name='resa_date_id_idx'),
+            models.Index(fields=['client', '-date_reservation', '-id'], name='resa_client_date_idx'),
+            models.Index(fields=['statut', '-date_reservation', '-id'], name='resa_statut_date_idx'),
+            models.Index(fields=['appartement', 'statut', 'date_fin', 'date_debut'], name='resa_apt_dispo_idx'),
+        ]
         constraints = [models.CheckConstraint(condition=Q(date_fin__gt=models.F('date_debut')), name='reservation_dates_valides')]
 
     def __str__(self):

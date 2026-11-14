@@ -29,7 +29,8 @@ class Appartement(models.Model):
     disponible = models.BooleanField(default=True)
 
     class Meta:
-        ordering = ('titre',)
+        ordering = ('titre', 'pk')
+        indexes = [models.Index(fields=['titre', 'id'], name='apt_titre_id_idx')]
 
     def __str__(self):
         return self.titre
@@ -77,7 +78,8 @@ class PeriodeVacances(models.Model):
     libelle = models.CharField(max_length=150)
 
     class Meta:
-        ordering = ('date_debut',)
+        ordering = ('date_debut', 'pk')
+        indexes = [models.Index(fields=['date_debut', 'id'], name='vacances_debut_id_idx')]
         verbose_name_plural = 'périodes de vacances'
         constraints = [models.CheckConstraint(condition=Q(date_fin__gt=models.F('date_debut')), name='vacances_dates_valides')]
 
@@ -102,6 +104,9 @@ class Photo(models.Model):
     legende = models.CharField(max_length=150, blank=True)
     principale = models.BooleanField(default=False)
     variantes = models.JSONField(default=list, blank=True, editable=False)
+
+    class Meta:
+        indexes = [models.Index(fields=['appartement', '-principale', 'id'], name='photo_apt_principale_idx')]
 
     def optimiser_image(self):
         from uuid import uuid4

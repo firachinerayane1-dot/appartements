@@ -65,6 +65,7 @@ class Paiement(models.Model):
         paiement.reference_virement = reference.strip()
         paiement.full_clean()
         paiement.save(update_fields=('statut', 'date_paiement', 'valide_par', 'reference_virement'))
+        ConfirmationEmail.objects.get_or_create(paiement=paiement)
         self.refresh_from_db()
         self.validation_nouvelle = True
         return self
@@ -76,3 +77,18 @@ class Paiement(models.Model):
             'methode': self.get_methode_display(), 'date': self.date_paiement,
             'référence du virement': self.reference_virement,
         }
+
+
+class ConfirmationEmail(models.Model):
+    """File durable, créée dans la même transaction que la validation du paiement."""
+
+    paiement = models.OneToOneField(Paiement, on_delete=models.CASCADE, related_name='confirmation_email')
+    cree_le = models.DateTimeField(auto_now_add=True)
+    disponible_le = models.DateTimeField(default=timezone.now, db_index=True)
+    envoye_le = models.DateTimeField(null=True, blank=True)
+    tentatives = models.PositiveIntegerField(default=0)
+    verrou = models.UUIDField(null=True, editable=False)
+    derniere_erreur = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ('disponible_le', 'pk')
