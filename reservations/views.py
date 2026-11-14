@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.db.models import Prefetch, Q
+from django.db.models import Count, Prefetch, Q
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.dateparse import parse_date
@@ -65,33 +65,21 @@ def reserver(request, appartement_id):
 
 @login_required
 def mes_reservations(request):
-    Reservation.expirer_en_attente()
-    photos = Photo.objects.order_by('-principale', 'pk')
-    reservations = list(
-        request.user.reservations.select_related('appartement').prefetch_related(
-            Prefetch(
-                'appartement__photos',
-                queryset=photos,
-                to_attr='photos_reservation',
-            )
-        )
+    reservations = request.user.reservations.all()
+    compteurs = reservations.aggregate(
+        reservations_total=Count('pk'),
+        reservations_confirmees=Count('pk', filter=Q(statut=Reservation.CONFIRMEE)),
+        reservations_en_attente=Count('pk', filter=Q(statut=Reservation.EN_ATTENTE)),
     )
-    return render(
-        request,
-        'reservations/mes_reservations.html',
-        {
-            'reservations': reservations,
-            'reservations_total': len(reservations),
-            'reservations_confirmees': sum(
-                reservation.statut == Reservation.CONFIRMEE
-                for reservation in reservations
-            ),
-            'reservations_en_attente': sum(
-                reservation.statut == Reservation.EN_ATTENTE
-                for reservation in reservations
-            ),
-        },
+    reservations = reservations.select_related('appartement').prefetch_related(
+        Prefetch('appartement__photos',
+                 queryset=Photo.objects.order_by('-principale', 'pk')[:1],
+                 to_attr='photos_reservation')
     )
+    page = Paginator(reservations, 12).get_page(request.GET.get('page'))
+    return render(request, 'reservations/mes_reservations.html', {
+        'reservations': page, 'page_obj': page, **compteurs,
+    })
 
 
 @login_required
@@ -147,7 +135,6 @@ def annuler(request, pk):
 
 @administrateur_required
 def admin_liste(request):
-    Reservation.expirer_en_attente()
     form = FiltreReservationAdminForm(request.GET or None)
     reservations = Reservation.objects.select_related('client', 'appartement')
     if form.is_valid():

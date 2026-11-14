@@ -24,7 +24,7 @@ def liste(request):
         appartements = chercher_appartements_disponibles(debut, fin, request.user)
         dates_recherche = {'date_debut': debut, 'date_fin': fin}
 
-    photos_cartes = Photo.objects.order_by('-principale', 'pk')
+    photos_cartes = Photo.objects.order_by('-principale', 'pk')[:3]
     appartements = appartements.prefetch_related(
         Prefetch('photos', queryset=photos_cartes, to_attr='photos_carte')
     )
@@ -89,14 +89,15 @@ def detail(request, pk):
 
 @administrateur_required
 def admin_liste(request):
-    photos = Photo.objects.order_by('-principale', 'pk')
+    photos = Photo.objects.order_by('-principale', 'pk')[:1]
     appartements = Appartement.objects.prefetch_related(
         Prefetch('photos', queryset=photos, to_attr='photos_admin')
     )
+    page = Paginator(appartements, 20).get_page(request.GET.get('page'))
     return render(
         request,
         'apartments/admin_liste.html',
-        {'appartements': appartements},
+        {'appartements': page, 'page_obj': page},
     )
 
 
@@ -131,7 +132,8 @@ def appartement_supprimer(request, pk):
 @administrateur_required
 def vacances_liste(request):
     periodes = PeriodeVacances.objects.select_related('appartement')
-    return render(request, 'apartments/vacances_liste.html', {'periodes': periodes})
+    page = Paginator(periodes, 20).get_page(request.GET.get('page'))
+    return render(request, 'apartments/vacances_liste.html', {'periodes': page, 'page_obj': page})
 
 
 @administrateur_required

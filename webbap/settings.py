@@ -201,6 +201,7 @@ EMAIL_BACKEND = os.getenv(
 )
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'localhost')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_TIMEOUT = int(os.getenv('EMAIL_TIMEOUT', '30'))
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 if EMAIL_HOST.lower() == 'smtp.gmail.com':
@@ -232,3 +233,7 @@ PAYMENT_RIB = os.getenv('PAYMENT_RIB', '')
 PAYMENT_IBAN = os.getenv('PAYMENT_IBAN', '')
 PAYMENT_BIC = os.getenv('PAYMENT_BIC', '')
 SUPPORT_WHATSAPP_NUMBER = os.getenv('SUPPORT_WHATSAPP_NUMBER', '')
+
+# 0 disables timing; works with DEBUG=False and never logs SQL parameters.
+DB_SLOW_QUERY_MS = float(os.getenv('DB_SLOW_QUERY_MS', '200'))
+MIDDLEWARE.insert(0, 'core.db_monitoring.SlowQueryMiddleware')

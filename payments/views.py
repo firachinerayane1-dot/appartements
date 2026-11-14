@@ -1,4 +1,3 @@
-import logging
 import re
 from urllib.parse import urlencode
 
@@ -13,12 +12,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from accounts.mixins import administrateur_required
 from reservations.models import Reservation
-from services.confirmation_reservation import envoyer_email_confirmation
 from .forms import FiltrePaiementForm, ValidationVirementForm
 from .models import Paiement
-
-
-logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -73,13 +68,7 @@ def admin_valider(request, reservation_id):
             form.add_error(None, exc.messages[0])
         else:
             if paiement.validation_nouvelle:
-                try:
-                    envoyer_email_confirmation(paiement)
-                except Exception:
-                    logger.exception("Échec de la confirmation pour %s", reservation.numero_reservation)
-                    messages.warning(request, "Réservation validée, mais l’email de confirmation n’a pas pu être envoyé. Le reçu reste disponible au client.")
-                else:
-                    messages.success(request, "Virement validé et réservation confirmée. La confirmation et son PDF ont été envoyés au client.")
+                messages.success(request, "Virement validé et réservation confirmée. La confirmation et son PDF seront envoyés au client en arrière-plan.")
             return redirect('reservations:admin_liste')
     return render(request, 'payments/admin_valider.html', {'form': form, 'reservation': reservation})
 
