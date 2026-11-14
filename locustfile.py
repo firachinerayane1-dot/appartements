@@ -1,4 +1,4 @@
-"""Parcours HTTP connexion → recherche → réservation. Voir docs/test-charge.md."""
+"""Sessions persistantes : 70 % navigation, 30 % réservation. Voir docs/test-charge.md."""
 import csv
 import os
 import random
@@ -54,6 +54,7 @@ def prepare_accounts(environment, **kwargs):
 
 
 class ProjectUser(HttpUser):
+    abstract = True
     wait_time = between(2, 6)
 
     def on_start(self):
@@ -67,6 +68,22 @@ class ProjectUser(HttpUser):
                 response_length=0, exception=RuntimeError('Pas assez de comptes CSV'),
             )
             raise StopUser()
+        # HttpUser retains its cookies for the lifetime of this virtual user.
+        # Failed authentication stops this user instead of creating a retry storm.
+        if not self.login():
+            raise StopUser()
+
+    def login(self):
+        login = self.get_page('/accounts/connexion/', '02 Formulaire connexion', csrf=True)
+        if login is None:
+            return False
+        self.wait()
+        if not self.post_form('/accounts/connexion/', '03 Connexion', login, {
+            'username': self.account['email'], 'password': self.account['password'],
+            'next': '/accounts/profil/',
+        }, r'/accounts/profil/'):
+            return False
+        return self.get_page('/accounts/profil/', '04 Profil authentifié') is not None
 
     def on_stop(self):
         if self.account:
@@ -114,34 +131,13 @@ class ProjectUser(HttpUser):
                 return {'date_debut': start.isoformat(),
                         'date_fin': (start + timedelta(days=nights)).isoformat()}
 
-    @task
-    def reservation_journey(self):
-        # Each loop represents a fresh visit, including the cost of authentication.
-        self.client.cookies.clear()
+    def visit(self, *, book):
         if self.get_page('/', '01 Accueil') is None:
             return
         self.wait()
-        login = self.get_page('/accounts/connexion/', '02 Formulaire connexion', csrf=True)
-        if login is None:
-            return
-        self.wait()
-        if not self.post_form('/accounts/connexion/', '03 Connexion', login, {
-            'username': self.account['email'], 'password': self.account['password'],
-            'next': '/accounts/profil/',
-        }, r'/accounts/profil/'):
-            return
-        if self.get_page('/accounts/profil/', '04 Profil authentifié') is None:
-            return
-        self.wait()
-        try:
-            self.search_and_book()
-        finally:
-            page = self.get_page('/accounts/profil/', '15 Profil avant déconnexion', csrf=True)
-            if page:
-                self.post_form('/accounts/deconnexion/', '16 Déconnexion', page, {},
-                               r'/accounts/connexion/')
+        self.search_and_book(book=book)
 
-    def search_and_book(self):
+    def search_and_book(self, *, book=True):
         for attempt in range(3):
             dates = self.dates()
             results = self.get_page('/appartements/', '05 Recherche disponibilités', dates)
@@ -164,6 +160,9 @@ class ProjectUser(HttpUser):
             if self.get_page(f'/appartements/{apartment_id}/', '06 Détail appartement', dates) is None:
                 return
             self.wait()
+        if not book:
+            return
+
         booking_path = f'/reservations/appartement/{apartment_id}/reserver/'
         form = self.get_page(booking_path, '07 Formulaire réservation', dates, csrf=True)
         if form is None:
@@ -193,3 +192,21 @@ class ProjectUser(HttpUser):
                 if page:
                     self.post_form(f'{detail_path}annuler/', '14 Annulation de test', page, {},
                                    re.escape(detail_path))
+
+
+class BrowsingUser(ProjectUser):
+    """70 % des utilisateurs recherchent et consultent sans réserver."""
+    weight = 7
+
+    @task
+    def browse(self):
+        self.visit(book=False)
+
+
+class BookingUser(ProjectUser):
+    """30 % des utilisateurs suivent le parcours complet de réservation."""
+    weight = 3
+
+    @task
+    def reserve(self):
+        self.visit(book=True)
