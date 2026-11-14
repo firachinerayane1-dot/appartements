@@ -35,7 +35,7 @@ body.auth-body {
   color: white;
   background:
     linear-gradient(145deg, rgba(22, 55, 47, .94), rgba(31, 75, 63, .70)),
-    url("../img/residence/balcon.jpeg") center/cover no-repeat,
+    url("../img/residence/balcon.webp") center/cover no-repeat,
     #1F4B3F;
 }
 
@@ -119,4 +119,10 @@ body.auth-body {
   .auth-showcase { min-height: 220px; }
   .auth-showcase h1 { font-size: 2.15rem; }
   .auth-showcase p { font-size: .95rem; }
+}
+
+@media (max-width: 700px) {
+.auth-showcase { background: linear-gradient(145deg, rgba(22, 55, 47, .94), rgba(31, 75, 63, .70)),
+    url("../img/residence/balcon-640.webp") center/cover no-repeat,
+    #1F4B3F; }
 }

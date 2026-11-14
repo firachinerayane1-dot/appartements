@@ -15,7 +15,7 @@
         <a class="button reservations-new-button" href="{% url 'apartments:liste' %}"><span>Nouvelle réservation</span><span aria-hidden="true">↗</span></a>
       </div>
       <figure class="reservations-hero-visual">
-        <img src="{% static 'img/residence/balcon-appartement.jpeg' %}" alt="Balcon d’un appartement donnant sur les jardins de la résidence">
+        <img src="{% static 'img/residence/balcon-appartement-640.webp' %}" srcset="{% static 'img/residence/balcon-appartement-320.webp' %} 320w, {% static 'img/residence/balcon-appartement-640.webp' %} 640w, {% static 'img/residence/balcon-appartement-960.webp' %} 960w, {% static 'img/residence/balcon-appartement-1540.webp' %} 1540w" sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 640px" width="1540" height="1021" decoding="async" alt="Balcon d’un appartement donnant sur les jardins de la résidence" loading="lazy">
         <figcaption><span>Votre destination</span><strong>Amwaj · Sidi Rahal</strong></figcaption>
       </figure>
     </div>
@@ -39,8 +39,8 @@
       <article class="reservation-card">
         <a class="reservation-card-media" href="{% url 'reservations:detail' r.pk %}" aria-label="Voir la réservation {{ r.numero_reservation }}">
           {% with photo=r.appartement.photos_reservation.0 %}
-          {% if photo %}<img src="{{ photo.image.url }}" alt="{{ photo.legende|default:r.appartement.titre }}" {% if not forloop.first %}loading="lazy"{% endif %}>
-          {% else %}<img src="{% static 'img/residence/salon-appartement.jpeg' %}" alt="Salon lumineux d’un appartement FOSEH Safar" {% if not forloop.first %}loading="lazy"{% endif %}>{% endif %}
+          {% if photo %}<img src="{{ photo.image_url }}" srcset="{{ photo.image_srcset }}" sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 640px" width="{{ photo.image_width }}" height="{{ photo.image_height }}" decoding="async" alt="{{ photo.legende|default:r.appartement.titre }}" loading="lazy">
+          {% else %}<img src="{% static 'img/residence/salon-appartement-640.webp' %}" srcset="{% static 'img/residence/salon-appartement-320.webp' %} 320w, {% static 'img/residence/salon-appartement-640.webp' %} 640w, {% static 'img/residence/salon-appartement-960.webp' %} 960w, {% static 'img/residence/salon-appartement-1540.webp' %} 1540w" sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 640px" width="1540" height="1021" decoding="async" alt="Salon lumineux d’un appartement FOSEH Safar" loading="lazy">{% endif %}
           {% endwith %}
           <span class="reservation-reference">N° {{ r.numero_reservation }}</span>
           <span class="status reservation-card-status {{ r.statut }}"><i></i>{{ r.get_statut_display }}</span>
@@ -75,7 +75,7 @@
     </div>
     {% else %}
     <div class="reservations-empty">
-      <div class="reservations-empty-image"><img src="{% static 'img/residence/piscine-jardin.jpeg' %}" alt="Piscine et jardins de la résidence Amwaj"><span>Votre prochaine escapade</span></div>
+      <div class="reservations-empty-image"><img src="{% static 'img/residence/piscine-jardin-640.webp' %}" srcset="{% static 'img/residence/piscine-jardin-320.webp' %} 320w, {% static 'img/residence/piscine-jardin-640.webp' %} 640w, {% static 'img/residence/piscine-jardin-747.webp' %} 747w" sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 640px" width="747" height="1194" decoding="async" alt="Piscine et jardins de la résidence Amwaj" loading="lazy"><span>Votre prochaine escapade</span></div>
       <div><span class="empty-compass" aria-hidden="true">◇</span><p class="kicker">Le carnet est encore vide</p><h3>Votre prochain séjour commence ici.</h3><p>Découvrez nos appartements disponibles dans la résidence Amwaj et choisissez les dates qui vous ressemblent.</p><a class="button button-primary" href="{% url 'apartments:liste' %}">Explorer les appartements <span>→</span></a></div>
     </div>
     {% endif %}

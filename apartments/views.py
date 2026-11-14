@@ -31,6 +31,9 @@ def liste(request):
     page = Paginator(appartements, 12).get_page(request.GET.get('page'))
     for appartement in page.object_list:
         appartement.tarif_affiche = appartement.tarif_pour_client(request.user)
+        if dates_recherche:
+            appartement.nombre_nuits = (fin - debut).days
+            appartement.total_sejour = appartement.calculer_prix(debut, fin, request.user)
     return render(
         request,
         'apartments/liste.html',
@@ -64,6 +67,13 @@ def detail(request, pk):
         dates_recherche = {'date_debut': debut, 'date_fin': fin}
 
     appartement = get_object_or_404(Appartement.objects.prefetch_related('photos', 'periodes_vacances'), pk=pk)
+    nombre_nuits = (dates_recherche['date_fin'] - dates_recherche['date_debut']).days if dates_recherche else None
+    total_sejour = (
+        appartement.calculer_prix(
+            dates_recherche['date_debut'], dates_recherche['date_fin'], request.user
+        )
+        if dates_recherche else None
+    )
     return render(
         request,
         'apartments/detail.html',
@@ -71,6 +81,8 @@ def detail(request, pk):
             'appartement': appartement,
             'dates_recherche': dates_recherche,
             'tarif_nuit': appartement.tarif_pour_client(request.user),
+            'nombre_nuits': nombre_nuits,
+            'total_sejour': total_sejour,
         },
     )
 

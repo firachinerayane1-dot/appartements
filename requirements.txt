@@ -1,6 +1,7 @@
 asgiref==3.11.1
 Django==6.0.7
 django-allauth[socialaccount]==65.18.0
+django-debug-toolbar==8.0.0
 openpyxl==3.1.5
 Pillow==11.3.0
 psycopg==3.3.4

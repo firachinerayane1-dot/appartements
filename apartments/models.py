@@ -101,6 +101,52 @@ class Photo(models.Model):
     image = models.ImageField(upload_to='appartements/')
     legende = models.CharField(max_length=150, blank=True)
     principale = models.BooleanField(default=False)
+    variantes = models.JSONField(default=list, blank=True, editable=False)
+
+    def optimiser_image(self):
+        from uuid import uuid4
+        from django.core.files.base import ContentFile
+        from .image_processing import webp_variants
+
+        prefix = f'appartements/webp/{uuid4().hex}'
+        variantes = []
+        source = self.image.open('rb')
+        try:
+            for width, height, content in webp_variants(source):
+                name = self.image.storage.save(f'{prefix}-{width}.webp', ContentFile(content))
+                variantes.append({'name': name, 'width': width, 'height': height})
+        finally:
+            if self.image._committed:
+                source.close()
+            else:
+                source.seek(0)
+        self.variantes = variantes
+
+    def save(self, *args, **kwargs):
+        if self.image and not self.image._committed:
+            self.optimiser_image()
+            if kwargs.get('update_fields') is not None:
+                kwargs['update_fields'] = set(kwargs['update_fields']) | {'variantes'}
+        super().save(*args, **kwargs)
+
+    @property
+    def image_url(self):
+        if self.variantes:
+            variant = next((v for v in self.variantes if v['width'] >= 640), self.variantes[-1])
+            return self.image.storage.url(variant['name'])
+        return self.image.url
+
+    @property
+    def image_srcset(self):
+        return ', '.join(f"{self.image.storage.url(v['name'])} {v['width']}w" for v in self.variantes)
+
+    @property
+    def image_width(self):
+        return self.variantes[-1]['width'] if self.variantes else ''
+
+    @property
+    def image_height(self):
+        return self.variantes[-1]['height'] if self.variantes else ''
 
     def __str__(self):
         return self.legende or f"Photo de {self.appartement}"

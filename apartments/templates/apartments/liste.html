@@ -19,7 +19,7 @@
         </div>
       </div>
       <aside class="apartments-hero-card" aria-label="Aperçu de l’appartement">
-        <img src="{% static 'img/residence/salon-appartement.jpeg' %}" alt="Salon lumineux de l’un des appartements FOSEH Safar">
+        <img src="{% static 'img/residence/salon-appartement-640.webp' %}" srcset="{% static 'img/residence/salon-appartement-320.webp' %} 320w, {% static 'img/residence/salon-appartement-640.webp' %} 640w, {% static 'img/residence/salon-appartement-960.webp' %} 960w, {% static 'img/residence/salon-appartement-1540.webp' %} 1540w" sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 640px" width="1540" height="1021" decoding="async" alt="Salon lumineux de l’un des appartements FOSEH Safar" fetchpriority="high">
         <div>
           <span>À l’intérieur</span>
           <strong>Des espaces faits pour se retrouver</strong>
@@ -31,6 +31,7 @@
 
   <section class="apartments-search-section" id="recherche">
     <div class="shell">
+
       <form class="apartments-search" method="get">
         <div class="apartments-search-intro">
           <span class="search-step">01</span>
@@ -70,7 +71,7 @@
       <article class="property-card catalog-card">
         <a class="property-media property-media-mosaic" href="{% url 'apartments:detail' appartement.pk %}?date_debut={{ dates_recherche.date_debut|date:'Y-m-d' }}&amp;date_fin={{ dates_recherche.date_fin|date:'Y-m-d' }}" aria-label="Découvrir {{ appartement.titre }}">
           {% for photo in appartement.photos_carte|slice:":3" %}
-          <img class="property-photo property-photo-{{ forloop.counter }}" src="{{ photo.image.url }}" alt="{% if forloop.first %}{{ photo.legende|default:appartement.titre }}{% else %}Vue {{ forloop.counter }} de {{ appartement.titre }}{% endif %}" {% if not forloop.first %}loading="lazy"{% endif %}>
+          <img class="property-photo property-photo-{{ forloop.counter }}" src="{{ photo.image_url }}" srcset="{{ photo.image_srcset }}" sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 640px" width="{{ photo.image_width }}" height="{{ photo.image_height }}" decoding="async" alt="{% if forloop.first %}{{ photo.legende|default:appartement.titre }}{% else %}Vue {{ forloop.counter }} de {{ appartement.titre }}{% endif %}" loading="lazy">
           {% empty %}
           <div class="property-placeholder"><span>FOSEH Safar</span></div>
           {% endfor %}
@@ -82,7 +83,7 @@
           <h3><a href="{% url 'apartments:detail' appartement.pk %}?date_debut={{ dates_recherche.date_debut|date:'Y-m-d' }}&amp;date_fin={{ dates_recherche.date_fin|date:'Y-m-d' }}">{{ appartement.titre }}</a></h3>
           <p>{{ appartement.description|truncatewords:24 }}</p>
           <div class="property-amenities" aria-label="Équipements principaux"><span>Cuisine équipée</span><span>Piscine</span><span>Balcon</span></div>
-          <div class="property-footer"><span>Pour une nuit</span><strong>{{ appartement.tarif_affiche }} <small>MAD</small></strong></div>
+          <div class="property-footer"><span>Total · {{ appartement.nombre_nuits }} nuit{{ appartement.nombre_nuits|pluralize }}</span><strong>{{ appartement.total_sejour }} <small>MAD</small></strong></div>
           {% if not user.est_administrateur %}<a class="button property-book-button" href="{% url 'reservations:reserver' appartement.pk %}?date_debut={{ dates_recherche.date_debut|date:'Y-m-d' }}&amp;date_fin={{ dates_recherche.date_fin|date:'Y-m-d' }}"><span>Réserver cet appartement</span><span aria-hidden="true">→</span></a>{% endif %}
         </div>
       </article>
@@ -102,12 +103,12 @@
     <div class="stay-gallery-wrap">
       <button class="gallery-control gallery-control-prev" type="button" aria-label="Images précédentes">←</button>
       <div class="stay-gallery" tabindex="0" aria-label="Galerie de la résidence">
-        <figure class="stay-gallery-item stay-gallery-wide"><img src="{% static 'img/residence/piscine.jpeg' %}" alt="Piscine de la résidence Amwaj" loading="lazy"><figcaption><span>01</span><strong>Au bord de l’eau</strong><small>Piscine &amp; jardins</small></figcaption></figure>
-        <figure class="stay-gallery-item"><img src="{% static 'img/residence/chambre-king.jpeg' %}" alt="Chambre double lumineuse" loading="lazy"><figcaption><span>02</span><strong>Bien dormir</strong><small>Chambre double</small></figcaption></figure>
-        <figure class="stay-gallery-item"><img src="{% static 'img/residence/balcon-appartement.jpeg' %}" alt="Balcon avec vue sur la résidence" loading="lazy"><figcaption><span>03</span><strong>Prendre l’air</strong><small>Balcon sur jardin</small></figcaption></figure>
-        <figure class="stay-gallery-item stay-gallery-wide"><img src="{% static 'img/residence/cuisine-appartement.jpeg' %}" alt="Cuisine équipée de l’appartement" loading="lazy"><figcaption><span>04</span><strong>Comme à la maison</strong><small>Cuisine équipée</small></figcaption></figure>
-        <figure class="stay-gallery-item"><img src="{% static 'img/residence/terrain-sport.jpeg' %}" alt="Terrain multisports de la résidence" loading="lazy"><figcaption><span>05</span><strong>Bouger ensemble</strong><small>Terrain multisports</small></figcaption></figure>
-        <figure class="stay-gallery-item"><img src="{% static 'img/residence/piscine-nuit.jpeg' %}" alt="Piscine illuminée à la nuit tombée" loading="lazy"><figcaption><span>06</span><strong>À la nuit tombée</strong><small>Calme &amp; lumière</small></figcaption></figure>
+        <figure class="stay-gallery-item stay-gallery-wide"><img src="{% static 'img/residence/piscine-640.webp' %}" srcset="{% static 'img/residence/piscine-320.webp' %} 320w, {% static 'img/residence/piscine-640.webp' %} 640w, {% static 'img/residence/piscine-960.webp' %} 960w, {% static 'img/residence/piscine-1195.webp' %} 1195w" sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 640px" width="1195" height="896" decoding="async" alt="Piscine de la résidence Amwaj" loading="lazy"><figcaption><span>01</span><strong>Au bord de l’eau</strong><small>Piscine &amp; jardins</small></figcaption></figure>
+        <figure class="stay-gallery-item"><img src="{% static 'img/residence/chambre-king-640.webp' %}" srcset="{% static 'img/residence/chambre-king-320.webp' %} 320w, {% static 'img/residence/chambre-king-640.webp' %} 640w, {% static 'img/residence/chambre-king-960.webp' %} 960w, {% static 'img/residence/chambre-king-1257.webp' %} 1257w" sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 640px" width="1257" height="832" decoding="async" alt="Chambre double lumineuse" loading="lazy"><figcaption><span>02</span><strong>Bien dormir</strong><small>Chambre double</small></figcaption></figure>
+        <figure class="stay-gallery-item"><img src="{% static 'img/residence/balcon-appartement-640.webp' %}" srcset="{% static 'img/residence/balcon-appartement-320.webp' %} 320w, {% static 'img/residence/balcon-appartement-640.webp' %} 640w, {% static 'img/residence/balcon-appartement-960.webp' %} 960w, {% static 'img/residence/balcon-appartement-1540.webp' %} 1540w" sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 640px" width="1540" height="1021" decoding="async" alt="Balcon avec vue sur la résidence" loading="lazy"><figcaption><span>03</span><strong>Prendre l’air</strong><small>Balcon sur jardin</small></figcaption></figure>
+        <figure class="stay-gallery-item stay-gallery-wide"><img src="{% static 'img/residence/cuisine-appartement-640.webp' %}" srcset="{% static 'img/residence/cuisine-appartement-320.webp' %} 320w, {% static 'img/residence/cuisine-appartement-640.webp' %} 640w, {% static 'img/residence/cuisine-appartement-960.webp' %} 960w, {% static 'img/residence/cuisine-appartement-1541.webp' %} 1541w" sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 640px" width="1541" height="1021" decoding="async" alt="Cuisine équipée de l’appartement" loading="lazy"><figcaption><span>04</span><strong>Comme à la maison</strong><small>Cuisine équipée</small></figcaption></figure>
+        <figure class="stay-gallery-item"><img src="{% static 'img/residence/terrain-sport-640.webp' %}" srcset="{% static 'img/residence/terrain-sport-320.webp' %} 320w, {% static 'img/residence/terrain-sport-640.webp' %} 640w, {% static 'img/residence/terrain-sport-896.webp' %} 896w" sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 640px" width="896" height="1053" decoding="async" alt="Terrain multisports de la résidence" loading="lazy"><figcaption><span>05</span><strong>Bouger ensemble</strong><small>Terrain multisports</small></figcaption></figure>
+        <figure class="stay-gallery-item"><img src="{% static 'img/residence/piscine-nuit-640.webp' %}" srcset="{% static 'img/residence/piscine-nuit-320.webp' %} 320w, {% static 'img/residence/piscine-nuit-640.webp' %} 640w, {% static 'img/residence/piscine-nuit-960.webp' %} 960w, {% static 'img/residence/piscine-nuit-1542.webp' %} 1542w" sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 640px" width="1542" height="1020" decoding="async" alt="Piscine illuminée à la nuit tombée" loading="lazy"><figcaption><span>06</span><strong>À la nuit tombée</strong><small>Calme &amp; lumière</small></figcaption></figure>
       </div>
       <button class="gallery-control gallery-control-next" type="button" aria-label="Images suivantes">→</button>
     </div>

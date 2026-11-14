@@ -32,6 +32,9 @@ SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-development-key")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "True").lower() in {"1", "true", "yes"}
 
+# Autoriser la Debug Toolbar pour les connexions locales IPv4 et IPv6.
+INTERNAL_IPS = ["127.0.0.1", "::1"]
+
 ALLOWED_HOSTS = [host for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,testserver").split(",") if host]
 
 
@@ -55,10 +58,12 @@ INSTALLED_APPS = [
     'notifications',
     'payments',
     'reservations',
+    "debug_toolbar",
 ]
 AUTH_USER_MODEL = 'accounts.Utilisateur'
 
 MIDDLEWARE = [
+    # "debug_toolbar.middleware.DebugToolbarMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
