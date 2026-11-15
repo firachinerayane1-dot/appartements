@@ -51,6 +51,23 @@ class LoadScenarioTests(unittest.TestCase):
         self.assertEqual(kwargs['headers']['Referer'], 'https://example.test/reserver/')
         self.assertFalse(kwargs['allow_redirects'])
 
+    def test_booking_failure_includes_only_form_errors(self):
+        response = self.response('post', text='''<p>Private page content</p>
+            <ul class="errorlist nonfield"><li>Appartement indisponible.</li></ul>
+            <ul class="errorlist"><li>Acceptez les politiques.</li></ul>''')
+        self.user.post_form('/reserver/', 'booking', Page(''), {}, r'/paiements/\d+/')
+        message = response.failure.call_args.args[0]
+        self.assertIn('Appartement indisponible.', message)
+        self.assertIn('Acceptez les politiques.', message)
+        self.assertNotIn('Private page content', message)
+
+    def test_redirect_failure_reports_destination_without_query(self):
+        response = self.response('get', 302, location='/appartements/?date_debut=2027-01-01')
+        self.user.get_page('/appartements/42/', 'detail')
+        message = response.failure.call_args.args[0]
+        self.assertIn('destination=/appartements/', message)
+        self.assertNotIn('date_debut', message)
+
     def test_login_redirect_and_external_redirect_are_failures(self):
         for location in ['/accounts/connexion/', 'https://evil.test/paiements/reservation/73/']:
             with self.subTest(location=location):

@@ -19,10 +19,15 @@ class Page(HTMLParser):
         super().__init__()
         self.csrf = None
         self.apartments = set()
+        self.errors = []
+        self._error_list_depth = 0
         self.feed(html)
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
+        if tag == 'ul':
+            if self._error_list_depth or 'errorlist' in attrs.get('class', '').split():
+                self._error_list_depth += 1
         if tag == 'input' and attrs.get('name') == 'csrfmiddlewaretoken':
             self.csrf = attrs.get('value')
         if tag == 'a':
@@ -31,6 +36,20 @@ class Page(HTMLParser):
             match = re.fullmatch(r'/appartements/(\d+)/', urlsplit(href).path)
             if match and href.startswith('/') and not href.startswith('//'):
                 self.apartments.add(int(match[1]))
+
+    def handle_endtag(self, tag):
+        if tag == 'ul' and self._error_list_depth:
+            self._error_list_depth -= 1
+
+    def handle_data(self, data):
+        if self._error_list_depth and data.strip():
+            self.errors.append(' '.join(data.split()))
+
+
+def redirect_detail(response):
+    # Keep query parameters (including login next/tokens) out of the report.
+    location = response.headers.get('Location', '')
+    return f' ; destination={urlsplit(location).path}' if location else ''
 
 
 def read_accounts(path):
@@ -94,7 +113,8 @@ class ProjectUser(HttpUser):
         with self.client.get(path, params=params, name=name, catch_response=True,
                              allow_redirects=False, timeout=30) as response:
             if response.status_code != 200:
-                response.failure(f'Page attendue HTTP 200, reçu {response.status_code}')
+                response.failure(f'Page attendue HTTP 200, reçu {response.status_code}'
+                                 + redirect_detail(response))
                 return None
             page = Page(response.text)
             if csrf and not page.csrf:
@@ -116,7 +136,10 @@ class ProjectUser(HttpUser):
                     or (destination.scheme, destination.netloc) != (origin.scheme, origin.netloc)
                     or not re.fullmatch(expected, destination.path)):
                 # A Django form can return 200 even when the operation failed.
-                response.failure(f'Formulaire refusé ou redirection inattendue (HTTP {response.status_code})')
+                errors = Page(response.text).errors if response.status_code == 200 else []
+                detail = (' ; erreurs=' + ' | '.join(errors)[:500]) if errors else ''
+                response.failure(f'Formulaire refusé ou redirection inattendue (HTTP {response.status_code})'
+                                 + redirect_detail(response) + detail)
                 return None
             return destination.path
 
