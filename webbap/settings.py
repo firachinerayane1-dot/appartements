@@ -237,3 +237,15 @@ SUPPORT_WHATSAPP_NUMBER = os.getenv('SUPPORT_WHATSAPP_NUMBER', '')
 # 0 disables timing; works with DEBUG=False and never logs SQL parameters.
 DB_SLOW_QUERY_MS = float(os.getenv('DB_SLOW_QUERY_MS', '200'))
 MIDDLEWARE.insert(0, 'core.db_monitoring.SlowQueryMiddleware')
+
+# Shared, disposable cache. Tests can select a local cache explicitly.
+REDIS_URL = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1')
+CACHES = {'default': {
+    'BACKEND': 'core.cache_backend.ResilientRedisCache',
+    'LOCATION': REDIS_URL,
+    'KEY_PREFIX': 'appartements:' + os.getenv('CACHE_VERSION', 'v1'),
+    'TIMEOUT': 300,
+    'OPTIONS': {'socket_connect_timeout': 0.3, 'socket_timeout': 0.3},
+}}
+if os.getenv('CACHE_BACKEND') == 'locmem':
+    CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}}

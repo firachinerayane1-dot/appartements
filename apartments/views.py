@@ -1,3 +1,4 @@
+from .cache import appartement_detail
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Prefetch
@@ -66,7 +67,7 @@ def detail(request, pk):
             )
         dates_recherche = {'date_debut': debut, 'date_fin': fin}
 
-    appartement = get_object_or_404(Appartement.objects.prefetch_related('photos', 'periodes_vacances'), pk=pk)
+    appartement = appartement_detail(pk)
     nombre_nuits = (dates_recherche['date_fin'] - dates_recherche['date_debut']).days if dates_recherche else None
     total_sejour = (
         appartement.calculer_prix(
