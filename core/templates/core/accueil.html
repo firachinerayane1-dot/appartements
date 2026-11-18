@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static cache %}
 {% block title %}FOSEH Safar · Votre séjour à Sidi Rahal{% endblock %}
 {% block body_class %}home-page{% endblock %}
 {% block extra_head %}<link rel="preload" as="image" type="image/webp" href="{% static 'img/residence/piscine-nuit-640.webp' %}" media="(max-width: 700px)" fetchpriority="high"><link rel="preload" as="image" type="image/webp" href="{% static 'img/residence/piscine-nuit.webp' %}" media="(min-width: 701px)" fetchpriority="high"><link rel="stylesheet" href="{% static 'css/home.css' %}?v=2">{% endblock %}
@@ -27,6 +27,7 @@
     <p class="home-search-note">Choisissez vos dates, découvrez les appartements, puis réservez votre séjour.</p>
   </section>
 
+  {% cache 3600 home_information %}
   <section class="section home-services" id="services"><div class="shell"><div class="section-heading home-section-heading"><div><p class="kicker">La résidence</p><h2>Tout pour ralentir.<br><em>Et profiter, simplement.</em></h2></div><p>Des jardins à la piscine, retrouvez le plaisir de prendre votre temps à la résidence Amwaj.</p></div><div class="feature-grid">
     <article><span class="feature-icon" aria-hidden="true">≈</span><span class="home-feature-number">01 / Détente</span><h3>Piscine au cœur des jardins</h3><p>Un espace de baignade entouré de pelouses, de palmiers et d’allées paysagées.</p></article>
     <article><span class="feature-icon" aria-hidden="true">⌂</span><span class="home-feature-number">02 / Sérénité</span><h3>Résidence privée</h3><p>Un environnement calme, soigné et pensé pour profiter sereinement de votre séjour.</p></article>
@@ -67,5 +68,6 @@
   </section>
 
   <section class="section shell"><div class="cta-panel"><div><p class="kicker light">Envie de vous évader ?</p><h2>Votre prochain séjour commence ici, à Sidi Rahal.</h2><p>Consultez les disponibilités et choisissez les dates qui vous ressemblent.</p></div><a class="button button-light" href="{% url 'apartments:liste' %}">Voir les appartements <span>→</span></a></div></section>
+  {% endcache %}
 </main>
 {% endblock %}

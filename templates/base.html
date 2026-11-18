@@ -1,4 +1,4 @@
-{% load static %}
+{% load static cache %}
 <!doctype html>
 <html lang="fr">
 <head>
@@ -17,12 +17,14 @@
       <a class="brand" href="{% url 'core:accueil' %}" aria-label="FOSEH Safar, accueil"><span class="brand-mark">F</span><span>FOSEH <span>Safar</span></span></a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav"><span></span><span></span><span></span><span class="sr-only">Ouvrir le menu</span></button>
       <nav class="main-nav" id="main-nav" aria-label="Navigation principale">
+        {% cache 600 navigation_public_links user.is_authenticated user.est_administrateur request.resolver_match.namespace %}
         <a class="{% if request.resolver_match.namespace == 'core' %}active{% endif %}" href="{% url 'core:accueil' %}">Accueil</a>
         {% if user.is_authenticated and user.est_administrateur %}
           <a class="{% if request.resolver_match.namespace == 'apartments' %}active{% endif %}" href="{% url 'apartments:admin_liste' %}">Gestion des appartements</a>
         {% else %}
           <a class="{% if request.resolver_match.namespace == 'apartments' %}active{% endif %}" href="{% url 'apartments:liste' %}">Appartements</a>
         {% endif %}
+        {% endcache %}
         {% if user.is_authenticated %}
           {% if user.est_administrateur %}
             <a class="{% if request.resolver_match.namespace == 'dashboard' %}active{% endif %}" href="{% url 'dashboard:index' %}">Tableau de bord</a>
@@ -49,6 +51,8 @@
   {% block content %}{% endblock %}
 
   {% block footer %}
+  {% now 'Y' as footer_year %}
+  {% cache 3600 footer user.is_authenticated user.est_administrateur footer_year %}
   <footer class="site-footer">
     <div class="shell footer-grid">
       <div><a class="brand brand-light" href="{% url 'core:accueil' %}"><span class="brand-mark">F</span><span>FOSEH <span>Safar</span></span></a><p>Des appartements lumineux dans une résidence privée avec piscine et jardins, à Sidi Rahal.</p></div>
@@ -58,6 +62,7 @@
     </div>
     <div class="shell footer-bottom"><span>© {% now 'Y' %} FOSEH Safar</span><span>Votre parenthèse à Sidi Rahal</span></div>
   </footer>
+  {% endcache %}
   {% endblock %}
   <script src="{% static 'js/site.js' %}?v=17" defer></script>
   {% block extra_js %}{% endblock %}
